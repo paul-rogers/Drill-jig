@@ -2,8 +2,9 @@
 
 The Jig project provides a light-weight, versioned, row-oriented API on top of Apache Drill.
 
-See the [Project Proposal](https://docs.google.com/document/d/1wzNZne5RrkN3MyOFNAsnNuSGrK4Am2OfZJXg2KfJXCY)
-for an overview.
+See the [Project Proposal](https://docs.google.com/document/d/1TpJOEUO-DBDGIidOML2_InpJ-fK4yHmsbV5ncqXT6pM)
+for an overview. See [DRILL-4791](https://issues.apache.org/jira/browse/DRILL-4791) for project
+information.
 
 ## Jig Modules
 
