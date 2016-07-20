@@ -1,0 +1,98 @@
+package org.apache.org.drill.jig.proto;
+
+option java_package = "org.apache.drill.jig.proto";
+//option java_outer_classname = "ClientApi";
+option optimize_for = SPEED;
+
+//-------------------------------------------------------------------
+// Protocol
+
+message OKResponse {
+  optional string message = 1;
+}
+
+message SuccessResponse {
+  optional int32 row_count = 1;
+}
+
+message ErrorResponse {
+  required int32 code = 1;
+  optional string sql_code = 2;
+  optional string message = 3;
+}
+
+message InformationResponse {
+  required int32 code = 1;
+  optional string sql_code = 2;
+  optional string message = 3;
+}
+
+//-------------------------------------------------------------------
+// Non-message data types
+
+enum PropertyType {
+  STRING = 1;
+  INT = 2;
+  BOOLEAN = 3;
+}
+
+message PropertyDef {
+  required string name = 1;
+  optional string value = 2;
+  optional PropertyType type = 3;
+}
+
+message PropertyValue {
+  required string name = 1;
+  optional string value = 2;
+}
+
+
+//-------------------------------------------------------------------
+// Session basics
+
+message ListLoginsResponse {
+  repeated string login_types = 1;
+}
+
+message LoginPropertiesRequest {
+  required string login_type = 1;
+}
+
+message LoginPropertiesResponse {
+  optional string login_type = 1;
+  optional string driver_class = 2;
+  repeated PropertyDef properties = 3;
+}
+
+message LoginRequest {
+  required string login_type = 1;
+  repeated PropertyValue properties = 2;
+}
+
+// LoginRequest --> OKResponse
+
+//-------------------------------------------------------------------
+// Query
+
+message ExecuteRequest {
+  required string statement = 1;
+}
+
+message QueryRequest {
+  required string statement = 1;
+  required int32 max_response_size_k = 2;
+  optional int32 max_wait_sec = 3;
+}
+
+// ExecuteRequest --> OKResponse
+
+message ColumnSchema {
+  optional string name = 1;
+  optional int32 type = 2;
+  optional int32 cardinality = 3;
+}
+
+message SchemaResponse {
+  repeated ColumnSchema columns = 1;
+}

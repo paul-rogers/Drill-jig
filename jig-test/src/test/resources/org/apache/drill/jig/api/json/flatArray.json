@@ -1,0 +1,4 @@
+[
+  { "numberField": 10, "stringField": "foo", "numberWithNullField": null, "stringWithNullField": null, "bool1": true, "bool2": false },
+  { "numberField": 20, "stringField": "bar", "numberWithNullField": 120, "stringWithNullField": "mumble", "bool1": false, "bool2": true }
+]

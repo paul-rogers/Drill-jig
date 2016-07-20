@@ -1,0 +1,7 @@
+REQ: Hello(2, 1)
+REQ: List Logins
+REQ: Login Properties( basic )
+REQ: Login( user-name = "bob", password = "secret" )
+REQ: Execute Stmt: ALTER SESSION SET foo = "bar";
+REQ: Execute Query: SELECT * FROM foo;
+REQ: Goodbye
