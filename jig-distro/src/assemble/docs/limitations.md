@@ -36,7 +36,7 @@ The Jig server introduces an additional "hop" in each client query. This will ca
 some additional, but probably small, overhead. Performance testing has not yet been
 done on Jig to quantify the cost.
 
-## Jig Server
+## Drillpress (Jig Server)
 
 The Jig server is best described as the simplest possible server implementation that
 actually works. The server is a "target rich environment" for your suggestions. What
@@ -46,3 +46,8 @@ Internally, the Jig server uses Netty for server-side asynchrounous IO. Drill al
 uses Netty in the Drill client, so using Netty for the Jig protocol is simple.
 The current implementation needs an additional layer between Netty and the Drill
 client. The current solution is good enough for a POC, however.
+
+## Launch Scripts
+
+Jig provides a script to launch the Drillpress server. These scripts depend on
+script revisions merged into Drill 1.8. (Still pending as of this writing.)
