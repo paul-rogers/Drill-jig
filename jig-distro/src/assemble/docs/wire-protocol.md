@@ -1,28 +1,32 @@
 # Jig Wire Protocol
 
-The Jig wire protocol is purpose-designed to achive a number of goals:
+The Jig wire protocol is purpose-designed to achieve a number of goals:
 
 1. Versioned.
 2. Language independent.
 3. Efficient.
-4. Simple to implement on a client.
+4. Simple to implement in a client.
 5. Synchronous.
 
-The format is a binary. At present it is a combination of an ad-hoc binary
+The format is binary. At present it is a combination of an ad-hoc binary
 protocol along with Protobuf-format messages and responses for most
 operations. However, row and schema messages are custom-designed to
 exploit knowledge of the data to reduce message size.
 
 ## Caveats
 
-This is a work in progress. Be suspicious of details such as data types.
+Both this document and the protocol itself is a work in progress. 
+Be suspicious of details such as data types.
 
 ## Basics
 
 The Jig protocol is a simple request/response mechanism. Each request
-represents some specific client action, though some of the actions are
-implicit (such as log in.) The client sends a request and waits for
-the response.
+represents some specific client action. Most messages represent Jig API-level
+operations, though some are at a lower level (such as log in.) The client 
+sends a request and waits for the response.
+
+All numbers are big-endian. In fact, the numeric compression depends on
+the big-endian representation.
 
 ## Session Initiation
 
@@ -35,15 +39,24 @@ protocol version to use for the session.
 
 * Int 16: Request ID: 0
 * Int 32: Length: 4
-* Int16: Client API version
-* Int16: Lowest supported version
+* Int 16: Client API version
+* Int 16: Lowest supported version
 
 ### Hello Response
 
 * Int 16: Response ID: 0
 * Int 32: Length: 4
-* Int16: Status code
-* Int16: Selected API version
+* Int 16: Server version
+* Int 16: Selected API version
+
+The returned selected version is the largest version supported by both the
+client and server.
+
+If the server cannot support the client version, the server returns an
+error response (see below) and closes the connection. Note that the error
+response itself may evolve, so we may have to define an error response
+specifically for the incompatible versions situation that won't change
+across releases.
 
 ## Standard Request/Response Format
 
@@ -55,9 +68,14 @@ standard header:
 * Int 32: Length
 * Varies: body
 
-The data response message may include a list of length/body pairs. A length of 0 indicates
-end of message. Other messages have a single pair. A length of zero indicates that no body
+Most messages have a single length/body pair. A length of zero indicates that no body
 is included.
+
+Some messages include a list of length/body pairs. A length of 0 indicates
+end of message.
+
+Whether a message returns no body, a single body, or a list of bodies is a static
+property of the message type. 
 
 ### OK Response
 
@@ -108,7 +126,7 @@ results. Results are one of four message types.
 ## Execute Statement
 
 The Execute Statement request is for those statements that return no results or a
-single results. For example: ALTER SESSION.
+single results. For example: `ALTER SESSION`.
 
 * ExecuteRequest
 * Error response or SuccessResponse
@@ -120,7 +138,7 @@ will be mapped into the success response (but that work remains to be done.)
 ## Execute Query
 
 A query is a statement that returns 0 or more result sets, each with a schema and
-1 or more rows. (More work is needed here: a LIMIT 0 query may return a schema
+one or more rows. (More work is needed here: a LIMIT 0 query may return a schema
 but no rows.)
 
 First, submit the query.
@@ -139,6 +157,13 @@ If submission is OK, read results until EOF:
 
 At any point the client can cancel the query by sending a Cancel request in
 place of the results request.
+
+### No Results Response
+
+The no results response is experimental. It allows the client to specify a maximum
+wait time for the next schema or set of results. If the time limit is exceeded, the
+server returns a no results response. The client can cancel the query, or can
+again poll the server. This feature is not yet implemented in the current code.
 
 ### Schema Response
 
