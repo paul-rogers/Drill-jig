@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.apache.drill.jig</groupId>
     <artifactId>jig-root</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>jig-server</artifactId>
   <name>jig-server</name>
@@ -13,7 +13,7 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <drill.version>1.7.0</drill.version>
+    <drill.version>1.8.0</drill.version>
     <dep.slf4j.version>1.7.6</dep.slf4j.version>
   </properties>
   
@@ -22,12 +22,6 @@
       <groupId>org.apache.drill.jig</groupId>
       <artifactId>jig-core</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.drill.jig</groupId>
-      <artifactId>jig-client</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- For configuration -->
@@ -78,6 +72,12 @@
       <groupId>org.apache.drill.exec</groupId>
       <artifactId>drill-java-exec</artifactId>
       <version>${drill.version}</version>
+		<exclusions>
+			<exclusion>
+				<artifactId>jdk.tools</artifactId>
+				<groupId>jdk.tools</groupId>
+			</exclusion>
+		</exclusions>
     </dependency>
     <!-- 
     <dependency>

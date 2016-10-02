@@ -1,6 +1,7 @@
 package org.apache.drill.jig.serde;
 
 import org.apache.drill.jig.api.Cardinality;
+import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.TupleSchema;
 
@@ -18,9 +19,9 @@ public abstract class BaseTupleSetSerde
     optional = new boolean[fieldCount];
     isArray = new boolean[fieldCount];
     for ( int i = 0;  i < fieldCount;  i++ ) {
-      FieldSchema field = schema.getField( i );
-      optional[i] = field.getCardinality() == Cardinality.OPTIONAL;
-      isArray[i] = field.getCardinality() == Cardinality.REPEATED;
+      FieldSchema field = schema.field( i );
+      optional[i] = field.nullable();
+      isArray[i] = field.type() == DataType.LIST;
     }
     
     int padCount = (fieldCount + 3) & ~0x3;

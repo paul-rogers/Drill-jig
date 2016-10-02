@@ -22,10 +22,10 @@ public class TupleWriterV1 implements TupleWriter
     int byteCount = isNull.length / 4;
     int posn = 0;
     for ( int i = 0;  i < byteCount;  i++ ) {
-      int value = Constants.encode( isNull[posn] ) * 2 + Constants.encode( isRepeated[posn++] );
-      value = (value << 2) + Constants.encode( isNull[posn] ) * 2 + Constants.encode( isRepeated[posn++] );
-      value = (value << 2) + Constants.encode( isNull[posn] ) * 2 + Constants.encode( isRepeated[posn++] );
-      value = (value << 2) + Constants.encode( isNull[posn] ) * 2 + Constants.encode( isRepeated[posn++] );
+      int value = SerdeUtils.encode( isNull[posn] ) * 2 + SerdeUtils.encode( isRepeated[posn++] );
+      value = (value << 2) + SerdeUtils.encode( isNull[posn] ) * 2 + SerdeUtils.encode( isRepeated[posn++] );
+      value = (value << 2) + SerdeUtils.encode( isNull[posn] ) * 2 + SerdeUtils.encode( isRepeated[posn++] );
+      value = (value << 2) + SerdeUtils.encode( isNull[posn] ) * 2 + SerdeUtils.encode( isRepeated[posn++] );
       buf.put( (byte) value );
     }
   }
@@ -74,7 +74,7 @@ public class TupleWriterV1 implements TupleWriter
 
   @Override
   public void writeBoolean(boolean value) {
-    buf.put( Constants.encode( value ) );
+    buf.put( SerdeUtils.encode( value ) );
   }
 
   @Override

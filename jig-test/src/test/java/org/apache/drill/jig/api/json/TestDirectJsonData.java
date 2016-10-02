@@ -10,14 +10,16 @@ import static org.junit.Assert.fail;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldAccessor;
-import org.apache.drill.jig.api.JigException;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.FieldValue;
+import org.apache.drill.jig.api.ScalarValue;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSet;
-import org.apache.drill.jig.api.ValueConversionError;
-import org.apache.drill.jig.api.json.JsonScanner;
+import org.apache.drill.jig.exception.JigException;
+import org.apache.drill.jig.exception.ValueConversionError;
+import org.apache.drill.jig.extras.json.JsonScanner;
 import org.junit.Test;
 
 public class TestDirectJsonData
@@ -53,12 +55,12 @@ public class TestDirectJsonData
     assertFalse( tuples.next( ) );
   }
 
-  public static void validateTuple1(TupleAccessor tuple)
+  public static void validateTuple1(TupleValue tuple)
   {
     assertNotNull( tuple );
     {
-      FieldAccessor field = tuple.getField(0);
-      assertTrue( field.getType() == DataType.INT64 );
+      FieldValue field = tuple.field(0);
+      assertTrue( field.type() == DataType.INT64 );
       assertTrue( field.getCardinality() == Cardinality.OPTIONAL );
       assertFalse( field.isNull() );
       try {
@@ -68,7 +70,7 @@ public class TestDirectJsonData
       catch ( ValueConversionError e ) {
         // Expected
       }
-      FieldAccessor.ScalarAccessor scalar = field.asScalar();
+      ScalarValue scalar = field.asScalar();
       assertNotNull( scalar );
       assertEquals( 10L, scalar.getLong() );
       assertEquals( 10, scalar.getInt() );
@@ -84,72 +86,72 @@ public class TestDirectJsonData
     }
     
     {
-      FieldAccessor field = tuple.getField( "numberField" );
+      FieldValue field = tuple.field( "numberField" );
       assertEquals( 10, field.asScalar().getInt() );
     }
       
     {
-      FieldAccessor field = tuple.getField( 1 );
+      FieldValue field = tuple.field( 1 );
       assertEquals( "foo", field.asScalar().getString() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "stringField" );
+      FieldValue field = tuple.field( "stringField" );
       assertEquals( "foo", field.asScalar().getString() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "numberWithNullField" );
+      FieldValue field = tuple.field( "numberWithNullField" );
       assertTrue( field.isNull() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "stringWithNullField" );
+      FieldValue field = tuple.field( "stringWithNullField" );
       assertTrue( field.isNull() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "bool1" );
+      FieldValue field = tuple.field( "bool1" );
       assertTrue( field.asScalar( ).getBoolean() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "bool2" );
+      FieldValue field = tuple.field( "bool2" );
       assertFalse( field.asScalar( ).getBoolean() );
     }
   }
 
-  public static void validateTuple2(TupleAccessor tuple)
+  public static void validateTuple2(TupleValue tuple)
   {
     {
-      FieldAccessor field = tuple.getField( "numberField" );
+      FieldValue field = tuple.field( "numberField" );
       assertEquals( 20, field.asScalar().getInt() );
     }
       
     {
-      FieldAccessor field = tuple.getField( "stringField" );
+      FieldValue field = tuple.field( "stringField" );
       assertEquals( "bar", field.asScalar().getString() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "numberWithNullField" );
+      FieldValue field = tuple.field( "numberWithNullField" );
       assertEquals( 120, field.asAny().getInt() );
       assertEquals( DataType.INT64, field.asAny().getDataType() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "stringWithNullField" );
+      FieldValue field = tuple.field( "stringWithNullField" );
       assertEquals( "mumble", field.asAny().getString() );
       assertEquals( DataType.STRING, field.asAny().getDataType() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "bool1" );
+      FieldValue field = tuple.field( "bool1" );
       assertFalse( field.asScalar( ).getBoolean() );
     }
     
     {
-      FieldAccessor field = tuple.getField( "bool2" );
+      FieldValue field = tuple.field( "bool2" );
       assertTrue( field.asScalar( ).getBoolean() );
     }
     
@@ -163,17 +165,17 @@ public class TestDirectJsonData
     TupleSet tuples = scanner.getTuples( );
     
     assertTrue( tuples.next() );
-    TupleAccessor tuple = tuples.getTuple();
+    TupleValue tuple = tuples.getTuple();
     {
-      FieldAccessor field = tuple.getField("index");
+      FieldValue field = tuple.field("index");
       assertEquals( 1, field.asScalar( ).getInt() );
     }
     
     {
-      FieldAccessor field = tuple.getField("numberArray");
+      FieldValue field = tuple.field("numberArray");
       assertFalse( field.isNull() );
 //      assertNull( field.asScalar( ) );
-      FieldAccessor.ArrayAccessor array = field.asArray();
+      ArrayValue array = field.asArray();
       assertNotNull( array );
       assertEquals( 3, array.size() );
       assertEquals( 1, array.get( 0 ).asScalar().getInt() );
@@ -184,8 +186,8 @@ public class TestDirectJsonData
     }
     
     {
-      FieldAccessor field = tuple.getField("stringArray");
-      FieldAccessor.ArrayAccessor array = field.asArray();
+      FieldValue field = tuple.field("stringArray");
+      ArrayValue array = field.asArray();
       assertEquals( 3, array.size() );
       assertEquals( "a", array.get( 0 ).asScalar().getString() );
       assertEquals( "b", array.get( 1 ).asScalar().getString() );
@@ -195,8 +197,8 @@ public class TestDirectJsonData
     }
     
     {
-      FieldAccessor field = tuple.getField("emptyArray");
-      FieldAccessor.ArrayAccessor array = field.asArray();
+      FieldValue field = tuple.field("emptyArray");
+      ArrayValue array = field.asArray();
       assertEquals( 0, array.size() );
     }
     

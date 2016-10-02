@@ -22,18 +22,18 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
-import org.apache.drill.jig.api.FieldAccessor;
-import org.apache.drill.jig.api.FieldAccessor.ScalarAccessor;
+import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.FieldSchema;
-import org.apache.drill.jig.api.JigException;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.ScalarValue;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSet;
+import org.apache.drill.jig.exception.JigException;
 
 public class JigJdbcResultSet implements ResultSet
 {
   private JigJdbcStatement stmt;
   private TupleSet tupleSet;
-  private TupleAccessor tuple;
+  private TupleValue tuple;
   private boolean wasNull;
   private JigResultSetMetaData resultMetaData;
   private boolean isEof;
@@ -48,14 +48,14 @@ public class JigJdbcResultSet implements ResultSet
   public <T> T unwrap(Class<T> iface) throws SQLException {
     if ( iface.isAssignableFrom( TupleSet.class ) )
       return (T) tupleSet;
-    if ( iface.isAssignableFrom( TupleAccessor.class ) )
+    if ( iface.isAssignableFrom( TupleValue.class ) )
       return (T) tuple;
     return null;
   }
 
   @Override
   public boolean isWrapperFor(Class<?> iface) throws SQLException {
-    return iface.isAssignableFrom( TupleAccessor.class ) ||
+    return iface.isAssignableFrom( TupleValue.class ) ||
            iface.isAssignableFrom( TupleSet.class );
   }
 
@@ -97,7 +97,7 @@ public class JigJdbcResultSet implements ResultSet
 
   @Override
   public String getString(int columnIndex) throws SQLException {
-    ScalarAccessor accessor = getScalar( columnIndex );
+    ScalarValue accessor = getScalar( columnIndex );
     if ( accessor == null )
       return null;
     // TODO: Type conversions
@@ -109,10 +109,10 @@ public class JigJdbcResultSet implements ResultSet
     }
   }
 
-  private ScalarAccessor getScalar(int columnIndex) throws SQLException {
+  private ScalarValue getScalar(int columnIndex) throws SQLException {
     validateOpen( );
     wasNull = true;
-    FieldAccessor field = tuple.getField( columnIndex - 1 );
+    FieldValue field = tuple.field( columnIndex - 1 );
     if ( field == null )
       throw new SQLException( "Invalid column index: " + columnIndex );
     wasNull = field.isNull();
@@ -123,7 +123,7 @@ public class JigJdbcResultSet implements ResultSet
   
   @Override
   public boolean getBoolean(int columnIndex) throws SQLException {
-    ScalarAccessor accessor = getScalar( columnIndex );
+    ScalarValue accessor = getScalar( columnIndex );
     if ( accessor == null )
       return false;
     // TODO: Type conversions
@@ -149,7 +149,7 @@ public class JigJdbcResultSet implements ResultSet
 
   @Override
   public int getInt(int columnIndex) throws SQLException {
-    ScalarAccessor accessor = getScalar( columnIndex );
+    ScalarValue accessor = getScalar( columnIndex );
     if ( accessor == null )
       return 0;
     // TODO: Type conversions
@@ -163,7 +163,7 @@ public class JigJdbcResultSet implements ResultSet
 
   @Override
   public long getLong(int columnIndex) throws SQLException {
-    ScalarAccessor accessor = getScalar( columnIndex );
+    ScalarValue accessor = getScalar( columnIndex );
     if ( accessor == null )
       return 0;
     // TODO: Type conversions
@@ -177,7 +177,7 @@ public class JigJdbcResultSet implements ResultSet
 
   @Override
   public float getFloat(int columnIndex) throws SQLException {
-    ScalarAccessor accessor = getScalar( columnIndex );
+    ScalarValue accessor = getScalar( columnIndex );
     if ( accessor == null )
       return 0;
     // TODO: Type conversions
@@ -191,7 +191,7 @@ public class JigJdbcResultSet implements ResultSet
 
   @Override
   public double getDouble(int columnIndex) throws SQLException {
-    ScalarAccessor accessor = getScalar( columnIndex );
+    ScalarValue accessor = getScalar( columnIndex );
     if ( accessor == null )
       return 0;
     // TODO: Type conversions
@@ -363,7 +363,7 @@ public class JigJdbcResultSet implements ResultSet
     if ( tupleSet == null )
       return null;
     if ( resultMetaData == null )
-      resultMetaData = new JigResultSetMetaData( tupleSet.getSchema( ) );
+      resultMetaData = new JigResultSetMetaData( tupleSet.schema( ) );
     return resultMetaData;
   }
 
@@ -382,10 +382,10 @@ public class JigJdbcResultSet implements ResultSet
   @Override
   public int findColumn(String columnLabel) throws SQLException {
     validateOpen( );
-    FieldSchema field = tupleSet.getSchema( ).getField( columnLabel );
+    FieldSchema field = tupleSet.schema( ).field( columnLabel );
     if ( field == null )
       throw new SQLException( "Invalid column name: " + columnLabel );
-    return field.getIndex( ) + 1;
+    return field.index( ) + 1;
   }
 
   @Override

@@ -1,58 +1,58 @@
 package org.apache.drill.jig.serde;
 
-import org.apache.drill.jig.api.FieldAccessor;
+import org.apache.drill.jig.api.FieldValue;
 
 public class FieldSerdeRegistry
 {
   public interface FieldSerializer
   {
-    void serialize( TupleWriter writer, FieldAccessor field );
+    void serialize( TupleWriter writer, FieldValue field );
   }
   
   public static class SerializeString implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeString( field.asScalar().getString() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeString( field.getString() );
     }   
   }
   
   public static class SerializeBoolean implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeBoolean( field.asScalar().getBoolean() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeBoolean( field.getBoolean() );
     }   
   }
   
   public static class SerializeLong implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeLong( field.asScalar().getLong() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeLong( field.getLong() );
     }   
   }
   
   public static class SerializeDouble implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeDouble( field.asScalar().getDouble() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeDouble( field.getDouble() );
     }   
   }
   
   public static class SerializeBigDecimal implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeDecimal( field.asScalar().getDecimal() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeDecimal( field.getDecimal() );
     }   
   }
   
   public static class SerializeAny implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
+    public void serialize(TupleWriter writer, FieldValue field) {
       throw new IllegalStateException ( "Not yet" );
     }   
   }

@@ -3,15 +3,15 @@ package org.apache.drill.jig.serde;
 import java.nio.ByteBuffer;
 
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldAccessor;
+import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.FieldSchema;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 
 /**
  * Serialize a tuple represented using the Tuple API. Each type has its
  * own serializer that converts a field, given as a generic
- * {@link FieldAccessor} into the specified form using the
+ * {@link FieldValue} into the specified form using the
  * {@link TupleWriter}.
  */
 
@@ -19,78 +19,78 @@ public class TupleSetSerializer extends BaseTupleSetSerde
 {
   public interface FieldSerializer
   {
-    void serialize( TupleWriter writer, FieldAccessor field );
+    void serialize( TupleWriter writer, FieldValue field );
   }
   
   public static class SerializeString implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeString( field.asScalar().getString() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeString( field.getString() );
     }   
   }
   
   public static class SerializeBoolean implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeBoolean( field.asScalar().getBoolean() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeBoolean( field.getBoolean() );
     }   
   }
   
   public static class SerializeByte implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeByte( field.asScalar().getByte() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeByte( field.getByte() );
     }   
   }
   
   public static class SerializeShort implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeShort( field.asScalar().getShort() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeShort( field.getShort() );
     }   
   }
   
   public static class SerializeInt implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeIntEncoded( field.asScalar().getInt() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeIntEncoded( field.getInt() );
     }   
   }
   
   public static class SerializeLong implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeLongEncoded( field.asScalar().getLong() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeLongEncoded( field.getLong() );
     }   
   }
   
   public static class SerializeFloat implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeFloat( field.asScalar().getFloat() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeFloat( field.getFloat() );
     }   
   }
   
   public static class SerializeDouble implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeDouble( field.asScalar().getDouble() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeDouble( field.getDouble() );
     }   
   }
   
   public static class SerializeDecimal implements FieldSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      writer.writeDecimal( field.asScalar().getDecimal() );
+    public void serialize(TupleWriter writer, FieldValue field) {
+      writer.writeDecimal( field.getDecimal() );
     }   
   }
   
@@ -108,8 +108,8 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     }
     
     @Override
-    public void serialize(TupleWriter writer, FieldAccessor field) {
-      DataType type = field.asAny().getDataType();
+    public void serialize(TupleWriter writer, FieldValue field) {
+      DataType type = field.type();
       writer.writeByte( (byte) type.typeCode( ) );
       serializers[ type.ordinal() ].serialize( writer, field );
     }   
@@ -146,7 +146,7 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     serializers[ DataType.FLOAT64.ordinal() ] = new SerializeDouble( );
     serializers[ DataType.DECIMAL.ordinal() ] = new SerializeDecimal( );
     serializers[ DataType.STRING.ordinal() ] = new SerializeString( );
-    serializers[ DataType.ANY.ordinal() ] = new SerializeAny( serializers );
+    serializers[ DataType.VARIANT.ordinal() ] = new SerializeAny( serializers );
     return serializers;
   }
 
@@ -155,11 +155,11 @@ public class TupleSetSerializer extends BaseTupleSetSerde
    */
   
   private void prepare( ) {
-    super.prepare( schema.getCount( ) );
+    super.prepare( schema.count( ) );
     serializer = new FieldSerializer[ fieldCount ];
     for ( int i = 0;  i < fieldCount;  i++ ) {
-      FieldSchema field = schema.getField( i );
-      serializer[i] = serializerByType[ field.getType().ordinal() ];
+      FieldSchema field = schema.field( i );
+      serializer[i] = serializerByType[ field.type().ordinal() ];
     }
   }
   
@@ -174,10 +174,10 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     writer.startBlock( buf );
     writer.writeIntEncoded( fieldCount );
     for ( int i = 0;  i < fieldCount;  i++ ) {
-      FieldSchema field = schema.getField( i );
-      writer.writeString( field.getName() );
-      writer.writeByte( (byte) field.getType().typeCode( ) );
-      writer.writeByte( (byte) field.getCardinality().cardinalityCode( ) );
+      FieldSchema field = schema.field( i );
+      writer.writeString( field.name() );
+      writer.writeByte( (byte) field.type().typeCode( ) );
+      writer.writeByte( (byte) SerdeUtils.encode( field.nullable( ) ) );
     }
     writer.endBlock( );
   }
@@ -190,7 +190,7 @@ public class TupleSetSerializer extends BaseTupleSetSerde
    * @param tuple
    */
   
-  public boolean serializeTuple( ByteBuffer buf, TupleAccessor tuple ) {
+  public boolean serializeTuple( ByteBuffer buf, TupleValue tuple ) {
     buf.mark();
     try
     {
@@ -217,9 +217,9 @@ public class TupleSetSerializer extends BaseTupleSetSerde
    * @param tuple
    */
   
-  private void scanFields(TupleAccessor tuple) {
+  private void scanFields(TupleValue tuple) {
     for ( int i = 0;  i < fieldCount;  i++ ) {
-      FieldAccessor field = tuple.getField( i );
+      FieldValue field = tuple.field( i );
       isNull[i] = field.isNull();
     }
   }
@@ -232,11 +232,11 @@ public class TupleSetSerializer extends BaseTupleSetSerde
    * @param tuple
    */
   
-  private void writeFields(TupleAccessor tuple) {
+  private void writeFields(TupleValue tuple) {
     for ( int i = 0;  i < fieldCount;  i++ ) {
       if ( isNull[i] || isRepeated[i] )
         continue;
-      FieldAccessor field = tuple.getField( i );
+      FieldValue field = tuple.field( i );
       serializer[i].serialize( writer, field );
     }
   }

@@ -32,7 +32,8 @@ public final class ColumnSchema implements Externalizable, Message<ColumnSchema>
     
     private String name;
     private int type;
-    private int cardinality;
+    private int nullable;
+    private ColumnSchema memberSchema;
 
     public ColumnSchema()
     {
@@ -67,16 +68,29 @@ public final class ColumnSchema implements Externalizable, Message<ColumnSchema>
         return this;
     }
 
-    // cardinality
+    // nullable
 
-    public int getCardinality()
+    public int getNullable()
     {
-        return cardinality;
+        return nullable;
     }
 
-    public ColumnSchema setCardinality(int cardinality)
+    public ColumnSchema setNullable(int nullable)
     {
-        this.cardinality = cardinality;
+        this.nullable = nullable;
+        return this;
+    }
+
+    // memberSchema
+
+    public ColumnSchema getMemberSchema()
+    {
+        return memberSchema;
+    }
+
+    public ColumnSchema setMemberSchema(ColumnSchema memberSchema)
+    {
+        this.memberSchema = memberSchema;
         return this;
     }
 
@@ -141,8 +155,12 @@ public final class ColumnSchema implements Externalizable, Message<ColumnSchema>
                     message.type = input.readInt32();
                     break;
                 case 3:
-                    message.cardinality = input.readInt32();
+                    message.nullable = input.readInt32();
                     break;
+                case 4:
+                    message.memberSchema = input.mergeObject(message.memberSchema, ColumnSchema.getSchema());
+                    break;
+
                 default:
                     input.handleUnknownField(number, this);
             }   
@@ -158,8 +176,12 @@ public final class ColumnSchema implements Externalizable, Message<ColumnSchema>
         if(message.type != 0)
             output.writeInt32(2, message.type, false);
 
-        if(message.cardinality != 0)
-            output.writeInt32(3, message.cardinality, false);
+        if(message.nullable != 0)
+            output.writeInt32(3, message.nullable, false);
+
+        if(message.memberSchema != null)
+             output.writeObject(4, message.memberSchema, ColumnSchema.getSchema(), false);
+
     }
 
     public String getFieldName(int number)
@@ -168,7 +190,8 @@ public final class ColumnSchema implements Externalizable, Message<ColumnSchema>
         {
             case 1: return "name";
             case 2: return "type";
-            case 3: return "cardinality";
+            case 3: return "nullable";
+            case 4: return "memberSchema";
             default: return null;
         }
     }
@@ -184,7 +207,8 @@ public final class ColumnSchema implements Externalizable, Message<ColumnSchema>
     {
         __fieldMap.put("name", 1);
         __fieldMap.put("type", 2);
-        __fieldMap.put("cardinality", 3);
+        __fieldMap.put("nullable", 3);
+        __fieldMap.put("memberSchema", 4);
     }
     
 }

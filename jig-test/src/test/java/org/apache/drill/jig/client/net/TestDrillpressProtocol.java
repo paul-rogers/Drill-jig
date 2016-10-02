@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.drill.jig.api.AlterSessionKeys;
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.drillpress.DrillPressContext;
 import org.apache.drill.jig.drillpress.EmbeddedDrillPress;
+import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.ExecuteRequest;
 import org.apache.drill.jig.proto.ListLoginsResponse;

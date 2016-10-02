@@ -4,10 +4,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.ByteBuffer;
 
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.TupleSet;
-import org.apache.drill.jig.api.array.ArrayResultCollection;
 import org.apache.drill.jig.api.array.TestArrayImpl;
+import org.apache.drill.jig.exception.JigException;
+import org.apache.drill.jig.extras.array.ArrayResultCollection;
 import org.junit.Test;
 
 public class SimpleSerdeTest
@@ -30,7 +30,7 @@ public class SimpleSerdeTest
   }
 
   private void loadBuffer(TupleSet tuples, ByteBuffer buf) throws JigException {
-    TupleSetSerializer serializer = new TupleSetSerializer( tuples.getSchema() );
+    TupleSetSerializer serializer = new TupleSetSerializer( tuples.schema() );
     serializer.serializeSchema( buf );
     while ( tuples.next() ) {
       serializer.serializeTuple( buf, tuples.getTuple() );

@@ -20,7 +20,8 @@ public enum DataType
   DATE_TIME_SPAN( 15, true, "Date-Time-Span", Constants.NOT_IMPLEMENTED ), 
   LIST( 16, false, "List", Constants.NOT_IMPLEMENTED ),
   MAP( 17, false, "Map", Constants.NOT_IMPLEMENTED ),
-  ANY( 18, true, "Any", Constants.TYPE_AND_VALUE );
+  VARIANT( 18, true, "Any", Constants.TYPE_AND_VALUE ),
+  NUMBER( 19, true, "Number", Constants.TYPE_AND_VALUE );
   
   private static DataType codeToTypeMap[] = initCodeToTypeMap( );
   public static int lengthForCode[] = initLengthForCodeMap( );
@@ -46,7 +47,7 @@ public enum DataType
    * @return
    */
   public int typeCode( ) { return typeCode; }
-  public String getDisplayName( ) { return displayName; }
+  public String displayName( ) { return displayName; }
   public boolean isScalar( ) { return isScalar; }
   
   /**
@@ -60,7 +61,7 @@ public enum DataType
   public int getStorageLength( ) { return storageLength; }
   
   public boolean isCompatible(DataType dataType) {
-    if ( this == ANY ) {
+    if ( this == VARIANT ) {
       return true;
     }
     return this == dataType;

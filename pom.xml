@@ -4,7 +4,7 @@
 
 	<groupId>org.apache.drill.jig</groupId>
 	<artifactId>jig-root</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Jig (Drill Client API) Root POM</name>
@@ -54,11 +54,10 @@
 	<dependencies>
 	</dependencies>
 	<modules>
-		<module>jig-core</module>
-		<module>jig-client</module>
-		<module>jig-jdbc</module>
-		<module>jig-server</module>
-		<module>jig-extras</module>
+	<module>jig-core</module>
+	<module>jig-jdbc</module>
+	<module>jig-server</module>
+	<module>jig-extras</module>
     <module>jig-test</module>
     <module>jig-distro</module>
   </modules>

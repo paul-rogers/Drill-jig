@@ -1,8 +1,8 @@
 package org.apache.drill.jig.api.impl;
 
 import org.apache.drill.jig.api.DrillConnection;
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.ResultCollection;
+import org.apache.drill.jig.exception.JigException;
 
 public abstract class AbstractDrillConnection implements DrillConnection
 {

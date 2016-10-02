@@ -4,16 +4,16 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.Statement;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.protocol.MessageConstants;
 import org.apache.drill.jig.direct.DrillSession;
 import org.apache.drill.jig.drillpress.net.RequestException;
+import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.QueryRequest;
 import org.apache.drill.jig.proto.SchemaResponse;
@@ -80,16 +80,16 @@ public class QuerySerializer
   }
 
   private DataResponse schemaResponse() throws RequestException {
-    TupleSchema schema = tupleSet.getSchema();
+    TupleSchema schema = tupleSet.schema();
     serializer = new TupleSetSerializer( schema );
     List<ColumnSchema> fields = new ArrayList<ColumnSchema>( );
-    int count = schema.getCount();
+    int count = schema.count();
     for ( int i = 0;  i < count;  i++ ) {
-      FieldSchema field = schema.getField( i );
+      FieldSchema field = schema.field( i );
       fields.add( new ColumnSchema( )
-          .setName( field.getName() )
+          .setName( field.name() )
           .setCardinality( field.getCardinality().cardinalityCode() )
-          .setType( field.getType().typeCode( ) ) );
+          .setType( field.type().typeCode( ) ) );
     }
     state = QueryState.ROWS;
     return new DataResponse( new SchemaResponse( )
@@ -106,7 +106,7 @@ public class QuerySerializer
         state = QueryState.SCHEMA;
         break;
       }
-      TupleAccessor tuple = tupleSet.getTuple();
+      TupleValue tuple = tupleSet.getTuple();
       if ( ! serializer.serializeTuple(buf, tuple) ) {
         if ( count == 0 ) {
           throw new RequestException( "Row too big for buffer",

@@ -45,7 +45,7 @@
  * [name][type][cardinality]
  * </pre>
  * The name is encoded as for string fields. The type and cardinality are one byte
- * each, encoded using the constants defined in {@link Constants}.
+ * each, encoded using the constants defined in {@link SerdeUtils}.
  * <h4>Tuple</h4>
  * Each tuple is serialized as:
  * <pre>

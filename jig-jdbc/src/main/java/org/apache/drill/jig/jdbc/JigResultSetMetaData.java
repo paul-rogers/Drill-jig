@@ -32,7 +32,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
 
   @Override
   public int getColumnCount() throws SQLException {
-    return schema.getCount();
+    return schema.count();
   }
 
   @Override
@@ -68,7 +68,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
   }
 
   private FieldSchema getJigField(int column) {
-    FieldSchema field = schema.getField( column - 1 );
+    FieldSchema field = schema.field( column - 1 );
     if ( field == null )
       throw new ArrayIndexOutOfBoundsException( "Column index " + column );
     return field;
@@ -92,7 +92,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
   @Override
   public boolean isSigned(int column) throws SQLException {
     FieldSchema field = getJigField( column );
-    return signed[ field.getType().ordinal() ];
+    return signed[ field.type().ordinal() ];
   }
 
   @Override
@@ -108,7 +108,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
 
   @Override
   public String getColumnName(int column) throws SQLException {
-    return getJigField( column ).getName();
+    return getJigField( column ).name();
   }
 
   @Override
@@ -145,7 +145,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
 
   private static int[] initTypes() {
     int types[] = new int[ DataType.values().length ];
-    types[ DataType.ANY.ordinal() ] = Types.JAVA_OBJECT;
+    types[ DataType.VARIANT.ordinal() ] = Types.JAVA_OBJECT;
     types[ DataType.BLOB.ordinal() ] = Types.BLOB;
     types[ DataType.BOOLEAN.ordinal() ] = Types.BOOLEAN;
     types[ DataType.DATE.ordinal() ] = Types.DATE;
@@ -170,12 +170,12 @@ public class JigResultSetMetaData implements ResultSetMetaData
   @Override
   public int getColumnType(int column) throws SQLException {
     FieldSchema field = getJigField( column );
-    return sqlTypes[ field.getType().ordinal() ];
+    return sqlTypes[ field.type().ordinal() ];
   }
 
   @Override
   public String getColumnTypeName(int column) throws SQLException {
-    return getJigField( column ).getType().getDisplayName();
+    return getJigField( column ).type().displayName();
   }
 
   @Override

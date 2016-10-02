@@ -1,6 +1,6 @@
 package org.apache.drill.jig.direct;
 
-import org.apache.drill.jig.api.JigException;
+import org.apache.drill.jig.exception.JigException;
 
 public class DrillSessionException extends JigException
 {

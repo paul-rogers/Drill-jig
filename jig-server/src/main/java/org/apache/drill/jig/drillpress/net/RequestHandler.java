@@ -1,6 +1,6 @@
 package org.apache.drill.jig.drillpress.net;
 
-import org.apache.drill.jig.api.JigException;
+import org.apache.drill.jig.exception.JigException;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

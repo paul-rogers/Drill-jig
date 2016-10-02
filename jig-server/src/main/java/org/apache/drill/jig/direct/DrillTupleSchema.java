@@ -21,6 +21,6 @@ public class DrillTupleSchema extends TupleSchemaImpl
   public DrillFieldAccessor accessors[];
   
   protected DrillFieldSchema getDrillField( int i ) {
-    return (DrillFieldSchema) getField( i );
+    return (DrillFieldSchema) field( i );
   }
 }

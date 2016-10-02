@@ -5,11 +5,11 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.ResultCollection;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
+import org.apache.drill.jig.exception.JigException;
 
 public class RowDisplay
 {
@@ -29,7 +29,7 @@ public class RowDisplay
   public static void printResults( ResultCollection results, PrintWriter out ) throws JigException {
     while( results.next() ) {
       TupleSet tupleSet = results.getTuples();
-      RowDisplay.printSchema( tupleSet.getSchema(), out );
+      RowDisplay.printSchema( tupleSet.schema(), out );
       while ( tupleSet.next() )
         RowDisplay.printRow( tupleSet.getTuple(), out );
     }
@@ -37,21 +37,21 @@ public class RowDisplay
   }
   
   public static void printSchema(TupleSchema schema, PrintWriter out) {
-    int n = schema.getCount();
+    int n = schema.count();
     for ( int i = 0; i < n;  i++ ) {
       if ( i > 0 )
         out.print( ", " );
-      out.print( schema.getField(i).getName());
+      out.print( schema.field(i).name());
     }
     out.println( );
   }
 
-  public static void printRow(TupleAccessor tuple, PrintWriter out) {
-    int n = tuple.getSchema().getCount();
+  public static void printRow(TupleValue tuple, PrintWriter out) {
+    int n = tuple.schema().count();
     for ( int i = 0; i < n;  i++ ) {
       if ( i > 0 )
         out.print( ", " );
-      Object value = tuple.getField(i).asScalar( ).getValue();
+      Object value = tuple.field(i).getValue();
       String disp;
       if ( value == null )
         disp = "<null>";

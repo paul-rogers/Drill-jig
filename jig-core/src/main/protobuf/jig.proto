@@ -90,7 +90,8 @@ message QueryRequest {
 message ColumnSchema {
   optional string name = 1;
   optional int32 type = 2;
-  optional int32 cardinality = 3;
+  optional int32 nullable = 3;
+  optional ColumnSchema memberSchema = 4;
 }
 
 message SchemaResponse {

@@ -3,7 +3,7 @@ package org.apache.drill.jig.serde;
 import java.nio.ByteBuffer;
 
 import org.apache.drill.jig.api.ResultCollection;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 
@@ -15,7 +15,7 @@ public class SimpleBufferResultSet implements ResultCollection
     int tupleIndex = -1;
     
     @Override
-    public TupleSchema getSchema() {
+    public TupleSchema schema() {
       return deserializer.getSchema( );
     }
 
@@ -36,7 +36,7 @@ public class SimpleBufferResultSet implements ResultCollection
     }
 
     @Override
-    public TupleAccessor getTuple() {
+    public TupleValue getTuple() {
       return deserializer.getTuple( );
     }
   }

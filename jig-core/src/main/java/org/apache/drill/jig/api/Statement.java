@@ -1,5 +1,7 @@
 package org.apache.drill.jig.api;
 
+import org.apache.drill.jig.exception.JigException;
+
 /**
  * Represents a statement. A statement has a life cycle
  * as follows:

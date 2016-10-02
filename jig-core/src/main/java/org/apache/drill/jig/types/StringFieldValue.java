@@ -1,0 +1,77 @@
+package org.apache.drill.jig.types;
+
+import java.math.BigDecimal;
+
+import org.apache.drill.jig.api.DataType;
+import org.apache.drill.jig.types.FieldAccessor.StringAccessor;
+
+public class StringFieldValue extends AbstractScalarFieldValue {
+
+	private StringAccessor accessor;
+	
+	@Override
+	public void bind(FieldAccessor accessor) {
+		this.accessor = (StringAccessor) accessor;
+	}
+
+	@Override
+	public DataType type() {
+		return DataType.STRING;
+	}
+
+	@Override
+	public boolean isNull() {
+		return getString( ) == null;
+	}
+
+	@Override
+	public boolean getBoolean() {
+		return StringConversions.toBoolean( getString( ) );
+	}
+
+	@Override
+	public byte getByte() {
+		return StringConversions.toByte( getString( ) );
+	}
+
+	@Override
+	public short getShort() {
+		return StringConversions.toShort( getString( ) );
+	}
+
+	@Override
+	public int getInt() {
+		return StringConversions.toInt( getString( ) );
+	}
+
+	@Override
+	public long getLong() {
+		return StringConversions.toLong( getString( ) );
+	}
+
+	@Override
+	public float getFloat() {
+		return StringConversions.toFloat( getString( ) );
+	}
+
+	@Override
+	public double getDouble() {
+		return StringConversions.toDouble( getString( ) );
+	}
+
+	@Override
+	public BigDecimal getDecimal() {
+		return StringConversions.toDecimal( getString( ) );
+	}
+
+	@Override
+	public String getString() {
+		return accessor.getString();
+	}
+
+	@Override
+	public Object getValue() {
+		return getString( );
+	}
+
+}

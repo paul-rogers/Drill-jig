@@ -5,453 +5,455 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 
-import org.apache.drill.jig.api.FieldAccessor;
+import org.apache.drill.jig.api.ArrayValue;
+import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.FieldSchema;
-import org.apache.drill.jig.api.ValueConversionError;
+import org.apache.drill.jig.api.ScalarValue;
 import org.apache.drill.jig.serde.TupleSetDeserializer.DeserializedTupleAccessor;
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
+import org.apache.drill.jig.exception.ValueConversionError;
 
-public class BufferFieldAccessor implements FieldAccessor
+public abstract class BufferFieldAccessor // implements FieldValue
 {
-  private abstract static class BufferScalarAccessor extends BufferFieldAccessor implements ScalarAccessor
-  {
-    @Override
-    public ScalarAccessor asScalar() {
-      verifyNotNull( );
-      return this;
-    }
-
-    @Override
-    public boolean getBoolean() {
-      throw notSupportedError( DataType.BOOLEAN.getDisplayName() );
-    }   
-
-    @Override
-    public byte getByte() {
-      throw notSupportedError( DataType.INT8.getDisplayName() );
-    }
-
-    @Override
-    public int getInt() {
-      throw notSupportedError( DataType.INT32.getDisplayName( ) );
-    }
-
-    @Override
-    public short getShort() {
-      throw notSupportedError( DataType.INT16.getDisplayName() );
-    }
-
-    @Override
-    public long getLong() {
-      throw notSupportedError( DataType.INT64.getDisplayName() );
-    }
-
-    @Override
-    public float getFloat() {
-      throw notSupportedError( DataType.STRING.getDisplayName() );
-    }
-
-    @Override
-    public double getDouble() {
-      throw notSupportedError( DataType.FLOAT64.getDisplayName() );
-    }
-
-    @Override
-    public BigDecimal getDecimal() {
-      throw notSupportedError( DataType.DECIMAL.getDisplayName() );
-    }
-
-    @Override
-    public String getString() {
-      throw notSupportedError( DataType.STRING.getDisplayName() );
-    }
-
-    @Override
-    public byte[] getBlob() {
-      throw notSupportedError( DataType.BLOB.getDisplayName() );
-    }
-
-    @Override
-    public LocalDate getDate() {
-      throw notSupportedError( DataType.DATE.getDisplayName() );
-    }
-
-    @Override
-    public LocalDateTime getDateTime() {
-      throw notSupportedError( DataType.LOCAL_DATE_TIME.getDisplayName() );
-    }
-
-    @Override
-    public Period getUTCTime() {
-      throw notSupportedError( DataType.UTC_DATE_TIME.getDisplayName() );
-    }
-
-    @Override
-    public Object getValue() {
-      throw notSupportedError( "Object" );
-    }
-    
-  }
-  
-  private static class BufferBooleanAccessor extends BufferScalarAccessor
-  {
-    @Override
-    public boolean getBoolean() {
-      seek( );
-      return reader.readBoolean();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getBoolean( );
-    }
-  }
-  
-  private static class BufferInt8Accessor extends BufferScalarAccessor
-  {
-    @Override
-    public byte getByte() {
-      seek( );
-      return reader.readByte();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getByte( );
-    }
-  }
-  
-  private static class BufferInt16Accessor extends BufferScalarAccessor
-  {
-    @Override
-    public short getShort() {
-      seek( );
-      return reader.readShort();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getShort( );
-    }
-  }
-  
-  private static class BufferInt32Accessor extends BufferScalarAccessor
-  {
-    @Override
-    public int getInt() {
-      seek( );
-      return reader.readIntEncoded();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getInt( );
-    }
-  }
-  
-  private static class BufferInt64Accessor extends BufferScalarAccessor
-  {
-    @Override
-    public long getLong() {
-      seek( );
-      return reader.readLongEncoded();
-    }
-    
-    @Override
-    public int getInt() {
-      return (int) getLong( );
-    }
-
-    @Override
-    public Object getValue() {
-      return getLong( );
-    }
-  }
-  
-  private static class BufferFloat32Accessor extends BufferScalarAccessor
-  {
-    @Override
-    public float getFloat() {
-      seek( );
-      return reader.readFloat();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getFloat( );
-    }
-  }
-  
-  private static class BufferFloat64Accessor extends BufferScalarAccessor
-  {
-    @Override
-    public double getDouble() {
-      seek( );
-      return reader.readDouble();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getDouble( );
-    }
-  }
-  
-  private static class BufferDecimalAccessor extends BufferScalarAccessor
-  {
-    @Override
-    public BigDecimal getDecimal() {
-      seek( );
-      return reader.readDecimal();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getDecimal( );
-    }
-  }
-  
-  private static class BufferStringAccessor extends BufferScalarAccessor
-  {
-    @Override
-    public String getString() {
-      seek( );
-      return reader.readString();
-    }
-    
-    @Override
-    public Object getValue() {
-      return getString( );
-    }
-  }
-  
-  private static class BufferAnyAccessor extends BufferFieldAccessor implements AnyAccessor
-  {
-    @Override
-    public ScalarAccessor asScalar() {
-      verifyNotNull( );
-      return this;
-    }
-
-    @Override
-    public AnyAccessor asAny() {
-      verifyNotNull( );
-      return this;
-    }
-
-    @Override
-    public DataType getDataType() {
-      seek( );
-      return DataType.typeForCode( reader.readByte() );
-    }
-    
-    @Override
-    public boolean getBoolean() {
-      if ( getDataType( ) == DataType.BOOLEAN )
-        return reader.readBoolean();
-      throw notSupportedError( DataType.BOOLEAN.getDisplayName() );
-    }
-
-    @Override
-    public Object getValue() {
-      switch( getDataType( ) ) {
-      case BOOLEAN:
-        return reader.readBoolean();
-      case INT8:
-        return reader.readByte();
-      case INT16:
-        return reader.readShort();
-      case INT32:
-        return reader.readIntEncoded();
-      case INT64:
-        return reader.readLongEncoded();
-      case FLOAT32:
-        return reader.readFloat( );
-      case FLOAT64:
-        return reader.readDouble( );
-      case DECIMAL:
-        return reader.readDecimal();
-      case STRING:
-        return reader.readString();
-      default:
-        return null;
-      }
-    }
-
-    @Override
-    public byte getByte() {
-      if ( getDataType( ) == DataType.INT8 )
-        return reader.readByte( );
-      throw notSupportedError( DataType.INT8.getDisplayName() );
-    }
-
-    @Override
-    public short getShort() {
-      if ( getDataType( ) == DataType.INT16 )
-        return reader.readShort( );
-      throw notSupportedError( DataType.INT16.getDisplayName() );
-    }
-
-    @Override
-    public int getInt() {
-      if ( getDataType( ) == DataType.INT32 )
-        return reader.readIntEncoded( );
-      throw notSupportedError( DataType.INT32.getDisplayName() );
-    }
-
-    @Override
-    public long getLong() {
-      if ( getDataType( ) == DataType.INT64 )
-        return reader.readLongEncoded( );
-      throw notSupportedError( DataType.INT64.getDisplayName() );
-    }
-
-    @Override
-    public float getFloat() {
-      if ( getDataType( ) == DataType.FLOAT32 )
-        return reader.readFloat( );
-      throw notSupportedError( DataType.FLOAT32.getDisplayName() );
-    }
-
-    @Override
-    public double getDouble() {
-      if ( getDataType( ) == DataType.FLOAT64 )
-        return reader.readDouble( );
-      throw notSupportedError( DataType.FLOAT64.getDisplayName() );
-    }
-
-    @Override
-    public BigDecimal getDecimal() {
-      if ( getDataType( ) == DataType.DECIMAL )
-        return reader.readDecimal();
-      throw notSupportedError( DataType.DECIMAL.getDisplayName() );
-    }
-
-    @Override
-    public String getString() {
-      if ( getDataType( ) == DataType.STRING )
-        return reader.readString();
-      throw notSupportedError( DataType.STRING.getDisplayName() );
-    }
-
-    @Override
-    public byte[] getBlob() {
-      throw notSupportedError( DataType.BLOB.getDisplayName() );
-    }
-
-    @Override
-    public LocalDate getDate() {
-      throw notSupportedError( DataType.DATE.getDisplayName() );
-    }
-
-    @Override
-    public LocalDateTime getDateTime() {
-      throw notSupportedError( DataType.LOCAL_DATE_TIME.getDisplayName() );
-    }
-
-    @Override
-    public Period getUTCTime() {
-      throw notSupportedError( DataType.UTC_DATE_TIME.getDisplayName() );
-    }
-  }
-  
-  int index;
-  private FieldSchema schema;
-  DeserializedTupleAccessor tuple;
-  TupleSetDeserializer deserializer;
-  TupleReader reader;
-  
-  public void bind( TupleSetDeserializer deserializer, int index ) {
-    this.deserializer = deserializer;
-    this.index = index;
-    tuple = deserializer.tuple;
-    schema = tuple.getSchema( ).getField( index );
-    reader = deserializer.reader;
-  }
-  
-  @Override
-  public DataType getType() {
-    return schema.getType();
-  }
-
-  @Override
-  public Cardinality getCardinality() {
-    return schema.getCardinality();
-  }
-
-  @Override
-  public boolean isNull() {
-    return deserializer.isNull[ index ];
-  }
-
-  @Override
-  public ScalarAccessor asScalar() {
-    throw notSupportedError( "scalar" );
-  }
-
-  @Override
-  public ArrayAccessor asArray() {
-    throw notSupportedError( "array" );
-  }
-
-  @Override
-  public AnyAccessor asAny() {
-    throw notSupportedError( DataType.ANY.getDisplayName() );
-  }
-
-  public ValueConversionError notSupportedError(String type) {
-    throw new ValueConversionError( "Cannot convert " + schema.getDisplayType( ) +
-                " to " + type );
-  }
-  
-  public void verifyNotNull( ) {
-    if ( isNull( ) )
-      throw new ValueConversionError( "Field is null: " + schema.getName( ) );
-  }
-  
-  protected void seek( ) {
-    reader.seek( deserializer.fieldIndexes[ index ] );
-  }
-  
-  public static BufferFieldAccessor makeAccessor( FieldSchema schema ) {
-    if ( schema.getCardinality() == Cardinality.REPEATED ) {
-//      JsonItemHandle itemHandle = new JsonItemHandle( handle );
-//      JsonFieldAccessor itemAccessor = makeScalarAccessor( itemHandle );
-//      return new JsonArrayAccessor( handle, itemAccessor, itemHandle );
-      assert false;
-      return null;
-    }
-    return makeScalarAccessor( schema );
-  }
-  
-  private static BufferFieldAccessor makeScalarAccessor( FieldSchema schema )
-  {
-    switch ( schema.getType( ) ) {
-    case BOOLEAN:
-      return new BufferBooleanAccessor( );
-    case INT8:
-      return new BufferInt8Accessor( );
-    case INT16:
-      return new BufferInt16Accessor( );
-    case INT32:
-      return new BufferInt32Accessor( );
-    case INT64:
-      return new BufferInt64Accessor( );
-    case FLOAT32:
-      return new BufferFloat32Accessor( );
-    case FLOAT64:
-      return new BufferFloat64Accessor( );
-    case DECIMAL:
-      return new BufferDecimalAccessor( );
-    case STRING:
-      return new BufferStringAccessor( );
-    case ANY: // Any is "any scalar"
-      return new BufferAnyAccessor( );
-    default:
-      assert false;
-      return null;
-    }
-  }
+//  private abstract static class BufferScalarAccessor extends BufferFieldAccessor implements ScalarValue
+//  {
+////    @Override
+////    public ScalarValue asScalar() {
+////      verifyNotNull( );
+////      return this;
+////    }
+//
+//    @Override
+//    public boolean getBoolean() {
+//      throw notSupportedError( DataType.BOOLEAN.displayName() );
+//    }   
+//
+//    @Override
+//    public byte getByte() {
+//      throw notSupportedError( DataType.INT8.displayName() );
+//    }
+//
+//    @Override
+//    public int getInt() {
+//      throw notSupportedError( DataType.INT32.displayName( ) );
+//    }
+//
+//    @Override
+//    public short getShort() {
+//      throw notSupportedError( DataType.INT16.displayName() );
+//    }
+//
+//    @Override
+//    public long getLong() {
+//      throw notSupportedError( DataType.INT64.displayName() );
+//    }
+//
+//    @Override
+//    public float getFloat() {
+//      throw notSupportedError( DataType.STRING.displayName() );
+//    }
+//
+//    @Override
+//    public double getDouble() {
+//      throw notSupportedError( DataType.FLOAT64.displayName() );
+//    }
+//
+//    @Override
+//    public BigDecimal getDecimal() {
+//      throw notSupportedError( DataType.DECIMAL.displayName() );
+//    }
+//
+//    @Override
+//    public String getString() {
+//      throw notSupportedError( DataType.STRING.displayName() );
+//    }
+//
+//    @Override
+//    public byte[] getBlob() {
+//      throw notSupportedError( DataType.BLOB.displayName() );
+//    }
+//
+//    @Override
+//    public LocalDate getDate() {
+//      throw notSupportedError( DataType.DATE.displayName() );
+//    }
+//
+//    @Override
+//    public LocalDateTime getDateTime() {
+//      throw notSupportedError( DataType.LOCAL_DATE_TIME.displayName() );
+//    }
+//
+//    @Override
+//    public Period getUTCTime() {
+//      throw notSupportedError( DataType.UTC_DATE_TIME.displayName() );
+//    }
+//
+//    @Override
+//    public Object getValue() {
+//      throw notSupportedError( "Object" );
+//    }
+//    
+//  }
+//  
+//  private static class BufferBooleanAccessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public boolean getBoolean() {
+//      seek( );
+//      return reader.readBoolean();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getBoolean( );
+//    }
+//  }
+//  
+//  private static class BufferInt8Accessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public byte getByte() {
+//      seek( );
+//      return reader.readByte();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getByte( );
+//    }
+//  }
+//  
+//  private static class BufferInt16Accessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public short getShort() {
+//      seek( );
+//      return reader.readShort();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getShort( );
+//    }
+//  }
+//  
+//  private static class BufferInt32Accessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public int getInt() {
+//      seek( );
+//      return reader.readIntEncoded();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getInt( );
+//    }
+//  }
+//  
+//  private static class BufferInt64Accessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public long getLong() {
+//      seek( );
+//      return reader.readLongEncoded();
+//    }
+//    
+//    @Override
+//    public int getInt() {
+//      return (int) getLong( );
+//    }
+//
+//    @Override
+//    public Object getValue() {
+//      return getLong( );
+//    }
+//  }
+//  
+//  private static class BufferFloat32Accessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public float getFloat() {
+//      seek( );
+//      return reader.readFloat();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getFloat( );
+//    }
+//  }
+//  
+//  private static class BufferFloat64Accessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public double getDouble() {
+//      seek( );
+//      return reader.readDouble();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getDouble( );
+//    }
+//  }
+//  
+//  private static class BufferDecimalAccessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public BigDecimal getDecimal() {
+//      seek( );
+//      return reader.readDecimal();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getDecimal( );
+//    }
+//  }
+//  
+//  private static class BufferStringAccessor extends BufferScalarAccessor
+//  {
+//    @Override
+//    public String getString() {
+//      seek( );
+//      return reader.readString();
+//    }
+//    
+//    @Override
+//    public Object getValue() {
+//      return getString( );
+//    }
+//  }
+//  
+////  private static class BufferAnyAccessor extends BufferFieldAccessor implements AnyAccessor
+////  {
+////    @Override
+////    public ScalarValue asScalar() {
+////      verifyNotNull( );
+////      return this;
+////    }
+////
+////    @Override
+////    public AnyAccessor asAny() {
+////      verifyNotNull( );
+////      return this;
+////    }
+////
+////    @Override
+////    public DataType getDataType() {
+////      seek( );
+////      return DataType.typeForCode( reader.readByte() );
+////    }
+////    
+////    @Override
+////    public boolean getBoolean() {
+////      if ( getDataType( ) == DataType.BOOLEAN )
+////        return reader.readBoolean();
+////      throw notSupportedError( DataType.BOOLEAN.displayName() );
+////    }
+////
+////    @Override
+////    public Object getValue() {
+////      switch( getDataType( ) ) {
+////      case BOOLEAN:
+////        return reader.readBoolean();
+////      case INT8:
+////        return reader.readByte();
+////      case INT16:
+////        return reader.readShort();
+////      case INT32:
+////        return reader.readIntEncoded();
+////      case INT64:
+////        return reader.readLongEncoded();
+////      case FLOAT32:
+////        return reader.readFloat( );
+////      case FLOAT64:
+////        return reader.readDouble( );
+////      case DECIMAL:
+////        return reader.readDecimal();
+////      case STRING:
+////        return reader.readString();
+////      default:
+////        return null;
+////      }
+////    }
+////
+////    @Override
+////    public byte getByte() {
+////      if ( getDataType( ) == DataType.INT8 )
+////        return reader.readByte( );
+////      throw notSupportedError( DataType.INT8.displayName() );
+////    }
+////
+////    @Override
+////    public short getShort() {
+////      if ( getDataType( ) == DataType.INT16 )
+////        return reader.readShort( );
+////      throw notSupportedError( DataType.INT16.displayName() );
+////    }
+////
+////    @Override
+////    public int getInt() {
+////      if ( getDataType( ) == DataType.INT32 )
+////        return reader.readIntEncoded( );
+////      throw notSupportedError( DataType.INT32.displayName() );
+////    }
+////
+////    @Override
+////    public long getLong() {
+////      if ( getDataType( ) == DataType.INT64 )
+////        return reader.readLongEncoded( );
+////      throw notSupportedError( DataType.INT64.displayName() );
+////    }
+////
+////    @Override
+////    public float getFloat() {
+////      if ( getDataType( ) == DataType.FLOAT32 )
+////        return reader.readFloat( );
+////      throw notSupportedError( DataType.FLOAT32.displayName() );
+////    }
+////
+////    @Override
+////    public double getDouble() {
+////      if ( getDataType( ) == DataType.FLOAT64 )
+////        return reader.readDouble( );
+////      throw notSupportedError( DataType.FLOAT64.displayName() );
+////    }
+////
+////    @Override
+////    public BigDecimal getDecimal() {
+////      if ( getDataType( ) == DataType.DECIMAL )
+////        return reader.readDecimal();
+////      throw notSupportedError( DataType.DECIMAL.displayName() );
+////    }
+////
+////    @Override
+////    public String getString() {
+////      if ( getDataType( ) == DataType.STRING )
+////        return reader.readString();
+////      throw notSupportedError( DataType.STRING.displayName() );
+////    }
+////
+////    @Override
+////    public byte[] getBlob() {
+////      throw notSupportedError( DataType.BLOB.displayName() );
+////    }
+////
+////    @Override
+////    public LocalDate getDate() {
+////      throw notSupportedError( DataType.DATE.displayName() );
+////    }
+////
+////    @Override
+////    public LocalDateTime getDateTime() {
+////      throw notSupportedError( DataType.LOCAL_DATE_TIME.displayName() );
+////    }
+////
+////    @Override
+////    public Period getUTCTime() {
+////      throw notSupportedError( DataType.UTC_DATE_TIME.displayName() );
+////    }
+////  }
+//  
+//  int index;
+//  private FieldSchema schema;
+//  DeserializedTupleAccessor tuple;
+//  TupleSetDeserializer deserializer;
+//  TupleReader reader;
+//  
+//  public void bind( TupleSetDeserializer deserializer, int index ) {
+//    this.deserializer = deserializer;
+//    this.index = index;
+//    tuple = deserializer.tuple;
+//    schema = tuple.schema( ).field( index );
+//    reader = deserializer.reader;
+//  }
+//  
+//  @Override
+//  public DataType type() {
+//    return schema.type();
+//  }
+//
+////  @Override
+////  public Cardinality getCardinality() {
+////    return schema.getCardinality();
+////  }
+//
+//  @Override
+//  public boolean isNull() {
+//    return deserializer.isNull[ index ];
+//  }
+//
+////  @Override
+////  public ScalarValue asScalar() {
+////    throw notSupportedError( "scalar" );
+////  }
+////
+////  @Override
+////  public ArrayValue asArray() {
+////    throw notSupportedError( "array" );
+////  }
+////
+////  @Override
+////  public AnyAccessor asAny() {
+////    throw notSupportedError( DataType.ANY.displayName() );
+////  }
+//
+//  public ValueConversionError notSupportedError(String type) {
+//    throw new ValueConversionError( "Cannot convert " + schema.getDisplayType( ) +
+//                " to " + type );
+//  }
+//  
+//  public void verifyNotNull( ) {
+//    if ( isNull( ) )
+//      throw new ValueConversionError( "Field is null: " + schema.name( ) );
+//  }
+//  
+//  protected void seek( ) {
+//    reader.seek( deserializer.fieldIndexes[ index ] );
+//  }
+//  
+//  public static BufferFieldAccessor makeAccessor( FieldSchema schema ) {
+//    if ( schema.type() == DataType.LIST ) {
+////      JsonItemHandle itemHandle = new JsonItemHandle( handle );
+////      JsonFieldAccessor itemAccessor = makeScalarAccessor( itemHandle );
+////      return new JsonArrayAccessor( handle, itemAccessor, itemHandle );
+//      assert false;
+//      return null;
+//    }
+//    return makeScalarAccessor( schema );
+//  }
+//  
+//  private static BufferFieldAccessor makeScalarAccessor( FieldSchema schema )
+//  {
+//    switch ( schema.type( ) ) {
+//    case BOOLEAN:
+//      return new BufferBooleanAccessor( );
+//    case INT8:
+//      return new BufferInt8Accessor( );
+//    case INT16:
+//      return new BufferInt16Accessor( );
+//    case INT32:
+//      return new BufferInt32Accessor( );
+//    case INT64:
+//      return new BufferInt64Accessor( );
+//    case FLOAT32:
+//      return new BufferFloat32Accessor( );
+//    case FLOAT64:
+//      return new BufferFloat64Accessor( );
+//    case DECIMAL:
+//      return new BufferDecimalAccessor( );
+//    case STRING:
+//      return new BufferStringAccessor( );
+////    case ANY: // Any is "any scalar"
+////      return new BufferAnyAccessor( );
+//    default:
+//      assert false;
+//      return null;
+//    }
+//  }
 
 //  interface BufferFieldHandle
 //  {

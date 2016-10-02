@@ -5,10 +5,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.StringWriter;
 
 import org.apache.drill.jig.api.DrillConnection;
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.Statement;
 import org.apache.drill.jig.client.ConnectionFactory;
+import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.test.CompareFiles;
 import org.apache.drill.jig.util.RowDisplay;
 import org.junit.AfterClass;

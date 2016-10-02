@@ -18,13 +18,15 @@ import org.apache.drill.exec.vector.NullableIntVector;
 import org.apache.drill.exec.vector.NullableVarCharVector;
 import org.apache.drill.exec.vector.ValueVector;
 import org.apache.drill.exec.vector.VarCharVector;
+import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldAccessor;
+import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.FieldSchema;
-import org.apache.drill.jig.api.ValueConversionError;
+import org.apache.drill.jig.api.ScalarValue;
+import org.apache.drill.jig.exception.ValueConversionError;
 
-public abstract class DrillFieldAccessor implements FieldAccessor
+public abstract class DrillFieldAccessor implements FieldValue
 {
   public VectorRecordReader reader;
   public FieldSchema schema;
@@ -34,7 +36,7 @@ public abstract class DrillFieldAccessor implements FieldAccessor
   public void bind( VectorRecordReader reader, FieldSchema schema ) {
     this.reader = reader;
     this.schema = schema;
-    this.fieldIndex = schema.getIndex();
+    this.fieldIndex = schema.index();
   }
 
   public void bindVector( ) {
@@ -42,8 +44,8 @@ public abstract class DrillFieldAccessor implements FieldAccessor
   }
 
   @Override
-  public DataType getType() {
-    return schema.getType();
+  public DataType type() {
+    return schema.type();
   }
 
   @Override
@@ -65,12 +67,12 @@ public abstract class DrillFieldAccessor implements FieldAccessor
   }
 
   @Override
-  public ScalarAccessor asScalar() {
+  public ScalarValue asScalar() {
     throw notSupportedError( "scalar" );
   }
 
   @Override
-  public ArrayAccessor asArray() {
+  public ArrayValue asArray() {
     throw notSupportedError( "array" );
   }
 
@@ -84,76 +86,76 @@ public abstract class DrillFieldAccessor implements FieldAccessor
                 " to " + type );
   }
   
-  public abstract static class DrillScalarAccessor extends DrillFieldAccessor implements ScalarAccessor
+  public abstract static class DrillScalarAccessor extends DrillFieldAccessor implements ScalarValue
   {
     @Override
-    public ScalarAccessor asScalar() {
+    public ScalarValue asScalar() {
       return this;
     }
 
     @Override
     public boolean getBoolean() {
-      throw notSupportedError( DataType.BOOLEAN.getDisplayName() );
+      throw notSupportedError( DataType.BOOLEAN.displayName() );
     }   
 
     @Override
     public byte getByte() {
-      throw notSupportedError( DataType.INT8.getDisplayName() );
+      throw notSupportedError( DataType.INT8.displayName() );
     }
 
     @Override
     public int getInt() {
-      throw notSupportedError( DataType.INT32.getDisplayName( ) );
+      throw notSupportedError( DataType.INT32.displayName( ) );
     }
 
     @Override
     public short getShort() {
-      throw notSupportedError( DataType.INT16.getDisplayName() );
+      throw notSupportedError( DataType.INT16.displayName() );
     }
 
     @Override
     public long getLong() {
-      throw notSupportedError( DataType.INT64.getDisplayName() );
+      throw notSupportedError( DataType.INT64.displayName() );
     }
 
     @Override
     public float getFloat() {
-      throw notSupportedError( DataType.STRING.getDisplayName() );
+      throw notSupportedError( DataType.STRING.displayName() );
     }
 
     @Override
     public double getDouble() {
-      throw notSupportedError( DataType.FLOAT64.getDisplayName() );
+      throw notSupportedError( DataType.FLOAT64.displayName() );
     }
 
     @Override
     public BigDecimal getDecimal() {
-      throw notSupportedError( DataType.DECIMAL.getDisplayName() );
+      throw notSupportedError( DataType.DECIMAL.displayName() );
     }
 
     @Override
     public String getString() {
-      throw notSupportedError( DataType.STRING.getDisplayName() );
+      throw notSupportedError( DataType.STRING.displayName() );
     }
 
     @Override
     public byte[] getBlob() {
-      throw notSupportedError( DataType.BLOB.getDisplayName() );
+      throw notSupportedError( DataType.BLOB.displayName() );
     }
 
     @Override
     public LocalDate getDate() {
-      throw notSupportedError( DataType.DATE.getDisplayName() );
+      throw notSupportedError( DataType.DATE.displayName() );
     }
 
     @Override
     public LocalDateTime getDateTime() {
-      throw notSupportedError( DataType.LOCAL_DATE_TIME.getDisplayName() );
+      throw notSupportedError( DataType.LOCAL_DATE_TIME.displayName() );
     }
 
     @Override
     public Period getUTCTime() {
-      throw notSupportedError( DataType.UTC_DATE_TIME.getDisplayName() );
+      throw notSupportedError( DataType.UTC_DATE_TIME.displayName() );
     }
 
     @Override

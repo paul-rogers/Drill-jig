@@ -1,5 +1,7 @@
 package org.apache.drill.jig.api;
 
+import org.apache.drill.jig.exception.JigException;
+
 /**
  * Iterator over a collection of records all with the same schema.
  * <p>
@@ -27,8 +29,8 @@ package org.apache.drill.jig.api;
 
 public interface TupleSet
 {
-  TupleSchema getSchema( );
+  TupleSchema schema( );
   int getIndex( );
   boolean next( ) throws JigException;
-  TupleAccessor getTuple( );
+  TupleValue getTuple( );
 }

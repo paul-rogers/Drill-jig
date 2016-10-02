@@ -3,13 +3,13 @@ package org.apache.drill.jig.drillpress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.direct.DrillSession;
 import org.apache.drill.jig.direct.DrillSessionException;
 import org.apache.drill.jig.drillpress.net.RequestException;
 import org.apache.drill.jig.drillpress.net.RequestProcessor;
 import org.apache.drill.jig.drillpress.net.RequestException.IncompatibleVersionsException;
 import org.apache.drill.jig.drillpress.net.RequestException.InvalidRequestException;
+import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ExecuteRequest;
 import org.apache.drill.jig.proto.ListLoginsResponse;
 import org.apache.drill.jig.proto.LoginPropertiesRequest;

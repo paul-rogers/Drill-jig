@@ -17,10 +17,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.client.ClientConstants;
 import org.apache.drill.jig.client.ConnectionFactory;
 import org.apache.drill.jig.client.DrillLoginFactory;
+import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.protocol.MessageConstants;
 
 /**

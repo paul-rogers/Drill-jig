@@ -1,9 +1,9 @@
 package org.apache.drill.jig.direct;
 
-import org.apache.drill.jig.api.FieldAccessor;
+import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ResultCollection;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 
@@ -23,7 +23,7 @@ public class DrillResultCollection implements ResultCollection
     }
 
     @Override
-    public TupleSchema getSchema() {
+    public TupleSchema schema() {
       return schema;
     }
 
@@ -53,7 +53,7 @@ public class DrillResultCollection implements ResultCollection
     }
 
     @Override
-    public TupleAccessor getTuple() {
+    public TupleValue getTuple() {
       return tuple;
     }
 
@@ -62,7 +62,7 @@ public class DrillResultCollection implements ResultCollection
     }
   }
   
-  public static class DrillTupleAccessor implements TupleAccessor
+  public static class DrillTupleAccessor implements TupleValue
   {
     private DrillTupleSchema schema;
 
@@ -71,7 +71,7 @@ public class DrillResultCollection implements ResultCollection
       
       int n = schema.accessors.length;
       for ( int i = 0;  i < n;  i++ ) {
-        schema.accessors[i].bind( reader, schema.getField( i ) );
+        schema.accessors[i].bind( reader, schema.field( i ) );
       }
     }
     
@@ -83,24 +83,24 @@ public class DrillResultCollection implements ResultCollection
     }
     
     @Override
-    public TupleSchema getSchema() {
+    public TupleSchema schema() {
       return schema;
     }
 
     @Override
-    public FieldAccessor getField(int i) {
-      if ( i < 0  &&  i >= schema.getCount() )
+    public FieldValue field(int i) {
+      if ( i < 0  &&  i >= schema.count() )
         return null;
       return schema.accessors[i];
     }
 
     @Override
-    public FieldAccessor getField(String name) {
-      FieldSchema field = schema.getField(name);
+    public FieldValue field(String name) {
+      FieldSchema field = schema.field(name);
       if ( field == null )
         return null;
       else
-        return schema.accessors[ field.getIndex() ];
+        return schema.accessors[ field.index() ];
     }
     
   }

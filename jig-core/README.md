@@ -5,6 +5,10 @@ This package contains code shared by both the Jig client and server. Contents in
 - `jig.api`: The heart of the Jig project: the API that defines how to work with Drill
 (or other) result sets.
 - `jig.api.impl`: Common shell implementations of several API interfaces.
+- `jig.client`: Remote client implementation of the Jig interfaces. This is the
+programming API for code that chooses to use Jig directly.
+- `jig.client.net`: Network client. Since Jig is synchronous, the cliet is quite
+simple: it builds on blocking Java IO.
 - `jig.proto`: Messages generated from Google protobuf definitions via the Protostuff project.
 (These may be replaced with a differnt message form based on feedback.)
 - `jig.protocol`: Hand-written message protocols used when initiating a connection.

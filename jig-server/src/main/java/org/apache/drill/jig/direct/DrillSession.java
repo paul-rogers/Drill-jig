@@ -9,9 +9,9 @@ import org.apache.drill.exec.proto.UserBitShared.QueryType;
 import org.apache.drill.exec.rpc.RpcException;
 import org.apache.drill.exec.rpc.user.QueryDataBatch;
 import org.apache.drill.exec.rpc.user.UserResultsListener;
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.Statement;
 import org.apache.drill.jig.api.impl.AbstractDrillConnection;
+import org.apache.drill.jig.exception.JigException;
 
 public class DrillSession extends AbstractDrillConnection
 {

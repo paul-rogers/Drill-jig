@@ -135,7 +135,7 @@ public class DrillTupleSchemaBuilder
   }
   
   private DrillFieldAccessor[] buildAccesors(DrillTupleSchema schema) {
-    int fieldCount = schema.getCount();
+    int fieldCount = schema.count();
     DrillFieldAccessor accessors[] = new DrillFieldAccessor[ fieldCount ];
     for ( int i = 0;  i < fieldCount;  i++ ) {
       accessors[i] = buildAccessor( schema.getDrillField( i ) );

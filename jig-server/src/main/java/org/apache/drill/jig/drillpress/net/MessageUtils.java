@@ -2,8 +2,8 @@ package org.apache.drill.jig.drillpress.net;
 
 import java.io.IOException;
 
-import org.apache.drill.jig.api.JigException;
-import org.apache.drill.jig.protocol.JigIOException;
+import org.apache.drill.jig.exception.JigException;
+import org.apache.drill.jig.exception.JigIOException;
 import org.apache.drill.jig.protocol.MessageConstants;
 
 import com.dyuproject.protostuff.LinkedBuffer;

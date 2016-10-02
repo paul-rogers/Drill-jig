@@ -1,5 +1,7 @@
 package org.apache.drill.jig.api;
 
+import org.apache.drill.jig.exception.JigException;
+
 /**
  * Connection to the Drill proxy. Each connection is
  * single-threaded and can execute one statement (query) at a time.

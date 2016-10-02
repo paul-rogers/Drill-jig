@@ -6,8 +6,8 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.ResultCollection;
+import org.apache.drill.jig.exception.JigException;
 
 public class JigJdbcStatement implements Statement
 {

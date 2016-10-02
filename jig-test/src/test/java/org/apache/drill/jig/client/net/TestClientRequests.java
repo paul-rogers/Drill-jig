@@ -1,6 +1,7 @@
 package org.apache.drill.jig.client.net;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import java.io.PrintWriter;
@@ -10,7 +11,7 @@ import java.util.List;
 
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.JigException;
+import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.ExecuteRequest;
 import org.apache.drill.jig.proto.ListLoginsResponse;

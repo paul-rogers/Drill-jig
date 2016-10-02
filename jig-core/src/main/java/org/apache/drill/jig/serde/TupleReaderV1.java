@@ -27,20 +27,20 @@ public class TupleReaderV1 implements TupleReader
     int posn = 0;
     for ( int i = 0;  i < byteCount;  i++ ) {
       byte b = buf.get();
-      isNull[posn] = Constants.decode(b & 0x80);
-      isRepeated[posn++] = Constants.decode(b & 0x40);
-      isNull[posn] = Constants.decode(b & 0x20);
-      isRepeated[posn++] = Constants.decode(b & 0x10);
-      isNull[posn] = Constants.decode(b & 0x08);
-      isRepeated[posn++] = Constants.decode(b & 0x04);
-      isNull[posn] = Constants.decode(b & 0x02);
-      isRepeated[posn++] = Constants.decode(b & 0x01);
+      isNull[posn] = SerdeUtils.decode(b & 0x80);
+      isRepeated[posn++] = SerdeUtils.decode(b & 0x40);
+      isNull[posn] = SerdeUtils.decode(b & 0x20);
+      isRepeated[posn++] = SerdeUtils.decode(b & 0x10);
+      isNull[posn] = SerdeUtils.decode(b & 0x08);
+      isRepeated[posn++] = SerdeUtils.decode(b & 0x04);
+      isNull[posn] = SerdeUtils.decode(b & 0x02);
+      isRepeated[posn++] = SerdeUtils.decode(b & 0x01);
     }
   }
   
   @Override
   public boolean readBoolean( ) {
-    return Constants.decode( buf.get( ) );
+    return SerdeUtils.decode( buf.get( ) );
   }
   
   @Override

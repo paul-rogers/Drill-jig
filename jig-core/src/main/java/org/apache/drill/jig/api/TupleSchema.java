@@ -7,7 +7,7 @@ package org.apache.drill.jig.api;
 
 public interface TupleSchema
 {
-  int getCount( );
-  FieldSchema getField( int i );
-  FieldSchema getField( String name );
+  int count( );
+  FieldSchema field( int i );
+  FieldSchema field( String name );
 }

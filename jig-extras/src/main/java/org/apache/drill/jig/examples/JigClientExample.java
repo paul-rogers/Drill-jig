@@ -1,14 +1,14 @@
 package org.apache.drill.jig.examples;
 
 import org.apache.drill.jig.api.DrillConnection;
-import org.apache.drill.jig.api.JigException;
 import org.apache.drill.jig.api.ResultCollection;
-import org.apache.drill.jig.api.TupleAccessor;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.client.ConnectionFactory;
 import org.apache.drill.jig.drillpress.DrillPressContext;
 import org.apache.drill.jig.drillpress.EmbeddedDrillPress;
+import org.apache.drill.jig.exception.JigException;
 
 /**
  * Illustrates the very basics of using Jig to query Drill.
@@ -107,11 +107,11 @@ public class JigClientExample {
       // Each tuple set has a distinct schema.
       // Display the column names
       
-      TupleSchema schema = tupleSet.getSchema( );
-      int n = schema.getCount();
+      TupleSchema schema = tupleSet.schema( );
+      int n = schema.count();
       for ( int i = 0; i < n;  i++ ) {
         if ( i > 0 ) System.out.print( ", " );
-        System.out.print( schema.getField(i).getName());
+        System.out.print( schema.field(i).name());
       }
       System.out.println( );
       
@@ -120,11 +120,11 @@ public class JigClientExample {
       // Not pretty or efficient, but fine for an example.
       
       while ( tupleSet.next() ) {
-        TupleAccessor tuple = tupleSet.getTuple();
+        TupleValue tuple = tupleSet.getTuple();
         for ( int i = 0; i < n;  i++ ) {
           if ( i > 0 ) System.out.print( ", " );
           System.out.print(
-              tuple.getField(i)   // Get the field object
+              tuple.field(i)   // Get the field object
               .asScalar( )        // Treat it as a scalar (rather than
                                   // null, array or map).
               .getValue() );      // Get the value as a Java object.

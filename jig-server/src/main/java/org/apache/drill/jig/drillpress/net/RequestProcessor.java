@@ -1,6 +1,6 @@
 package org.apache.drill.jig.drillpress.net;
 
-import org.apache.drill.jig.api.JigException;
+import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ExecuteRequest;
 import org.apache.drill.jig.proto.ListLoginsResponse;
 import org.apache.drill.jig.proto.LoginPropertiesRequest;

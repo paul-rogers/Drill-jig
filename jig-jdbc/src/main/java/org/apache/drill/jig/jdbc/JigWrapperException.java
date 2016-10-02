@@ -2,7 +2,7 @@ package org.apache.drill.jig.jdbc;
 
 import java.sql.SQLException;
 
-import org.apache.drill.jig.api.JigException;
+import org.apache.drill.jig.exception.JigException;
 
 public class JigWrapperException extends SQLException
 {
