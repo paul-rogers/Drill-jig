@@ -60,6 +60,16 @@ public interface FieldAccessor {
     void bind( int index );
   }
   
+  public interface VariantIndexedAccessor extends IndexedAccessor, TypeAccessor {
+  }
+  
+  public interface ArrayAccessor extends IndexedAccessor
+  {
+    int size( );
+    Object getArray( );
+    FieldAccessor memberAccessor( );
+  }
+  
   public interface Resetable {
     void reset( );
   }

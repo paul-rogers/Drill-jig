@@ -13,16 +13,26 @@ import org.apache.drill.jig.types.FieldValueContainer.IndexableFieldValueContain
  * the field.)
  */
 
+@Deprecated
 public class VariantIndexedFieldValueContainer implements IndexableFieldValueContainer {
 
-  private final IndexedAccessor indexAccessor;
-  private final TypeAccessor typeAccessor;
+  private IndexedAccessor indexAccessor;
+  private TypeAccessor typeAccessor;
   private final FieldValueCache valueCache;
 
-  public VariantIndexedFieldValueContainer( IndexedAccessor accessor, FieldValueFactory factory ) {
-    this.indexAccessor = accessor;
-    this.typeAccessor = (TypeAccessor) accessor;
+  public VariantIndexedFieldValueContainer( FieldValueFactory factory ) {
+//    this.typeAccessor = (TypeAccessor) accessor;
     valueCache = new FieldValueCache( factory );
+  }
+
+  @Override
+  public void bind(IndexedAccessor accessor) {
+    this.indexAccessor = accessor;
+  }
+
+  @Override
+  public void bind(int index) {
+    indexAccessor.bind( index );
   }
   
   @Override
@@ -32,10 +42,5 @@ public class VariantIndexedFieldValueContainer implements IndexableFieldValueCon
     AbstractFieldValue value = valueCache.get( typeAccessor.getType( ) );
     value.bind( indexAccessor );
     return value;
-  }
-
-  @Override
-  public void bind(int index) {
-    indexAccessor.bind( index );
   }
 }

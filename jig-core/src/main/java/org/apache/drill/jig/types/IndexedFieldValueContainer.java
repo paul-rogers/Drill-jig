@@ -10,12 +10,16 @@ import org.apache.drill.jig.types.FieldValueContainer.IndexableFieldValueContain
 
 public class IndexedFieldValueContainer implements IndexableFieldValueContainer {
 
-  private final IndexedAccessor accessor;
+  private IndexedAccessor accessor;
   private final FieldValue nonNullValue;
 
-  public IndexedFieldValueContainer( IndexedAccessor accessor, FieldValue nonNullValue ) {
-    this.accessor = accessor;
+  public IndexedFieldValueContainer( FieldValue nonNullValue ) {
     this.nonNullValue = nonNullValue;
+  }
+
+  @Override
+  public void bind(IndexedAccessor accessor) {
+    this.accessor = accessor;
   }
   
   @Override
