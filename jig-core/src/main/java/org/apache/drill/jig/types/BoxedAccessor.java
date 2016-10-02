@@ -1,10 +1,20 @@
 package org.apache.drill.jig.types;
 
+import java.math.BigDecimal;
+
+import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.types.FieldAccessor.*;
 
-public class BoxedAccessor implements BooleanAccessor, Int8Accessor, Int16Accessor, Int32Accessor, Int64Accessor, Float32Accessor, Float64Accessor, StringAccessor, ObjectAccessor {
+/**
+ * Field value accessor backed by a Java object. The caller is responsible
+ * for calling only the accessor that corresponds to the object's type.
+ */
 
-  private ObjectAccessor accessor;
+public class BoxedAccessor implements BooleanAccessor, Int8Accessor,
+    Int16Accessor, Int32Accessor, Int64Accessor, Float32Accessor,
+    Float64Accessor, DecimalAccessor, StringAccessor, ObjectAccessor {
+
+  protected final ObjectAccessor accessor;
 
   public BoxedAccessor( ObjectAccessor accessor ) {
     this.accessor = accessor;
@@ -51,6 +61,11 @@ public class BoxedAccessor implements BooleanAccessor, Int8Accessor, Int16Access
   }
 
   @Override
+  public BigDecimal getDecimal() {
+    return (BigDecimal) getObject( );
+  }
+
+  @Override
   public String getString() {
     return (String) getObject( );
   }
@@ -58,5 +73,26 @@ public class BoxedAccessor implements BooleanAccessor, Int8Accessor, Int16Access
   @Override
   public Object getObject() {
     return accessor.getObject();
+  }
+  
+  /**
+   * Extends the boxed accessor to convert the boxed object to the corresponding
+   * Jig type using the factory provided. Used when the boxed object participates
+   * in a Variant field.
+   */
+ 
+  public static class VariantBoxedAccessor extends BoxedAccessor implements TypeAccessor
+  {
+    private final FieldValueFactory factory;
+
+    public VariantBoxedAccessor( ObjectAccessor accessor, FieldValueFactory factory ) {
+      super( accessor );
+      this.factory = factory;
+    }
+
+    @Override
+    public DataType getType() {
+      return factory.objectToJigType( accessor.getObject( ) );
+    }
   }
 }

@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 
 import org.apache.drill.jig.exception.ValueConversionError;
 
+/**
+ * Conversion functions from a Decimal value.
+ */
+
 public class DecimalConversions {
   
   private DecimalConversions( ) { }

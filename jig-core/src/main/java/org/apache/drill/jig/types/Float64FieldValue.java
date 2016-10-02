@@ -3,8 +3,11 @@ package org.apache.drill.jig.types;
 import java.math.BigDecimal;
 
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.types.FieldAccessor.Float32Accessor;
 import org.apache.drill.jig.types.FieldAccessor.Float64Accessor;
+
+/**
+ * Field value backed by a double value.
+ */
 
 public class Float64FieldValue extends AbstractScalarFieldValue {
 
@@ -17,12 +20,7 @@ public class Float64FieldValue extends AbstractScalarFieldValue {
 
   @Override
   public DataType type() {
-    return DataType.FLOAT32;
-  }
-
-  @Override
-  public boolean isNull() {
-    return accessor.isNull();
+    return DataType.FLOAT64;
   }
 
   @Override

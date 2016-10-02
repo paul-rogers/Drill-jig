@@ -2,6 +2,10 @@ package org.apache.drill.jig.types;
 
 import org.apache.drill.jig.exception.ValueConversionError;
 
+/**
+ * Conversion functions from a short value.
+ */
+
 public class Int16Conversions {
 
   private Int16Conversions() { }

@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.types.FieldAccessor.BooleanAccessor;
 
+/**
+ * Field value backed by a boolean.
+ */
+
 public class BooleanFieldValue extends AbstractScalarFieldValue {
 
   private BooleanAccessor accessor;
@@ -19,11 +23,6 @@ public class BooleanFieldValue extends AbstractScalarFieldValue {
     return DataType.BOOLEAN;
   }
 
-  @Override
-  public boolean isNull() {
-    return accessor.isNull();
-  }
-  
   @Override
   public boolean getBoolean() {
     return accessor.getBoolean( );

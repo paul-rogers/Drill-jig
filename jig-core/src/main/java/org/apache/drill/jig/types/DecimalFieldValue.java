@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.types.FieldAccessor.DecimalAccessor;
 
+/**
+ * Field value backed by a decimal value.
+ */
+
 public class DecimalFieldValue extends AbstractScalarFieldValue {
 
   private DecimalAccessor accessor;
@@ -17,11 +21,6 @@ public class DecimalFieldValue extends AbstractScalarFieldValue {
   @Override
   public DataType type() {
     return DataType.DECIMAL;
-  }
-
-  @Override
-  public boolean isNull() {
-    return accessor.isNull();
   }
 
   @Override

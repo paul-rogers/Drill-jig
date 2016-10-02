@@ -2,6 +2,14 @@ package org.apache.drill.jig.types;
 
 import java.math.BigDecimal;
 
+import org.apache.drill.jig.api.DataType;
+
+/**
+ * The field accessor provides a uniform way to access the value,
+ * nullness, and type of a field. Each attribute has a different accessor
+ * to keep accessor implementations simple.
+ */
+
 public interface FieldAccessor {
 
   public interface BooleanAccessor extends FieldAccessor {
@@ -42,6 +50,18 @@ public interface FieldAccessor {
 
   public interface ObjectAccessor extends FieldAccessor {
     Object getObject();
+  }
+  
+  public interface TypeAccessor extends FieldAccessor {
+    DataType getType( );
+  }
+  
+  public interface IndexedAccessor extends FieldAccessor {
+    void bind( int index );
+  }
+  
+  public interface Resetable {
+    void reset( );
   }
 
   boolean isNull();

@@ -2,6 +2,10 @@ package org.apache.drill.jig.types;
 
 import org.apache.drill.jig.exception.ValueConversionError;
 
+/**
+ * Conversion functions from a long value.
+ */
+
 public class Int64Conversions {
 
   private Int64Conversions() { }

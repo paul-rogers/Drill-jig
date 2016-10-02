@@ -1,37 +1,20 @@
 package org.apache.drill.jig.extras.array;
 
-import org.apache.drill.jig.api.FieldSchema;
-import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.TupleSchema;
-import org.apache.drill.jig.api.TupleValue;
+import org.apache.drill.jig.api.impl.AbstractTupleValue;
+import org.apache.drill.jig.types.FieldValueContainerSet;
 
-public class ArrayTupleValue implements TupleValue {
+public class ArrayTupleValue extends AbstractTupleValue {
 
-  private ArrayTupleSet tupleSet;
-  private FieldValue[] values;
+  private final ArrayTupleSet tupleSet;
 
-  public ArrayTupleValue(ArrayTupleSet tupleSet, FieldValue[] fieldValues) {
+  public ArrayTupleValue(ArrayTupleSet tupleSet, FieldValueContainerSet containers) {
+    super( containers );
     this.tupleSet = tupleSet;
-    this.values = fieldValues;
   }
 
   @Override
   public TupleSchema schema() {
     return tupleSet.schema();
-  }
-
-  @Override
-  public FieldValue field(int i) {
-    if (i < 0 || i >= values.length)
-      return null;
-    return values[i];
-  }
-
-  @Override
-  public FieldValue field(String name) {
-    FieldSchema field = schema().field(name);
-    if (field == null)
-      return null;
-    return field(field.index());
   }
 }

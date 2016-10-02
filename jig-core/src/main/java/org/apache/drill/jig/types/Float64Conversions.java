@@ -2,6 +2,10 @@ package org.apache.drill.jig.types;
 
 import org.apache.drill.jig.exception.ValueConversionError;
 
+/**
+ * Conversion functions from a double value.
+ */
+
 public class Float64Conversions {
 
   private Float64Conversions() { }

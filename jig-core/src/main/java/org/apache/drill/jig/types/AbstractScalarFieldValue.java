@@ -9,54 +9,64 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.exception.ValueConversionError;
 
+/**
+ * Base class for scalar field values. Provides default do-nothing
+ * Implementations for the non-scalar methods.
+ */
+
 public abstract class AbstractScalarFieldValue implements AbstractFieldValue {
 
-	@Override
-	public byte[] getBlob() {
-		throw typeError( "blob" );
-	}
+  @Override
+  public boolean isNull() {
+    return false;
+  }
+  
+  @Override
+  public byte[] getBlob() {
+    throw typeError("blob");
+  }
 
-	@Override
-	public LocalDate getDate() {
-		throw typeError( "date" );
-	}
+  @Override
+  public LocalDate getDate() {
+    throw typeError("date");
+  }
 
-	@Override
-	public LocalDateTime getDateTime() {
-		throw typeError( "local Date/Time" );
-	}
+  @Override
+  public LocalDateTime getDateTime() {
+    throw typeError("local Date/Time");
+  }
 
-	@Override
-	public Period getUTCTime() {
-		throw typeError( "UTC Time" );
-	}
+  @Override
+  public Period getUTCTime() {
+    throw typeError("UTC Time");
+  }
 
-	@Override
-	public int size() {
-		throw typeError( "collection" );
-	}
+  @Override
+  public int size() {
+    throw typeError("collection");
+  }
 
-	@Override
-	public DataType memberType() {
-		throw typeError( "array" );
-	}
+  @Override
+  public DataType memberType() {
+    throw typeError("array");
+  }
 
-	@Override
-	public FieldValue get(int i) {
-		throw typeError( "array" );
-	}
+  @Override
+  public FieldValue get(int i) {
+    throw typeError("array");
+  }
 
-	@Override
-	public Collection<String> keys() {
-		throw typeError( "map" );
-	}
+  @Override
+  public Collection<String> keys() {
+    throw typeError("map");
+  }
 
-	@Override
-	public FieldValue get(String key) {
-		throw typeError( "map" );
-	}
-	
-	private ValueConversionError typeError( String dest ) {
-		return new ValueConversionError( "Can't convert scalar to " + dest );
-	}
+  @Override
+  public FieldValue get(String key) {
+    throw typeError("map");
+  }
+
+  private ValueConversionError typeError(String dest) {
+    return new ValueConversionError("Can't convert scalar to " + dest);
+  }
 }

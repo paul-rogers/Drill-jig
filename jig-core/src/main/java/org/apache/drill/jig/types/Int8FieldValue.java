@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.types.FieldAccessor.Int8Accessor;
 
+/**
+ * Field value backed by a byte value.
+ */
+
 public class Int8FieldValue extends AbstractScalarFieldValue {
 
   private Int8Accessor accessor;
@@ -17,11 +21,6 @@ public class Int8FieldValue extends AbstractScalarFieldValue {
   @Override
   public DataType type() {
     return DataType.INT8;
-  }
-
-  @Override
-  public boolean isNull() {
-    return accessor.isNull();
   }
 
   @Override

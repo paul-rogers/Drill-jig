@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.types.FieldAccessor.Int32Accessor;
 
+/**
+ * Field value backed by an int value.
+ */
+
 public class Int32FieldValue extends AbstractScalarFieldValue {
 
   private Int32Accessor accessor;
@@ -17,11 +21,6 @@ public class Int32FieldValue extends AbstractScalarFieldValue {
   @Override
   public DataType type() {
     return DataType.INT32;
-  }
-
-  @Override
-  public boolean isNull() {
-    return accessor.isNull();
   }
 
   @Override

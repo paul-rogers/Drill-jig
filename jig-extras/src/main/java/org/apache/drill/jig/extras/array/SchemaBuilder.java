@@ -13,7 +13,13 @@ import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.extras.array.ArrayFieldHandle.ArrayTupleHandle;
 import org.apache.drill.jig.types.AbstractFieldValue;
 import org.apache.drill.jig.types.BoxedAccessor;
+import org.apache.drill.jig.types.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.types.FieldValueContainer;
+import org.apache.drill.jig.types.FieldValueContainerSet;
 import org.apache.drill.jig.types.FieldValueFactory;
+import org.apache.drill.jig.types.NullableFieldValueContainer;
+import org.apache.drill.jig.types.SingleFieldValueContainer;
+import org.apache.drill.jig.types.VariantFieldValueContainer;
 
 public class SchemaBuilder {
   public static class FieldImpl {
@@ -27,7 +33,6 @@ public class SchemaBuilder {
     DataType type;
     ListType listType;
     FieldImpl memberDef;
-    AbstractFieldValue value;
 
     public FieldImpl(int index) {
       this.index = index;
@@ -112,9 +117,9 @@ public class SchemaBuilder {
      if (listType == ListType.OBJECT_ARRAY) {
         if ( memberDef == null )
           memberDef = new FieldImpl( 0 );
-        int n = Array.getLength( value );
+        int n = Array.getLength( object );
         for ( int i = 0;  i < n;  i++ ) {
-          memberDef.define(Array.get(value, i), factory);
+          memberDef.define(Array.get(object, i), factory);
         }
       } else {
         if (memberDef == null) {
@@ -145,15 +150,24 @@ public class SchemaBuilder {
         return new FieldSchemaImpl(name, type, nullable);
     }
 
-    public FieldValue buildValue(FieldValueFactory factory, ArrayTupleHandle tupleHandle) {
-      if ( listType == null ) {
-        value = factory.buildValue( type );
-        value.bind( new BoxedAccessor( new ArrayFieldHandle( tupleHandle, index ) ) );
-      }
-      else {
+    public FieldValueContainer buildValue(FieldValueFactory factory, ArrayTupleHandle tupleHandle) {
+      if ( listType != null ) {
         assert false;
+      } else if ( type == DataType.VARIANT ) {
+        ArrayFieldHandle accessor = new ArrayFieldHandle( tupleHandle, index );
+        VariantBoxedAccessor valueAccessor = new VariantBoxedAccessor( accessor, factory );
+        return new VariantFieldValueContainer( valueAccessor, factory );
+      } else {
+        AbstractFieldValue value = factory.buildValue( type );
+        ArrayFieldHandle accessor = new ArrayFieldHandle( tupleHandle, index );
+        value.bind( new BoxedAccessor( accessor ) );
+        if ( nullable ) {
+          return new NullableFieldValueContainer( accessor, value );
+        } else {
+          return new SingleFieldValueContainer( value );
+        }
       }
-      return value;
+      return null;
     }
   }
 
@@ -183,12 +197,12 @@ public class SchemaBuilder {
     return schema;
   }
   
-  public FieldValue[] fieldValues( ArrayTupleHandle tupleHandle ) {
+  public FieldValueContainerSet fieldValues( ArrayTupleHandle tupleHandle ) {
     int fieldCount = fields.length;
-    FieldValue values[] = new FieldValue[ fieldCount ];
+    FieldValueContainer values[] = new FieldValueContainer[ fieldCount ];
     for ( int i = 0;  i < fieldCount;  i++ ) {
       values[i] = fields[i].buildValue( factory, tupleHandle );
     }
-    return values;
+    return new FieldValueContainerSet( values );
   }
 }

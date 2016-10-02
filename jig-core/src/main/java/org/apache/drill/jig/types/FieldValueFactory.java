@@ -5,11 +5,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.exception.ValueConversionError;
+
+/**
+ * Builds a field value given a data type, and converts Java object
+ * types to Jig types. Designed to allow the type system to be
+ * extensible. Scalar types are simple and are provided here.
+ * Map and list types are implementation-specific and can be
+ * created by implementation-specific subclasses of this class. 
+ */
 
 public class FieldValueFactory {
 
+  /**
+   * Create a field value given a Jig data type. The caller must
+   * bind the field value to an accessor that provides the actual
+   * value.
+   * 
+   * @param type
+   * @return a new field value
+   */
+  
   public AbstractFieldValue buildValue(DataType type) {
     switch (type) {
     case BOOLEAN:
@@ -51,11 +67,25 @@ public class FieldValueFactory {
     throw new IllegalStateException("No field value for type: " + type);
   }
 
+  /**
+   * Convert a Java object to the corresponding Jig type.
+   * 
+   * @param value
+   * @return
+   */
+  
   public DataType objectToJigType(Object value) {
     if (value == null)
       return DataType.NULL;
     return classToJigType( value.getClass() );
   }
+  
+  /**
+   * Convert a Java class name to the corresponding Jig type.
+   * 
+   * @param className
+   * @return
+   */
   
   public DataType classNameToJigType( String className ) {
     try {
@@ -65,6 +95,12 @@ public class FieldValueFactory {
     }
   }
   
+  /**
+   * Convert a Java class to the corresponding Jig type.
+   * 
+   * @param valueClass
+   * @return
+   */
   public DataType classToJigType( Class<? extends Object> valueClass ) {
    if ( Boolean.class.equals( valueClass ) )
       return DataType.BOOLEAN;
@@ -95,6 +131,16 @@ public class FieldValueFactory {
     throw new IllegalArgumentException("No Jig type for object of class "
         + valueClass.getSimpleName());
   }
+
+  /**
+   * Given two Jig types, compute the common type. Null and any time is
+   * the other type. Like types are merged as that type. Two dislike
+   * scalars merge to a VARIANT. All other merges are illegal.
+   * 
+   * @param type1
+   * @param type2
+   * @return
+   */
 
   public DataType mergeTypes(DataType type1, DataType type2) {
     if (type1 == null || type1 == DataType.NULL)

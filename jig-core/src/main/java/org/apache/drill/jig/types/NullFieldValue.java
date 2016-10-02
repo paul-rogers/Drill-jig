@@ -6,6 +6,8 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
 
 public class NullFieldValue extends AbstractScalarFieldValue {
+  
+  public static final NullFieldValue INSTANCE = new NullFieldValue( );
 
   @Override
   public void bind(FieldAccessor accessor) {
