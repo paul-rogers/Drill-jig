@@ -4,28 +4,31 @@ import java.lang.reflect.Array;
 import java.util.List;
 
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.impl.ArrayFieldSchemaImpl;
 import org.apache.drill.jig.api.impl.FieldSchemaImpl;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
 import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.extras.array.ArrayFieldHandle.ArrayTupleHandle;
-import org.apache.drill.jig.types.AbstractFieldValue;
 import org.apache.drill.jig.types.BoxedAccessor;
 import org.apache.drill.jig.types.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.types.DataDef;
+import org.apache.drill.jig.types.DataDef.ListDef;
+import org.apache.drill.jig.types.DataDef.ScalarDef;
+import org.apache.drill.jig.types.FieldAccessor;
+import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.types.FieldValueContainer;
 import org.apache.drill.jig.types.FieldValueContainerSet;
 import org.apache.drill.jig.types.FieldValueFactory;
-import org.apache.drill.jig.types.NullableFieldValueContainer;
-import org.apache.drill.jig.types.SingleFieldValueContainer;
-import org.apache.drill.jig.types.VariantFieldValueContainer;
+import org.apache.drill.jig.types.JavaArrayAccessor.ObjectArrayAccessor;
+import org.apache.drill.jig.types.JavaArrayAccessor.PrimitiveArrayAccessor;
+import org.apache.drill.jig.types.JavaListAccessor;
 
 public class SchemaBuilder {
   public static class FieldImpl {
     public enum ListType {
-      LIST, OBJECT_ARRAY, TYPED_OBJECT_ARRAY, PRIMITIVE_ARRAY,
-      ARRAY_OF_ARRAY
+      LIST, OBJECT_ARRAY, PRIMITIVE_ARRAY
     }
 
     int index;
@@ -33,6 +36,7 @@ public class SchemaBuilder {
     DataType type;
     ListType listType;
     FieldImpl memberDef;
+    private FieldAccessor accessor;
 
     public FieldImpl(int index) {
       this.index = index;
@@ -44,6 +48,7 @@ public class SchemaBuilder {
       if (!buildArray(object, factory)) {
         type = factory.mergeTypes(type, factory.objectToJigType(object));
         if (type == DataType.LIST) {
+          listType = ListType.LIST;
           buildList( (List<Object>) object, factory );
         }
       }
@@ -67,7 +72,7 @@ public class SchemaBuilder {
       char second = objClass.charAt( 1 );
       switch ( second ) {
       case '[':
-        thisType = ListType.ARRAY_OF_ARRAY;
+        thisType = ListType.OBJECT_ARRAY;
         memberType = DataType.LIST;
         break;
       case  'B':
@@ -133,7 +138,7 @@ public class SchemaBuilder {
       }
       return true;
     }
-
+    
     private void buildList(List<Object> list, FieldValueFactory factory) {
       if ( memberDef == null )
         memberDef = new FieldImpl( 0 );
@@ -145,30 +150,179 @@ public class SchemaBuilder {
 
     public FieldSchemaImpl buildSchema(String name) {
       if (type == DataType.LIST)
-        return new ArrayFieldSchemaImpl(name, nullable, memberDef.buildSchema(null));
+        return new ArrayFieldSchemaImpl(name, nullable, memberDef.buildSchema("*"));
       else
         return new FieldSchemaImpl(name, type, nullable);
     }
 
-    public FieldValueContainer buildValue(FieldValueFactory factory, ArrayTupleHandle tupleHandle) {
+    public void buildTupleFieldAccessor( ArrayTupleHandle tupleHandle, FieldValueFactory factory ) {
+      ArrayFieldHandle fieldHandle = new ArrayFieldHandle( tupleHandle, index );
+      buildFieldAccessor( fieldHandle, factory );
+    }
+    
+    public void buildFieldAccessor( ObjectAccessor objAccessor, FieldValueFactory factory ) {
       if ( listType != null ) {
-        assert false;
-      } else if ( type == DataType.VARIANT ) {
-        ArrayFieldHandle accessor = new ArrayFieldHandle( tupleHandle, index );
-        VariantBoxedAccessor valueAccessor = new VariantBoxedAccessor( accessor, factory );
-        return new VariantFieldValueContainer( valueAccessor, factory );
+        buildListAccessor( objAccessor, factory );
+      } else if ( type == DataType.MAP ) {
+        buildMapAccessor( objAccessor, factory );
+      } else if ( type.isVariant() ) {
+        accessor = new VariantBoxedAccessor( objAccessor, factory );
       } else {
-        AbstractFieldValue value = factory.buildValue( type );
-        ArrayFieldHandle accessor = new ArrayFieldHandle( tupleHandle, index );
-        value.bind( new BoxedAccessor( accessor ) );
-        if ( nullable ) {
-          return new NullableFieldValueContainer( accessor, value );
-        } else {
-          return new SingleFieldValueContainer( value );
-        }
+        accessor = new BoxedAccessor( objAccessor );
       }
+    }
+
+    private void buildListAccessor(ObjectAccessor objAccessor, FieldValueFactory factory) {
+      ArrayAccessor arrayAccessor;
+      switch ( listType ) {
+      case LIST:
+        arrayAccessor = new JavaListAccessor( objAccessor );
+        break;
+      case OBJECT_ARRAY:
+        arrayAccessor = new ObjectArrayAccessor( objAccessor );
+        break;
+      case PRIMITIVE_ARRAY:
+        arrayAccessor = new PrimitiveArrayAccessor( objAccessor, memberDef.type );
+        break;
+      default:
+        throw new IllegalStateException( "Undefined list type: " + listType );
+      }
+      accessor = arrayAccessor;
+      memberDef.buildFieldAccessor( (ObjectAccessor) arrayAccessor.memberAccessor(), factory );
+    }
+
+    private Object buildMapAccessor(FieldAccessor accessor2,
+        FieldValueFactory factory) {
+      // TODO Auto-generated method stub
       return null;
     }
+
+    
+    public DataDef buildDef( ) {
+      if ( listType != null ) {
+        return new ListDef( nullable, memberDef.buildDef( ), (ArrayAccessor) accessor );
+      } else if ( type == DataType.MAP ) {
+        assert false;
+        return null;
+      } else {
+        return new ScalarDef( type, nullable, accessor );
+      }
+    }
+
+    public FieldValueContainer build(ArrayTupleHandle tupleHandle,
+        FieldValueFactory factory) {
+      buildTupleFieldAccessor( tupleHandle, factory );
+      DataDef def = buildDef( );
+      def.build( factory );
+      return def.container;
+    }
+    
+//    private DataDef buildListDef( ObjectAccessor accessor) {
+//     ArrayAccessor arrayAccessor;
+//      switch ( listType ) {
+//      case LIST:
+//        arrayAccessor = new JavaListAccessor( accessor );
+//        break;
+//      case OBJECT_ARRAY:
+//        arrayAccessor = new ObjectArrayAccessor( accessor );
+//        break;
+//      case PRIMITIVE_ARRAY:
+//        arrayAccessor = new PrimitiveArrayAccessor( accessor, memberDef.type );
+//        break;
+//      default:
+//        throw new IllegalStateException( "Undefined list type: " + listType );
+//      }
+//      DataDef memberDefn = memberDef.buildDef( (ObjectAccessor) arrayAccessor.memberAccessor() );
+//      ListDef listDef = new ListDef( nullable, memberDefn );
+//      listDef.arrayAccessor = arrayAccessor;
+//      return listDef;
+//    }
+//
+//    private DataDef buildMapDef( ObjectAccessor accessor) {
+//    }
+
+//    public void foo( ) {
+//      if ( listType != null ) {
+//        switch ( listType ) {
+//        case ARRAY_OF_ARRAY:
+//          break;
+//        case LIST:
+//          JavaListAccessor listAccessor = new JavaListAccessor( accessor );
+//          ArrayFieldValue value = this.memberDef.buildArrayField( listAccessor, factory );
+//          return FieldBuilder.buildTypedContainer(nullable, accessor, value );
+//          break;
+//        case OBJECT_ARRAY:
+//          break;
+//        case PRIMITIVE_ARRAY:
+//          break;
+//        case TYPED_OBJECT_ARRAY:
+//          break;
+//        default:
+//          break;
+//        
+//        }
+//        assert false;
+//      } else if ( type.isVariant() ) {
+//        VariantBoxedAccessor valueAccessor = new VariantBoxedAccessor( accessor, factory );
+//        return new VariantFieldValueContainer( valueAccessor, factory );
+//      } else {
+//        AbstractFieldValue value = factory.buildValue( type );
+//        value.bind( new BoxedAccessor( accessor ) );
+//        return FieldBuilder.buildTypedContainer(nullable, accessor, value );
+//      }
+//      return null;
+//    }
+
+//    public FieldValueContainer buildContainer(FieldValueFactory factory, ArrayTupleHandle tupleHandle) {
+//      ArrayFieldHandle accessor = new ArrayFieldHandle( tupleHandle, index );
+//      return buildValue( factory, accessor );
+//    }
+//    
+//    public FieldValueContainer buildValue(FieldValueFactory factory, ObjectAccessor accessor) {
+//      if ( listType != null ) {
+//        return buildList( factory, accessor );
+//      }
+//      if ( listType != null ) {
+//        switch ( listType ) {
+//        case ARRAY_OF_ARRAY:
+//          break;
+//        case LIST:
+//          JavaListAccessor listAccessor = new JavaListAccessor( accessor );
+//          ArrayFieldValue value = this.memberDef.buildArrayField( listAccessor, factory );
+//          return FieldBuilder.buildTypedContainer(nullable, accessor, value );
+//          break;
+//        case OBJECT_ARRAY:
+//          break;
+//        case PRIMITIVE_ARRAY:
+//          break;
+//        case TYPED_OBJECT_ARRAY:
+//          break;
+//        default:
+//          break;
+//        
+//        }
+//        assert false;
+//      } else if ( type.isVariant() ) {
+//        VariantBoxedAccessor valueAccessor = new VariantBoxedAccessor( accessor, factory );
+//        return new VariantFieldValueContainer( valueAccessor, factory );
+//      } else {
+//        AbstractFieldValue value = factory.buildValue( type );
+//        value.bind( new BoxedAccessor( accessor ) );
+//        return FieldBuilder.buildTypedContainer(nullable, accessor, value );
+//      }
+//      return null;
+//    }
+//
+//    private ArrayFieldValue buildArrayField(ArrayAccessor arrayAccessor, FieldValueFactory factory) {
+//      FieldValueContainer buildValue = buildValue( factory, )
+//      ArrayValueImpl arrayValue;
+//      if ( type.isVariant() ) {
+//        arrayValue = new VariantArrayValue( arrayAccessor, type, factory );
+//      } else {
+//        arrayValue = new TypedArrayValue( arrayAccessor, type );
+//      }
+//      ArrayFieldValue value = FieldBuilder.buildArrayFieldValue( arrayAccessor, arrayValue );
+//    }
   }
 
   FieldValueFactory factory;
@@ -201,7 +355,7 @@ public class SchemaBuilder {
     int fieldCount = fields.length;
     FieldValueContainer values[] = new FieldValueContainer[ fieldCount ];
     for ( int i = 0;  i < fieldCount;  i++ ) {
-      values[i] = fields[i].buildValue( factory, tupleHandle );
+      values[i] = fields[i].build( tupleHandle, factory);
     }
     return new FieldValueContainerSet( values );
   }

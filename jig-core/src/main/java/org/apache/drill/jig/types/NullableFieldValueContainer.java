@@ -8,12 +8,17 @@ import org.apache.drill.jig.api.FieldValue;
 
 public class NullableFieldValueContainer implements FieldValueContainer {
 
-  private final FieldAccessor accessor;
-  private final FieldValue nonNullValue;
+  private final AbstractFieldValue nonNullValue;
+  private FieldAccessor accessor;
 
-  public NullableFieldValueContainer( FieldAccessor accessor, FieldValue nonNullValue ) {
-    this.accessor = accessor;
+  public NullableFieldValueContainer( AbstractFieldValue nonNullValue ) {
     this.nonNullValue = nonNullValue;
+  }
+
+  @Override
+  public void bind(FieldAccessor accessor) {
+    this.accessor = accessor;
+    nonNullValue.bind( accessor );
   }
   
   @Override
@@ -23,5 +28,4 @@ public class NullableFieldValueContainer implements FieldValueContainer {
     else
       return nonNullValue;
   }
-
 }

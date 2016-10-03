@@ -38,5 +38,23 @@ public class FieldSchemaImpl implements FieldSchema
   
   @Override
   public int getLength( ) { return length; }
+  
+  @Override
+  public String toString( ) {
+    StringBuilder buf = new StringBuilder( );
+    buf.append( "[Field Schema: " );
+    buildString( buf );
+    buf.append( "]" );
+    return buf.toString();
+  }
+
+  protected void buildString(StringBuilder buf) {
+    buf.append( "name=" );
+    buf.append( name );
+    buf.append( ", type=" );
+    buf.append( type );
+    buf.append( ", nullable=" );
+    buf.append( isNullable );
+  }
 
 }

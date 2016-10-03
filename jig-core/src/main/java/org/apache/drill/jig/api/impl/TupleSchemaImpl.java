@@ -45,4 +45,17 @@ public class TupleSchemaImpl implements TupleSchema
   public Iterable<FieldSchema> fields( ) {
     return fields;
   }
+  
+  @Override
+  public String toString( ) {
+    StringBuilder buf = new StringBuilder( );
+    buf.append( "[Tuple Schema " );
+    for ( int i = 0;  i < fields.size();  i++ ) {
+      if ( i > 0 )
+        buf.append( "\n  " );
+      buf.append( fields.get( i ).toString( ) );
+    }
+    buf.append( " ]" );
+    return buf.toString();
+  }
 }

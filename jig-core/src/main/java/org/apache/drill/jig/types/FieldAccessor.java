@@ -2,6 +2,7 @@ package org.apache.drill.jig.types;
 
 import java.math.BigDecimal;
 
+import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
 
 /**
@@ -60,14 +61,62 @@ public interface FieldAccessor {
     void bind( int index );
   }
   
-  public interface VariantIndexedAccessor extends IndexedAccessor, TypeAccessor {
+//  public interface VariantIndexedAccessor extends IndexedAccessor, TypeAccessor {
+//  }
+  
+  /**
+   * Interface to any array that can be presented as a
+   * {@link ArrayValue}.
+   */
+  
+  public interface ArrayAccessor extends FieldAccessor
+  {
+    /**
+     * Returns the member accessor which must be invariant over the life of
+     * this accessor, whether bound to an array or not. That is, the
+     * type of accessor must be static. If the value is a structured type,
+     * this value will be bound to the implementation of that value.
+     * <p>
+     * The value accessed by the member accessor is only defined when
+     * this accessor is defined, and must be selected by calling
+     * {@link #select(int)}.
+     * 
+     * @return
+     */
+    
+    FieldAccessor memberAccessor( );
+    
+    /**
+     * Returns the size of array backing this accessor.
+     * @return
+     */
+    
+    int size( );
+    
+    /**
+     * Return a Java representation of the array. The value is optional and
+     * is implementation-specific.
+     * 
+     * @return
+     */
+    
+    Object getValue( );
+    
+    /**
+     * Select the array value backing the member accessor. Allows the member
+     * accessor to be static, only the index of the selected value changes
+     * over time.
+     * 
+     * @param index
+     */
+    
+    void select( int index );
   }
   
-  public interface ArrayAccessor extends IndexedAccessor
+  public interface ArrayValueAccessor extends FieldAccessor
   {
-    int size( );
-    Object getArray( );
-    FieldAccessor memberAccessor( );
+    ArrayValue getArray( );
+    Object getValue( );
   }
   
   public interface Resetable {

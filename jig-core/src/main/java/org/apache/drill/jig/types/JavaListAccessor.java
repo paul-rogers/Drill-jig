@@ -7,8 +7,15 @@ import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
 
 public class JavaListAccessor implements ArrayAccessor {
   
-  public class JavaListMemberAccessor implements ObjectAccessor {
+  public class JavaListMemberAccessor implements IndexedAccessor, ObjectAccessor {
 
+    private int index;
+    
+    @Override
+    public void bind( int index ) {
+      this.index = index;
+    }
+    
     @Override
     public boolean isNull() {
       return getObject( ) == null;
@@ -22,7 +29,6 @@ public class JavaListAccessor implements ArrayAccessor {
 
   private final ObjectAccessor listAccessor;
   private final JavaListMemberAccessor memberAccessor = new JavaListMemberAccessor( );
-  private int index;
   private final BoxedAccessor memberValueAccessor;
 
   public JavaListAccessor( ObjectAccessor listAccessor ) {
@@ -36,11 +42,6 @@ public class JavaListAccessor implements ArrayAccessor {
   }
 
   @Override
-  public void bind(int index) {
-    this.index = index;
-  }
-  
-  @Override
   public int size() {
     if ( listAccessor.isNull() )
       return 0;
@@ -48,7 +49,7 @@ public class JavaListAccessor implements ArrayAccessor {
   }
 
   @Override
-  public Object getArray() {
+  public Object getValue() {
     return listAccessor.getObject();
   }
 
@@ -65,9 +66,76 @@ public class JavaListAccessor implements ArrayAccessor {
   }
 
   @Override
-  public FieldAccessor memberAccessor() {
+  public FieldAccessor memberAccessor( ) {
     return memberValueAccessor;
   }
+
+  @Override
+  public void select( int index ) {
+    memberAccessor.bind( index );
+  }
+
+//  public class JavaListMemberAccessor implements ObjectAccessor {
+//
+//    @Override
+//    public boolean isNull() {
+//      return getObject( ) == null;
+//    }
+//
+//    @Override
+//    public Object getObject() {
+//      return getList( ).get( index );
+//    }    
+//  }
+//
+//  private final ObjectAccessor listAccessor;
+//  private final JavaListMemberAccessor memberAccessor = new JavaListMemberAccessor( );
+//  private int index;
+//  private final BoxedAccessor memberValueAccessor;
+//
+//  public JavaListAccessor( ObjectAccessor listAccessor ) {
+//    this.listAccessor = listAccessor;
+//    memberValueAccessor = new BoxedAccessor( memberAccessor );
+//  }
+//
+//  public JavaListAccessor( ObjectAccessor listAccessor, FieldValueFactory factory ) {
+//    this.listAccessor = listAccessor;
+//    memberValueAccessor = new VariantBoxedAccessor( memberAccessor, factory );
+//  }
+//
+//  @Override
+//  public void bind(int index) {
+//    this.index = index;
+//  }
+//  
+//  @Override
+//  public int size() {
+//    if ( listAccessor.isNull() )
+//      return 0;
+//    return getList( ).size( );
+//  }
+//
+//  @Override
+//  public Object getArray() {
+//    return listAccessor.getObject();
+//  }
+//
+//  @Override
+//  public boolean isNull() {
+//    return listAccessor.isNull();
+//  }
+//  
+//  @SuppressWarnings("unchecked")
+//  private List<? extends Object> getList( ) {
+//    if ( listAccessor.isNull( ) )
+//      return null;
+//    return (List<? extends Object>) listAccessor.getObject( );
+//  }
+//
+//  @Override
+//  public FieldAccessor memberAccessor() {
+//    return memberValueAccessor;
+//  }
   
 //  public static class TypedJavaListAccessor extends JavaListAccessor {
 //    

@@ -41,6 +41,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.BOOLEAN, tuple.field( 0 ).type() );
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 1, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 1, tuple.field( 0 ).getShort( ) );
@@ -90,6 +91,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.INT8, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -140,6 +142,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.INT16, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -195,6 +198,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.INT32, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -249,6 +253,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.INT64, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -303,6 +308,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.FLOAT32, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -358,6 +364,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.FLOAT64, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -391,6 +398,56 @@ public class TestScalars {
   }
 
   @Test
+  public void testDecimal( ) throws JigException {
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new BigDecimal( 0 ) },
+          { new BigDecimal( 10 ) }
+        }
+      );
+    ResultCollection results = new ArrayResultCollection( batch );
+    assertTrue( results.next() );
+    TupleSet tupleSet = results.getTuples();
+    
+    TupleSchema schema = tupleSet.schema();
+    FieldSchema field = schema.field( 0 );
+    assertEquals( "col", field.name() );
+    assertEquals( DataType.DECIMAL, field.type() );
+    assertFalse( field.nullable() );
+    
+    assertTrue( tupleSet.next() );
+    TupleValue tuple = tupleSet.getTuple();
+    assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.DECIMAL, tuple.field( 0 ).type() );
+    assertFalse( tuple.field( 0 ).getBoolean() );
+    assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
+    assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
+    assertEquals( (int) 0, tuple.field( 0 ).getInt( ) );
+    assertEquals( (long) 0, tuple.field( 0 ).getLong( ) );
+    assertEquals( (float) 0, tuple.field( 0 ).getFloat( ), 0.001 );
+    assertEquals( (double) 0, tuple.field( 0 ).getDouble( ), 0.001 );
+    assertEquals( BigDecimal.ZERO, tuple.field( 0 ).getDecimal( ) );
+    assertEquals( "0", tuple.field( 0 ).getString( ) );
+    
+    assertTrue( tupleSet.next() );
+    tuple = tupleSet.getTuple();
+    assertTrue( tuple.field( 0 ).getBoolean() );
+    assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
+    assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
+    assertEquals( (int) 10, tuple.field( 0 ).getInt( ) );
+    assertEquals( (long) 10, tuple.field( 0 ).getLong( ) );
+    assertEquals( (float) 10, tuple.field( 0 ).getFloat( ), 0.001 );
+    assertEquals( (double) 10, tuple.field( 0 ).getDouble( ), 0.001 );
+    assertEquals( new BigDecimal( 10 ), tuple.field( 0 ).getDecimal( ) );
+    assertEquals( "10", tuple.field( 0 ).getString( ) );
+    
+   assertFalse( tupleSet.next() );
+    assertFalse( results.next() );
+    results.close( );
+  }
+
+  @Test
   public void testString( ) throws JigException {
     Batch batch = new Batch(
         new String[] { "col" },
@@ -413,6 +470,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertFalse( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.STRING, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -466,6 +524,7 @@ public class TestScalars {
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.getTuple();
     assertTrue( tuple.field( 0 ).isNull() );
+    assertEquals( DataType.NULL, tuple.field( 0 ).type() );
     
     assertFalse( tupleSet.next() );
     assertFalse( results.next() );

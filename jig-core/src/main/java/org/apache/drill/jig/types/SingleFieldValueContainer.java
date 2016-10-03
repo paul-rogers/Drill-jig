@@ -9,10 +9,15 @@ import org.apache.drill.jig.api.FieldValue;
 
 public class SingleFieldValueContainer implements FieldValueContainer {
 
-  private final FieldValue value;
+  private final AbstractFieldValue value;
   
-  public SingleFieldValueContainer( FieldValue value ) {
+  public SingleFieldValueContainer( AbstractFieldValue value ) {
     this.value = value;
+  }
+
+  @Override
+  public void bind(FieldAccessor accessor) {
+    value.bind( accessor );
   }
   
   @Override

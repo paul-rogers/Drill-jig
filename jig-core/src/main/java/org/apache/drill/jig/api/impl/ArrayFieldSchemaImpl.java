@@ -5,14 +5,22 @@ import org.apache.drill.jig.api.FieldSchema;
 
 public class ArrayFieldSchemaImpl extends FieldSchemaImpl {
 
-	FieldSchema memberSchema;
-	
-	public ArrayFieldSchemaImpl(String name, boolean isNullable, FieldSchema memberSchema ) {
-		super(name, DataType.LIST, isNullable);
-		this.memberSchema = memberSchema;
-	}
-	
-	public FieldSchema member( ) {
-		return memberSchema;
-	}
+  FieldSchema memberSchema;
+
+  public ArrayFieldSchemaImpl(String name, boolean isNullable,
+      FieldSchema memberSchema) {
+    super(name, DataType.LIST, isNullable);
+    this.memberSchema = memberSchema;
+  }
+
+  public FieldSchema member() {
+    return memberSchema;
+  }
+
+  @Override
+  protected void buildString(StringBuilder buf) {
+    super.buildString( buf );
+    buf.append( ", member=" );
+    buf.append( memberSchema.toString() );
+  }
 }

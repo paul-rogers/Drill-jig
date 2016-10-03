@@ -7,22 +7,31 @@ import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
 
 public abstract class JavaArrayAccessor implements ArrayAccessor {
+  
+  protected abstract class AbstractMemberAccessor implements IndexedAccessor
+  {
+    protected int index;
+    
+    @Override
+    public void bind(int index) {
+      this.index = index;
+    }
+    
+    protected Object getArray( ) {
+      return prepareArray( index );
+    }
+  }
 
   protected final ObjectAccessor arrayAccessor;
-  protected int memberIndex;
+  protected IndexedAccessor memberAccessor;
 
   public JavaArrayAccessor( ObjectAccessor arrayAccessor ) {
     this.arrayAccessor = arrayAccessor;
   }
 
   @Override
-  public void bind(int index) {
-    memberIndex = index;
-  }
-  
-  @Override
   public int size() {
-    Object array = getArray( );
+    Object array = getValue( );
     if ( array == null )
       return 0;
     return Array.getLength( array );
@@ -34,14 +43,24 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
   }
 
   @Override
-  public Object getArray( ) {
+  public Object getValue( ) {
     if ( arrayAccessor.isNull( ) )
       return null;
     return arrayAccessor.getObject( );
   }
+
+  @Override
+  public FieldAccessor memberAccessor( ) {
+    return memberAccessor;
+  }
+
+  @Override
+  public void select( int i ) {
+    memberAccessor.bind( i );
+  }
   
-  protected Object prepareArray( ) {
-    Object array = getArray( );
+  protected Object prepareArray( int memberIndex ) {
+    Object array = getValue( );
     if ( array == null )
       throw new ValueConversionError( "Array is null ");
     if ( memberIndex < 0  ||  memberIndex <= Array.getLength( array ) )
@@ -96,7 +115,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
   
   public static class ObjectArrayAccessor extends JavaArrayAccessor {
     
-    private class ObjectArrayMemberAccessor implements ObjectAccessor {
+    private class ObjectArrayMemberAccessor extends AbstractMemberAccessor implements ObjectAccessor {
       
       @Override
       public boolean isNull() {
@@ -105,25 +124,25 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
       
       @Override
       public Object getObject() {
-       return Array.get( prepareArray( ), memberIndex );
+       return Array.get( getArray( ), index );
       }
     }
     
-    private final ObjectArrayMemberAccessor memberAccessor = new ObjectArrayMemberAccessor( );
-
-    public ObjectArrayAccessor(ObjectAccessor arrayAccessor) {
-      super(arrayAccessor);
+   public ObjectArrayAccessor(ObjectAccessor arrayAccessor) {
+      super( arrayAccessor );
+      memberAccessor = new ObjectArrayMemberAccessor( );
     }
 
-    @Override
-    public FieldAccessor memberAccessor() {
-     return memberAccessor;
-    }
+//    @Override
+//    public FieldAccessor memberAccessor( int i ) {
+//      memberAccessor.bind( i );
+//      return memberAccessor;
+//    }
   }
   
   public static class PrimitiveArrayAccessor extends JavaArrayAccessor {
   
-    private class PrimitiveMemberAccessor implements FieldAccessor {
+    private class PrimitiveMemberAccessor extends AbstractMemberAccessor implements FieldAccessor {
 
       @Override
       public boolean isNull() {
@@ -135,7 +154,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
 
       @Override
       public boolean getBoolean() {    
-        return ((boolean[]) prepareArray( ))[memberIndex];
+        return ((boolean[]) getArray( ))[index];
       }   
     }
     
@@ -143,7 +162,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
 
       @Override
       public byte getByte() {    
-        return ((byte[]) prepareArray( ))[memberIndex];
+        return ((byte[]) getArray( ))[index];
       }   
     }
     
@@ -151,7 +170,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
 
       @Override
       public short getShort() {    
-        return ((short[]) prepareArray( ))[memberIndex];
+        return ((short[]) getArray( ))[index];
       }   
     }
     
@@ -159,7 +178,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
 
       @Override
       public int getInt() {    
-        return ((int[]) prepareArray( ))[memberIndex];
+        return ((int[]) getArray( ))[index];
       }   
     }
     
@@ -167,7 +186,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
 
       @Override
       public long getLong() {    
-        return ((long[]) prepareArray( ))[memberIndex];
+        return ((long[]) getArray( ))[index];
       }   
     }
     
@@ -175,7 +194,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
 
      @Override
       public float getFloat() {    
-        return ((float[]) prepareArray( ))[memberIndex];
+        return ((float[]) getArray( ))[index];
       }   
     }
     
@@ -183,12 +202,10 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
 
       @Override
       public double getDouble() {    
-        return ((double[]) prepareArray( ))[memberIndex];
+        return ((double[]) getArray( ))[index];
       }   
     }
 
-    private final FieldAccessor memberAccessor;
-    
     public PrimitiveArrayAccessor( ObjectAccessor arrayAccessor, DataType memberType ) {
       super(arrayAccessor);
       switch ( memberType ) {
@@ -216,11 +233,6 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
       default:
         throw new IllegalStateException( "Not a scalar type: " + memberType );
       }
-    }
-
-    @Override
-    public FieldAccessor memberAccessor() {
-      return memberAccessor;
     }
   }
 

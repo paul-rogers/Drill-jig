@@ -10,12 +10,16 @@ import org.apache.drill.jig.types.FieldAccessor.TypeAccessor;
 
 public class VariantFieldValueContainer implements FieldValueContainer {
 
-  private final TypeAccessor accessor;
   private final FieldValueCache valueCache;
+  private TypeAccessor accessor;
 
-  public VariantFieldValueContainer( TypeAccessor accessor, FieldValueFactory factory ) {
-    this.accessor = accessor;
+  public VariantFieldValueContainer( FieldValueFactory factory ) {
     valueCache = new FieldValueCache( factory );
+  }
+
+  @Override
+  public void bind(FieldAccessor accessor) {
+    this.accessor = (TypeAccessor) accessor;
   }
   
   @Override

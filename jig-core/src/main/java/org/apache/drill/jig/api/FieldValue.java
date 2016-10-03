@@ -14,8 +14,10 @@ package org.apache.drill.jig.api;
  * a shorter to longer version of the same type.
  */
 
-public interface FieldValue extends ScalarValue, ArrayValue, MapValue
+public interface FieldValue extends ScalarValue
 {
   DataType type( );
   boolean isNull( );
+  MapValue getMap( );
+  ArrayValue getArray( );
 }

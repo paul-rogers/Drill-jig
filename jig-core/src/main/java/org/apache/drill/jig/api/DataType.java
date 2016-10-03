@@ -89,4 +89,8 @@ public enum DataType
     return lengths;
   }
 
+  public boolean isVariant() {
+    return this == VARIANT  ||  this == NUMBER;
+  }
+
 }

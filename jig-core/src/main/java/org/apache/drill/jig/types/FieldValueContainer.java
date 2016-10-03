@@ -8,8 +8,8 @@ import org.apache.drill.jig.types.FieldAccessor.IndexedAccessor;
  * vary depending on conditions relevant to the field.
  */
 
-@Deprecated
 public interface FieldValueContainer {
+  void bind( FieldAccessor accessor );
   FieldValue get( );
   
   /**
@@ -17,6 +17,7 @@ public interface FieldValueContainer {
    * The member is selected with the {@link #bind(int)} method.
    */
   
+  @Deprecated
   public interface IndexableFieldValueContainer extends FieldValueContainer {
     void bind( IndexedAccessor accessor );
     void bind( int index );
