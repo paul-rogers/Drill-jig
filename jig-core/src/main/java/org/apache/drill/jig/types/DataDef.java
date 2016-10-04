@@ -5,8 +5,15 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.types.ArrayFieldValue.SimpleArrayValueAccessor;
 import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
 import org.apache.drill.jig.types.FieldAccessor.ArrayValueAccessor;
+import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
+
+/**
+ * Definition of the a field used to build the field values that correspond
+ * to a set of field definitions and accessors.
+ */
 
 public abstract class DataDef {
+  
   public final DataType type;
   public final boolean nullable;
   public FieldValueContainer container;
@@ -28,6 +35,10 @@ public abstract class DataDef {
     }
   }
 
+  /**
+   * Definition of a scalar field.
+   */
+  
   public static class ScalarDef extends DataDef {
     
     public FieldAccessor accessor;
@@ -47,6 +58,28 @@ public abstract class DataDef {
       }
       if ( accessor != null )
         container.bind( accessor );
+    }
+  }
+  
+  /**
+   * Definition of a scalar field.
+   */
+  
+  public static class MapDef extends DataDef {
+    
+    public MapValueAccessor accessor;
+    
+    public MapDef( boolean nullable, MapValueAccessor accessor ) {
+      super(DataType.MAP, nullable);
+      this.accessor = accessor;
+    }
+
+    @Override
+    public void build( FieldValueFactory factory ) {
+      MapFieldValue value = new MapFieldValue( );
+      value.bind( accessor );
+      container = makeTypedContainer( value, accessor );
+      container.bind( accessor );
     }
   }
   

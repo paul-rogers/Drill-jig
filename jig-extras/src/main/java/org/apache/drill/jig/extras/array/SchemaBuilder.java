@@ -13,10 +13,10 @@ import org.apache.drill.jig.extras.array.ArrayFieldHandle.ArrayTupleHandle;
 import org.apache.drill.jig.types.BoxedAccessor;
 import org.apache.drill.jig.types.BoxedAccessor.VariantBoxedAccessor;
 import org.apache.drill.jig.types.DataDef;
-import org.apache.drill.jig.types.DataDef.ListDef;
-import org.apache.drill.jig.types.DataDef.ScalarDef;
+import org.apache.drill.jig.types.DataDef.*;
 import org.apache.drill.jig.types.FieldAccessor;
 import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.types.FieldValueContainer;
 import org.apache.drill.jig.types.FieldValueContainerSet;
@@ -24,6 +24,7 @@ import org.apache.drill.jig.types.FieldValueFactory;
 import org.apache.drill.jig.types.JavaArrayAccessor.ObjectArrayAccessor;
 import org.apache.drill.jig.types.JavaArrayAccessor.PrimitiveArrayAccessor;
 import org.apache.drill.jig.types.JavaListAccessor;
+import org.apache.drill.jig.types.JavaMapAccessor;
 import org.apache.drill.jig.types.NullAccessor;
 
 /**
@@ -246,7 +247,7 @@ public class SchemaBuilder {
       if ( listType != null ) {
         buildListAccessor( objAccessor, factory );
       } else if ( type == DataType.MAP ) {
-        buildMapAccessor( objAccessor, factory );
+        accessor = new JavaMapAccessor( objAccessor, factory );
       } else if ( type.isUndefined( ) ) {
         accessor = new NullAccessor( );
       } else if ( type.isVariant() ) {
@@ -278,12 +279,6 @@ public class SchemaBuilder {
       accessor = arrayAccessor;
     }
 
-    private Object buildMapAccessor(FieldAccessor accessor2,
-        FieldValueFactory factory) {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
     /**
      * Build the definitions used to generate the field value tree.
      * 
@@ -294,8 +289,7 @@ public class SchemaBuilder {
       if ( listType != null ) {
         return new ListDef( nullable, memberDef.buildDef( ), (ArrayAccessor) accessor );
       } else if ( type == DataType.MAP ) {
-        assert false;
-        return null;
+        return new MapDef( nullable, (MapValueAccessor) accessor );
       } else {
         return new ScalarDef( type, nullable, accessor );
       }

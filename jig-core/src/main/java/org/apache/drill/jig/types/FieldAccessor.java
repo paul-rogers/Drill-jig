@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
+import org.apache.drill.jig.api.MapValue;
 
 /**
  * The field accessor provides a uniform way to access the value,
@@ -61,9 +62,6 @@ public interface FieldAccessor {
     void bind( int index );
   }
   
-//  public interface VariantIndexedAccessor extends IndexedAccessor, TypeAccessor {
-//  }
-  
   /**
    * Interface to any array that can be presented as a
    * {@link ArrayValue}.
@@ -116,6 +114,12 @@ public interface FieldAccessor {
   public interface ArrayValueAccessor extends FieldAccessor
   {
     ArrayValue getArray( );
+    Object getValue( );
+  }
+  
+  public interface MapValueAccessor extends FieldAccessor
+  {
+    MapValue getMap( );
     Object getValue( );
   }
   

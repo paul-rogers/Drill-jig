@@ -6,8 +6,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.drill.jig.api.ArrayValue;
+import org.apache.drill.jig.api.MapValue;
 
 public class Helpers {
 
@@ -33,6 +35,21 @@ public class Helpers {
       } else {
         assertFalse( actual.get( i ).isNull() );
         assertEquals( expectedVal, actual.get( i ).getValue() );
+      }
+    }
+  }
+
+  public static void compareMaps(Object object, MapValue actual) {
+    @SuppressWarnings("unchecked")
+    Map<String,Object> map = (Map<String,Object>) object;
+    assertEquals( map.size( ), actual.size( ) );
+    for ( String key : map.keySet() ) {
+      Object expectedValue = map.get( key );
+      if ( expectedValue == null ) {
+        assertTrue( actual.get( key ).isNull() );
+      } else {
+        assertFalse( actual.get( key ).isNull() );
+        assertEquals( expectedValue, actual.get( key ).getValue() );
       }
     }
   }

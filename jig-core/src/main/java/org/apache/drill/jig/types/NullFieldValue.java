@@ -5,6 +5,11 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
 
+/**
+ * Field value for a Null or Undefined field. Also used for any nullable
+ * field type when the value is null. 
+ */
+
 public class NullFieldValue extends AbstractScalarFieldValue {
   
   public static final NullFieldValue INSTANCE = new NullFieldValue( );

@@ -6,6 +6,7 @@ import org.apache.drill.jig.types.FieldAccessor.TypeAccessor;
 /**
  * Field value container for a variant field. The container holds a cache
  * of field values so that the type-specific field values are reused across
+ * multiple fields.
  */
 
 public class VariantFieldValueContainer implements FieldValueContainer {

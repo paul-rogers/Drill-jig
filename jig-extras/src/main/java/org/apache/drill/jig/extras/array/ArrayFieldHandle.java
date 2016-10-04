@@ -2,6 +2,12 @@ package org.apache.drill.jig.extras.array;
 
 import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
 
+/**
+ * Accesses a field within an array. Uses a tuple handle to point
+ * to the current tuple, holds an index of the target field. Together,
+ * the allow this handle to pick out the same field in a set of tuples.
+ */
+
 public class ArrayFieldHandle implements ObjectAccessor {
 
   public interface ArrayTupleHandle {

@@ -5,6 +5,11 @@ import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.types.FieldValueFactory;
 
+/**
+ * Result collection that works with a data set defined in memory as
+ * a Java array.
+ */
+
 public class ArrayResultCollection implements ResultCollection {
 
   private final Batch[] batches;
