@@ -2,11 +2,9 @@ package org.apache.drill.jig.types;
 
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.types.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.types.ArrayFieldValue.SimpleArrayValueAccessor;
 import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
 import org.apache.drill.jig.types.FieldAccessor.ArrayValueAccessor;
-import org.apache.drill.jig.types.FieldAccessor.TypeAccessor;
-import org.apache.drill.jig.types.ArrayFieldValue.SimpleArrayValueAccessor;
 
 public abstract class DataDef {
   public final DataType type;
@@ -20,9 +18,11 @@ public abstract class DataDef {
   
   public abstract void build( FieldValueFactory factory );
   
-  protected FieldValueContainer makeTypedContainer( AbstractFieldValue value ) {
+  protected FieldValueContainer makeTypedContainer( AbstractFieldValue value, FieldAccessor accessor ) {
     if ( nullable ) {
-      return new NullableFieldValueContainer( value );
+      NullableFieldValueContainer container = new NullableFieldValueContainer( value );
+      container.bind( accessor );
+      return container;
     } else {
       return new SingleFieldValueContainer( value );
     }
@@ -43,7 +43,7 @@ public abstract class DataDef {
         container = new VariantFieldValueContainer( factory );
       } else {
         AbstractFieldValue value = factory.buildValue( type );
-        container = makeTypedContainer( value );
+        container = makeTypedContainer( value, accessor );
       }
       if ( accessor != null )
         container.bind( accessor );
@@ -75,7 +75,7 @@ public abstract class DataDef {
       }
       ArrayFieldValue value = new ArrayFieldValue( );
       value.bind( arrayValueAccessor );
-      container = makeTypedContainer( value );
+      container = makeTypedContainer( value, arrayValueAccessor );
     }
   }
 }

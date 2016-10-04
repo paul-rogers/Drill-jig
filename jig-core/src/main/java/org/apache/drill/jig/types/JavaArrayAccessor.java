@@ -63,7 +63,7 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
     Object array = getValue( );
     if ( array == null )
       throw new ValueConversionError( "Array is null ");
-    if ( memberIndex < 0  ||  memberIndex <= Array.getLength( array ) )
+    if ( memberIndex < 0  ||  Array.getLength( array ) <= memberIndex )
       throw new ValueConversionError( "Index out of bounds: " + memberIndex + ", size = " + Array.getLength( array ) );
     return array;
   }

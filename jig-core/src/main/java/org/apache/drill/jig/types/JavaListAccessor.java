@@ -41,11 +41,13 @@ public class JavaListAccessor implements ArrayAccessor {
     memberValueAccessor = new VariantBoxedAccessor( memberAccessor, factory );
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public int size() {
-    if ( listAccessor.isNull() )
+    List list = getList( );
+    if ( list == null )
       return 0;
-    return getList( ).size( );
+    return list.size( );
   }
 
   @Override
@@ -58,11 +60,11 @@ public class JavaListAccessor implements ArrayAccessor {
     return listAccessor.isNull();
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private List<? extends Object> getList( ) {
     if ( listAccessor.isNull( ) )
       return null;
-    return (List<? extends Object>) listAccessor.getObject( );
+    return (List) listAccessor.getObject( );
   }
 
   @Override

@@ -2,7 +2,19 @@ package org.apache.drill.jig.api;
 
 public enum DataType 
 {
+  /**
+   * Undefined means that, for whatever reason, we cannot infer the
+   * type of the field. This can occur, say, for the member type of
+   * an empty list.
+   */
+  
   UNDEFINED( 0, false, "Undefined", 0 ),
+  
+  /**
+   * The null type means that we tried to infer the field type,
+   * but every occurrence of the field contained a null value.
+   */
+  
   NULL( 1, true, "Null", 0 ), 
   BOOLEAN( 2, true, "Boolean", 1 ), 
   INT8( 3, true, "Int-8", 1 ),
@@ -20,7 +32,18 @@ public enum DataType
   DATE_TIME_SPAN( 15, true, "Date-Time-Span", Constants.NOT_IMPLEMENTED ), 
   LIST( 16, false, "List", Constants.NOT_IMPLEMENTED ),
   MAP( 17, false, "Map", Constants.NOT_IMPLEMENTED ),
+  
+  /**
+   * Represents a field that can take on any scalar value.
+   */
+  
   VARIANT( 18, true, "Any", Constants.TYPE_AND_VALUE ),
+  
+  /**
+   * Represents a variant field that can take on only numeric
+   * values (as in JSON).
+   */
+  
   NUMBER( 19, true, "Number", Constants.TYPE_AND_VALUE );
   
   private static DataType codeToTypeMap[] = initCodeToTypeMap( );
@@ -91,6 +114,10 @@ public enum DataType
 
   public boolean isVariant() {
     return this == VARIANT  ||  this == NUMBER;
+  }
+
+  public boolean isUndefined() {
+    return this == NULL  ||  this == UNDEFINED;
   }
 
 }

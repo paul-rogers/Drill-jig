@@ -3,11 +3,8 @@ package org.apache.drill.jig.types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Collection;
 
 import org.apache.drill.jig.api.ArrayValue;
-import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.exception.ValueConversionError;
 

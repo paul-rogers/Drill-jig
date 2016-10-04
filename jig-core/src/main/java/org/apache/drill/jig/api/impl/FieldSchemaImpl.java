@@ -57,4 +57,9 @@ public class FieldSchemaImpl implements FieldSchema
     buf.append( isNullable );
   }
 
+  @Override
+  public FieldSchema member() {
+    return null;
+  }
+
 }

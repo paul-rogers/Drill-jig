@@ -2,8 +2,8 @@ package org.apache.drill.jig.extras.array;
 
 public class Batch
 {
-  String names[];
-  Object data[][];
+  public String names[];
+  public Object data[][];
   
   public Batch( String names[], Object data[][] ) {
     this.names = names;

@@ -45,6 +45,7 @@ public class FieldValueFactory {
     case INT8:
       return new Int8FieldValue();
     case NULL:
+    case UNDEFINED:
       return new NullFieldValue();
     case STRING:
       return new StringFieldValue();
@@ -56,7 +57,6 @@ public class FieldValueFactory {
           "No field value yet implemented for type: " + type);
     case VARIANT:
     case NUMBER:
-    case UNDEFINED:
       throw new IllegalStateException("No field value for type: " + type);
     default:
       return extendedValue(type);
@@ -143,9 +143,9 @@ public class FieldValueFactory {
    */
 
   public DataType mergeTypes(DataType type1, DataType type2) {
-    if (type1 == null || type1 == DataType.NULL)
+    if (type1 == null || type1 == DataType.NULL || type1 == DataType.UNDEFINED)
       return type2;
-    if (type2 == null || type2 == DataType.NULL)
+    if (type2 == null || type2 == DataType.NULL || type2 == DataType.UNDEFINED)
       return type1;
     if (type1 == type2)
       return type1;

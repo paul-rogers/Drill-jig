@@ -13,6 +13,7 @@ public class ArrayFieldSchemaImpl extends FieldSchemaImpl {
     this.memberSchema = memberSchema;
   }
 
+  @Override
   public FieldSchema member() {
     return memberSchema;
   }

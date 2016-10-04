@@ -10,6 +10,7 @@ public interface FieldSchema
   int index();
   DataType type( );
   boolean nullable( );
+  FieldSchema member( );
   String getDisplayType();
   int getLength();
 }
