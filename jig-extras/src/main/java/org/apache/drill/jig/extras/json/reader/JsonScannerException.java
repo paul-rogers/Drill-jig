@@ -1,4 +1,4 @@
-package org.apache.drill.jig.extras.json;
+package org.apache.drill.jig.extras.json.reader;
 
 import org.apache.drill.jig.exception.ClientRuntimeException;
 

@@ -125,9 +125,7 @@ public class JigClientExample {
           if ( i > 0 ) System.out.print( ", " );
           System.out.print(
               tuple.field(i)   // Get the field object
-              .asScalar( )        // Treat it as a scalar (rather than
-                                  // null, array or map).
-              .getValue() );      // Get the value as a Java object.
+              .getValue() );   // Get the value as a Java object.
         }
         System.out.println( );
       }

@@ -13,42 +13,43 @@ import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.extras.json.JsonFieldAccessor.JsonFieldHandle;
-import org.apache.drill.jig.extras.json.JsonScanner.BufferingTupleReader;
 import org.apache.drill.jig.extras.json.JsonTupleSchema.JsonFieldSchema;
+import org.apache.drill.jig.extras.json.reader.BufferingTupleReader;
+import org.apache.drill.jig.extras.json.reader.JsonScannerException;
 
 public class JsonTupleSet implements TupleSet, TupleValue
 {
   private enum State { START, RUN, EOF, SCHEMA_CHANGE };
   
-  public class TupleFieldHandle implements JsonFieldHandle
-  {
-    protected final JsonFieldSchema fieldSchema;
-    
-    protected TupleFieldHandle( JsonFieldSchema schema ) {
-      this.fieldSchema = schema;
-    }
-    
-    @Override
-    public JsonValue get( ) {
-      return currentObject.get( fieldSchema.name() );
-    }
-
-    @Override
-    public ValueConversionError notSupportedError( String type ) {
-      return new ValueConversionError( "Cannot convert " + fieldSchema.type().toString() + " to " + type );
-    }
-
-    @Override
-    public DataType getType() {
-      return fieldSchema.type();
-    }
-
-    @Override
-    public Cardinality getCardinality() {
-      return fieldSchema.getCardinality();
-    }
-
-  }
+//  public class TupleFieldHandle implements JsonFieldHandle
+//  {
+//    protected final JsonFieldSchema fieldSchema;
+//    
+//    protected TupleFieldHandle( JsonFieldSchema schema ) {
+//      this.fieldSchema = schema;
+//    }
+//    
+//    @Override
+//    public JsonValue get( ) {
+//      return currentObject.get( fieldSchema.name() );
+//    }
+//
+//    @Override
+//    public ValueConversionError notSupportedError( String type ) {
+//      return new ValueConversionError( "Cannot convert " + fieldSchema.type().toString() + " to " + type );
+//    }
+//
+//    @Override
+//    public DataType getType() {
+//      return fieldSchema.type();
+//    }
+//
+//    @Override
+//    public Cardinality getCardinality() {
+//      return fieldSchema.getCardinality();
+//    }
+//
+//  }
   
   private final BufferingTupleReader recordReader;
   JsonTupleSchema resultSchema;

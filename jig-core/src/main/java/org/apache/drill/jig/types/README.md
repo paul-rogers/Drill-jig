@@ -55,3 +55,18 @@ Accessors are of two types. Most are implementation-specific and reside in the
 package for that implementation. Others are generic and reside here. In particular,
 this package contains generic Java accessors such as the `JavaMapAccessor` and
 `CachedObjectAccessor`.
+
+## Building a Schema
+
+A data source implementation builds up both the schema (meta-data) and value
+(data access) structures for each tuple set. (Recall that a tuple set represents
+a group of tuples all with the same schema.) Build the schema and values
+generally follows several steps:
+
+1. Scan the underlying implementation to infer Jig data types for each
+field. If the field is a list, infer the data type for list members as
+well. (Maps are defined to have string keys and variant values.)
+2. Determine the set of accessors needed to convert from implementation
+representation to Jig representation.
+3. Create a set of tuple and field values that map the accessors into
+the declared Jig types.

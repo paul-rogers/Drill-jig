@@ -44,7 +44,13 @@ public enum DataType
    * values (as in JSON).
    */
   
-  NUMBER( 19, true, "Number", Constants.TYPE_AND_VALUE );
+  NUMBER( 19, true, "Number", Constants.TYPE_AND_VALUE ),
+  
+  /**
+   * Represents a tuple field (with specified schema.)
+   */
+  
+  TUPLE( 20, false, "Tuple", Constants.NOT_IMPLEMENTED );
   
   private static DataType codeToTypeMap[] = initCodeToTypeMap( );
   public static int lengthForCode[] = initLengthForCodeMap( );

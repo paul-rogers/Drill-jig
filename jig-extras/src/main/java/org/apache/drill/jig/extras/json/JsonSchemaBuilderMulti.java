@@ -8,8 +8,9 @@ import javax.json.JsonValue.ValueType;
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
-import org.apache.drill.jig.extras.json.JsonScanner.JsonTupleReader;
 import org.apache.drill.jig.extras.json.JsonTupleSchema.JsonFieldSchema;
+import org.apache.drill.jig.extras.json.reader.JsonScannerException;
+import org.apache.drill.jig.extras.json.reader.JsonTupleReader;
 
 /**
  * Sample n rows to infer a schema. Or, build a schema from a provided
