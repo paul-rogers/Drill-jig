@@ -77,7 +77,6 @@ public abstract class DataDef {
     @Override
     public void build( FieldValueFactory factory ) {
       MapFieldValue value = new MapFieldValue( );
-      value.bind( accessor );
       container = makeTypedContainer( value, accessor );
       container.bind( accessor );
     }

@@ -40,7 +40,7 @@ import org.apache.drill.jig.types.NullAccessor;
  */
 
 public class SchemaBuilder {
-  public static class FieldImpl {
+  public static class FieldDefn {
     public enum ListType {
       LIST, OBJECT_ARRAY, TYPED_OBJECT_ARRAY, PRIMITIVE_ARRAY
     }
@@ -49,10 +49,10 @@ public class SchemaBuilder {
     private boolean nullable = false;
     private DataType type = DataType.UNDEFINED;
     private ListType listType;
-    private FieldImpl memberDef;
+    private FieldDefn memberDef;
     private FieldAccessor accessor;
 
-    public FieldImpl(int index) {
+    public FieldDefn(int index) {
       this.index = index;
     }
 
@@ -165,7 +165,7 @@ public class SchemaBuilder {
             + " and " + thisType);
 
       if ( memberDef == null ) {
-        memberDef = new FieldImpl( 0 );
+        memberDef = new FieldDefn( 0 );
         memberDef.type = memberType;
       }
       switch ( listType ) {
@@ -217,7 +217,7 @@ public class SchemaBuilder {
      */
     private void buildList(List<Object> list, FieldValueFactory factory) {
       if ( memberDef == null )
-        memberDef = new FieldImpl( 0 );
+        memberDef = new FieldDefn( 0 );
       int n = list.size( );
       for ( int i = 0;  i < n;  i++ ) {
         memberDef.define(list.get( i ), factory);
@@ -305,7 +305,7 @@ public class SchemaBuilder {
   }
   
   FieldValueFactory factory;
-  private FieldImpl fields[];
+  private FieldDefn fields[];
 
   public SchemaBuilder(FieldValueFactory factory ) {
     this.factory = factory;
@@ -313,9 +313,9 @@ public class SchemaBuilder {
 
   public TupleSchema buildSchema(Batch batch ) {
     int fieldCount = batch.names.length;
-    fields = new FieldImpl[fieldCount];
+    fields = new FieldDefn[fieldCount];
     for (int i = 0; i < fieldCount; i++) {
-      fields[i] = new FieldImpl(i);
+      fields[i] = new FieldDefn(i);
     }
     int rowCount = batch.data.length;
     for (int i = 0; i < rowCount; i++) {

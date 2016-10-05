@@ -11,15 +11,4 @@ import org.apache.drill.jig.types.FieldAccessor.IndexedAccessor;
 public interface FieldValueContainer {
   void bind( FieldAccessor accessor );
   FieldValue get( );
-  
-  /**
-   * Wraps an array field to allow access to array members.
-   * The member is selected with the {@link #bind(int)} method.
-   */
-  
-  @Deprecated
-  public interface IndexableFieldValueContainer extends FieldValueContainer {
-    void bind( IndexedAccessor accessor );
-    void bind( int index );
-  }
 }
