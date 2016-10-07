@@ -188,21 +188,29 @@ public class ObjectParser {
     return child;
   }
 
-  public DataType parseType( JsonValue value ) {
-    if ( value == JsonValue.NULL ) {
-      return DataType.NULL;
-    } else if ( value == JsonValue.TRUE || value == JsonValue.FALSE ) {
+  public static DataType parseType( JsonValue value ) {
+    switch ( value.getValueType() ) {
+    case TRUE:
+    case FALSE:
       return DataType.BOOLEAN;
-    } else if ( value instanceof JsonObject ) {
-      return DataType.TUPLE;
-    } else if ( value instanceof JsonString ) {
+    case NULL:
+      return DataType.VARIANT;
+    case NUMBER:
+      JsonNumber number = (JsonNumber) value;
+      if ( number.isIntegral() ) {
+        return DataType.INT64;
+      }
+      else {
+        return DataType.DECIMAL;
+      }
+    case STRING:
       return DataType.STRING;
-    } else if ( value instanceof JsonNumber ) {
-      return DataType.NUMBER;
-    } else if ( value instanceof JsonArray ) {
+    case OBJECT:
+      return DataType.TUPLE;
+    case ARRAY:
       return DataType.LIST;
-    } else {
-      throw new ValueConversionError( "Unknown JSON value: " + value.getClass().getSimpleName() );
+    default:
+      throw new ValueConversionError( "Unknown JSON value: " + value.getValueType() );
     }
   }
 

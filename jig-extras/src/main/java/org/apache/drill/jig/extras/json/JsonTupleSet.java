@@ -16,6 +16,7 @@ import org.apache.drill.jig.extras.json.JsonFieldAccessor.JsonFieldHandle;
 import org.apache.drill.jig.extras.json.JsonTupleSchema.JsonFieldSchema;
 import org.apache.drill.jig.extras.json.reader.BufferingTupleReader;
 import org.apache.drill.jig.extras.json.reader.JsonScannerException;
+import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
 
 public class JsonTupleSet implements TupleSet, TupleValue
 {
@@ -50,7 +51,20 @@ public class JsonTupleSet implements TupleSet, TupleValue
 //    }
 //
 //  }
-  
+
+  public class TupleObjectAccessor implements ObjectAccessor {
+
+    @Override
+    public boolean isNull() {
+      return currentObject == null;
+    }
+
+    @Override
+    public Object getObject() {
+      return currentObject;
+    }
+  }
+
   private final BufferingTupleReader recordReader;
   JsonTupleSchema resultSchema;
   JsonTupleSchema inputSchema;
