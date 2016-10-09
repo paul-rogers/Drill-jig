@@ -31,7 +31,7 @@ public class RowDisplay
       TupleSet tupleSet = results.getTuples();
       RowDisplay.printSchema( tupleSet.schema(), out );
       while ( tupleSet.next() )
-        RowDisplay.printRow( tupleSet.getTuple(), out );
+        RowDisplay.printRow( tupleSet.tuple(), out );
     }
     out.flush( );
   }

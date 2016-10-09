@@ -44,47 +44,47 @@ public class TestScalarVariant {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next( ) );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.BOOLEAN, tuple.field( 0 ).type( ) );
     assertTrue( tuple.field( 0 ).getBoolean() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.INT8, tuple.field( 0 ).type( ) );
     assertEquals( 10, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.INT16, tuple.field( 0 ).type( ) );
     assertEquals( 20, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.INT32, tuple.field( 0 ).type( ) );
     assertEquals( 30, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.INT64, tuple.field( 0 ).type( ) );
     assertEquals( 40, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.FLOAT32, tuple.field( 0 ).type( ) );
     assertEquals( 50, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.FLOAT64, tuple.field( 0 ).type( ) );
     assertEquals( 60, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.DECIMAL, tuple.field( 0 ).type( ) );
     assertEquals( 70, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( DataType.STRING, tuple.field( 0 ).type( ) );
     assertEquals( 80, tuple.field( 0 ).getInt() );  
     
@@ -115,25 +115,25 @@ public class TestScalarVariant {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next( ) );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.BOOLEAN, tuple.field( 0 ).type( ) );
     assertTrue( tuple.field( 0 ).getBoolean() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.INT32, tuple.field( 0 ).type( ) );
     assertEquals( 30, tuple.field( 0 ).getInt() );
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.STRING, tuple.field( 0 ).type( ) );
     assertEquals( 80, tuple.field( 0 ).getInt() );  
     
     assertTrue( tupleSet.next( ) );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );

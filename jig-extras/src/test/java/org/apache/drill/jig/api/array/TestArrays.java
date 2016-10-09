@@ -52,7 +52,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
@@ -60,7 +60,7 @@ public class TestArrays {
     assertEquals( Array.get( batch.data[0][0], 0), array.get(0).getString() );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     Helpers.compareArrays( batch.data[1][0], tuple.field( 0 ).getArray() );
     
     assertFalse( tupleSet.next() );
@@ -98,7 +98,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     
@@ -138,7 +138,7 @@ public class TestArrays {
     assertTrue( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     
@@ -179,12 +179,12 @@ public class TestArrays {
     assertTrue( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -225,7 +225,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
@@ -233,7 +233,7 @@ public class TestArrays {
     assertEquals( Array.get( batch.data[0][0], 0), array.get(0).getString() );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     Helpers.compareArrays( batch.data[1][0], tuple.field( 0 ).getArray() );
     
     assertFalse( tupleSet.next() );
@@ -271,7 +271,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( 0, array.size() );
@@ -311,7 +311,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( 0, array.size() );
@@ -347,7 +347,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( DataType.STRING, array.get( 0 ).type() );
     assertEquals( DataType.INT32, array.get( 1 ).type() );
@@ -355,7 +355,7 @@ public class TestArrays {
     Helpers.compareArrays( batch.data[0][0], array );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -390,7 +390,7 @@ public class TestArrays {
     assertTrue( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( DataType.STRING, array.get( 0 ).type() );
     assertEquals( DataType.INT32, array.get( 1 ).type() );
@@ -399,7 +399,7 @@ public class TestArrays {
     Helpers.compareArrays( batch.data[0][0], array );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -431,7 +431,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
@@ -465,7 +465,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
@@ -499,7 +499,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     
@@ -532,7 +532,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     
@@ -565,7 +565,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     
@@ -599,7 +599,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     
@@ -632,7 +632,7 @@ public class TestArrays {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareArrays( batch.data[0][0], array );
     

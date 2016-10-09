@@ -47,7 +47,7 @@ public class TestMap {
     assertNull( field.member( ) );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     MapValue array = tuple.field( 0 ).getMap();
     Helpers.compareMaps( batch.data[0][0], array );
     

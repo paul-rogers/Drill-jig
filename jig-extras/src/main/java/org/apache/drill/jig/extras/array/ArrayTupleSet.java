@@ -41,7 +41,7 @@ public class ArrayTupleSet implements TupleSet, ArrayTupleHandle {
   }
 
   @Override
-  public TupleValue getTuple() {
+  public TupleValue tuple() {
     if ( rowIndex < batch.data.length )
      return tuple;
    else

@@ -305,8 +305,8 @@ public class SchemaBuilder {
   }
   
   FieldValueFactory factory;
+  
   private FieldDefn fields[];
-
   public SchemaBuilder(FieldValueFactory factory ) {
     this.factory = factory;
   }

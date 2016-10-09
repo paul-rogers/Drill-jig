@@ -17,6 +17,22 @@
  */
 
 /**
- * 
+ * Simple, JSON-based result set implementation. Allows
+ * testing of Jig components without connecting to Drill.
+ * <p>
+ * Translates a set of JSON objects to a Jig schema and implementation
+ * in a number of steps:
+ * <ul>
+ * <li>{@link ObjectParser} - scan a set of JSON objects to extract the
+ * common schemas. Detect unsupported structures, such as the same field
+ * being both a scalar and a map/array.</li>
+ * <li>{@link SchemaBuilder} - translate the parsed object schema into a jig
+ * schema, optionally flattening child objects.</li>
+ * <li>{@link DefinitionBuilder} - translate the above intermediate schema
+ * into a set of accessors that read actual JSON values at runtime.</li>
+ * <li>Runtime builder - Create Jig field values and associated objects
+ * to present the accessors to the application.</li>
+ * </ul>
  */
+
 package org.apache.drill.jig.extras.json;

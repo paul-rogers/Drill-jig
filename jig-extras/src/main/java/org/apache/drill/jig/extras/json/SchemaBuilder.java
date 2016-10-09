@@ -12,6 +12,24 @@ import org.apache.drill.jig.extras.json.ObjectParser.SchemaNode;
 import org.apache.drill.jig.extras.json.ObjectParser.TupleNode;
 import org.apache.drill.jig.types.FieldValueFactory;
 
+/**
+ * Builds a set of accessors to translate a JSON object of a particular schema
+ * into the Jig API format.
+ * <ul>
+ * <li>A JSON object represents the tuple.<li>
+ * <li>The member of the tuple object represent fields. Fields are accessed
+ * by key in the tuple objects. Fields may be either non-existent or a JSON
+ * NULL value; both are treated as a null value (and the field schema must
+ * be nullable.)</li>
+ * <li>A simple JSON value is represented as a Jig scalar.</li>
+ * <li>A JSON array is represented as a Jig List.</li>
+ * <li>Non-root tuples can be represented either as a Jig map, or flattened
+ * <li>into the root tuple. In this case, a name of form "a.b" means the
+ * value a in the root tuple object (which must be a JSON object), then
+ * the value b in the nested object.</li>
+ * </ul>
+ */
+
 public class SchemaBuilder {
   
   public static class Context {
@@ -34,6 +52,32 @@ public class SchemaBuilder {
       nestedContext.nullable = effectiveNullable( childNullable );
       return nestedContext;
     }
+  }
+  
+  public class SchemaNode {
+    
+  }
+  
+  public class ObjectNode extends SchemaNode {
+  }
+  
+  public class TypleObjectNode extends ObjectNode {
+    JsonTupleValue tuple;
+    JsonTupleAccessor accessor;
+    TupleSchema schema;
+  }
+  
+  public class FlattenedObjectNode extends ObjectNode {
+    ObjectNode parent
+    
+  }
+  
+  public class ArrayNode extends SchemaNode {
+    
+  }
+  
+  public class ValueNode extends SchemaNode {
+    
   }
 
   private TupleNode root;

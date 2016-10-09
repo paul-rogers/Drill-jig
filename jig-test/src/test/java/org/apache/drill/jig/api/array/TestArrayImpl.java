@@ -52,7 +52,7 @@ public class TestArrayImpl {
     
     assertTrue( tupleSet.next() );
     assertEquals( 0, tupleSet.getIndex() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertNotNull( tuple );
     assertEquals( "first", tuple.field( 0 ).getString() );
     assertEquals( 1, tuple.field(1).getInt() );
@@ -60,7 +60,7 @@ public class TestArrayImpl {
     
     assertTrue( tupleSet.next() );
     assertEquals( 1, tupleSet.getIndex() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertNotNull( tuple );
     assertEquals( "second", tuple.field( 0 ).getString() );
     assertEquals( 10, tuple.field(1).getInt() );
@@ -97,7 +97,7 @@ public class TestArrayImpl {
     assertTrue( results.next( ) );
     TupleSet tuples = results.getTuples();
     assertTrue( tuples.next() );
-    TupleValue tuple = tuples.getTuple();
+    TupleValue tuple = tuples.tuple();
     assertEquals( "first", tuple.field( 0 ).getString() );
     assertEquals( 1, tuple.field( 1 ).getByte() );
     assertEquals( 2, tuple.field( 2 ).getShort() );
@@ -109,7 +109,7 @@ public class TestArrayImpl {
     assertEquals( new BigDecimal( 7 ), tuple.field( 8 ).getDecimal() );
 
     assertTrue( tuples.next() );
-    tuple = tuples.getTuple();
+    tuple = tuples.tuple();
     assertEquals( "second", tuple.field( 0 ).getString() );
     assertTrue( tuple.field( 1 ).isNull( ) );
     assertTrue( tuple.field( 2 ).isNull( ) );
@@ -121,7 +121,7 @@ public class TestArrayImpl {
     assertTrue( tuple.field( 8 ).isNull( ) );
 
     assertTrue( tuples.next() );
-    tuple = tuples.getTuple();
+    tuple = tuples.tuple();
     assertTrue( tuple.field( 0 ).isNull( ) );
     assertEquals( 31, tuple.field( 1 ).getByte() );
     assertTrue( tuple.field( 2 ).isNull( ) );

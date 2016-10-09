@@ -26,7 +26,7 @@ public abstract class DataDef {
   public abstract void build( FieldValueFactory factory );
   
   protected FieldValueContainer makeTypedContainer( AbstractFieldValue value, FieldAccessor accessor ) {
-    if ( nullable ) {
+    if ( nullable && type != DataType.NULL ) {
       NullableFieldValueContainer container = new NullableFieldValueContainer( value );
       container.bind( accessor );
       return container;

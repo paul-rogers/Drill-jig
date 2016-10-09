@@ -106,7 +106,7 @@ public class QuerySerializer
         state = QueryState.SCHEMA;
         break;
       }
-      TupleValue tuple = tupleSet.getTuple();
+      TupleValue tuple = tupleSet.tuple();
       if ( ! serializer.serializeTuple(buf, tuple) ) {
         if ( count == 0 ) {
           throw new RequestException( "Row too big for buffer",

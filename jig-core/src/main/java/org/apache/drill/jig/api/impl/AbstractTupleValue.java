@@ -8,11 +8,13 @@ import org.apache.drill.jig.types.FieldValueContainerSet;
 
 public abstract class AbstractTupleValue implements TupleValue {
 
-  public final FieldValueContainerSet containers;
+  protected final FieldValueContainerSet containers;
   public Resetable resetable[];
+  private final int size;
   
   public AbstractTupleValue( FieldValueContainerSet containers ) {
     this.containers = containers;
+    size = containers.size( );
   }
   
   public void reset( ) {
@@ -24,6 +26,12 @@ public abstract class AbstractTupleValue implements TupleValue {
 
   @Override
   public FieldValue field(int i) {
+    if ( i < 0  ||  size <= i )
+      return null;
+    return fieldValue(i);
+  }
+  
+  protected FieldValue fieldValue(int i ) {
     return containers.field(i);
   }
 
@@ -32,7 +40,7 @@ public abstract class AbstractTupleValue implements TupleValue {
     FieldSchema field = schema().field(name);
     if (field == null)
       return null;
-    return field(field.index());
+    return fieldValue(field.index());
   }
 
 }

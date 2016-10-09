@@ -59,7 +59,7 @@ public class TestNestedLists {
     assertFalse( member2.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( 2, array.size() );
@@ -69,7 +69,7 @@ public class TestNestedLists {
     Helpers.compareLists( list2, array.get( 1 ).getArray( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     array = tuple.field( 0 ).getArray();
     assertEquals( 0, array.size() );
     
@@ -111,7 +111,7 @@ public class TestNestedLists {
     assertFalse( member2.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( 2, array.size() );
@@ -121,7 +121,7 @@ public class TestNestedLists {
     Helpers.compareArrays( parent.get( 1 ), array.get( 1 ).getArray( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     array = tuple.field( 0 ).getArray();
     assertEquals( 0, array.size() );
     
@@ -167,7 +167,7 @@ public class TestNestedLists {
     assertFalse( member2.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( 2, array.size() );
@@ -177,7 +177,7 @@ public class TestNestedLists {
     Helpers.compareLists( list2, array.get( 1 ).getArray( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     array = tuple.field( 0 ).getArray();
     assertEquals( 0, array.size() );
     
@@ -219,7 +219,7 @@ public class TestNestedLists {
     assertFalse( member2.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( 2, array.size() );
@@ -229,7 +229,7 @@ public class TestNestedLists {
     Helpers.compareArrays( array2, array.get( 1 ).getArray( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     array = tuple.field( 0 ).getArray();
     assertEquals( 0, array.size() );
     

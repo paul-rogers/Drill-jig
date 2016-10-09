@@ -83,7 +83,7 @@ public class RemoteResultCollection implements ResultCollection
     }
 
     @Override
-    public TupleValue getTuple() {
+    public TupleValue tuple() {
       return deserializer.getTuple();
     }
 

@@ -10,6 +10,8 @@ public class FieldValueContainerSet {
     this.containers = containers;
   }
   
+  public int size( ) { return containers.length; }
+  
   public FieldValue field( int index ) {
     if ( index < 0  ||  containers.length <= index )
       return null;

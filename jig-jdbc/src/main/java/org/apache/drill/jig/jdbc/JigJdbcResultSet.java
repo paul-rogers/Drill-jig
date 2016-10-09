@@ -64,7 +64,7 @@ public class JigJdbcResultSet implements ResultSet
     validateOpen( );
     try {
       isEof = ! tupleSet.next();
-      tuple = isEof ? null : tupleSet.getTuple();
+      tuple = isEof ? null : tupleSet.tuple();
       return ! isEof;
     } catch (JigException e) {
       throw wrapJigException( e );

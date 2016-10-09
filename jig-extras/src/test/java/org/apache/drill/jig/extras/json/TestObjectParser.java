@@ -11,10 +11,10 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.extras.json.ObjectParser.ArrayNode;
-import org.apache.drill.jig.extras.json.ObjectParser.FieldNode;
-import org.apache.drill.jig.extras.json.ObjectParser.SchemaNode;
-import org.apache.drill.jig.extras.json.ObjectParser.TupleNode;
+import org.apache.drill.jig.extras.json.ObjectParser.JsonArrayNode;
+import org.apache.drill.jig.extras.json.ObjectParser.JsonScalarNode;
+import org.apache.drill.jig.extras.json.ObjectParser.JsonSchemaNode;
+import org.apache.drill.jig.extras.json.ObjectParser.JsonObjectNode;
 import org.apache.drill.jig.types.FieldValueFactory;
 import org.junit.Test;
 
@@ -89,16 +89,16 @@ public class TestObjectParser {
         .build( );
     
     ObjectParser parser = new ObjectParser( new FieldValueFactory( ) );
-    TupleNode tuple = parser.parseObject( obj );
+    JsonObjectNode tuple = parser.parseObject( obj );
     assertEquals( 15, tuple.children.size() );
     
     // String
     
-    SchemaNode child = tuple.children.get( 0 );
+    JsonSchemaNode child = tuple.children.get( 0 );
     assertEquals( "a", child.name );
     assertEquals( DataType.STRING, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof FieldNode );
+    assertTrue( child instanceof JsonScalarNode );
     
     // Number (int)
     
@@ -106,7 +106,7 @@ public class TestObjectParser {
     assertEquals( "b", child.name );
     assertEquals( DataType.NUMBER, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof FieldNode );
+    assertTrue( child instanceof JsonScalarNode );
     
     // Number (float)
     
@@ -114,7 +114,7 @@ public class TestObjectParser {
     assertEquals( "c", child.name );
     assertEquals( DataType.NUMBER, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof FieldNode );
+    assertTrue( child instanceof JsonScalarNode );
     
     // Tuple
     
@@ -122,22 +122,22 @@ public class TestObjectParser {
     assertEquals( "d", child.name );
     assertEquals( DataType.TUPLE, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof TupleNode );
+    assertTrue( child instanceof JsonObjectNode );
     
-    TupleNode childTuple = (TupleNode) child;
+    JsonObjectNode childTuple = (JsonObjectNode) child;
     assertEquals( 2, childTuple.children.size( ) );
     
-    SchemaNode grandChild = childTuple.children.get( 0 );
+    JsonSchemaNode grandChild = childTuple.children.get( 0 );
     assertEquals( "da", grandChild.name );
     assertEquals( DataType.STRING, grandChild.type );
     assertFalse( grandChild.nullable );
-    assertTrue( grandChild instanceof FieldNode );
+    assertTrue( grandChild instanceof JsonScalarNode );
     
     grandChild = childTuple.children.get( 1 );
     assertEquals( "db", grandChild.name );
     assertEquals( DataType.NUMBER, grandChild.type );
     assertFalse( grandChild.nullable );
-    assertTrue( grandChild instanceof FieldNode );
+    assertTrue( grandChild instanceof JsonScalarNode );
     
     // Null
     
@@ -145,7 +145,7 @@ public class TestObjectParser {
     assertEquals( "e", child.name );
     assertEquals( DataType.NULL, child.type );
     assertTrue( child.nullable );
-    assertTrue( child instanceof FieldNode );
+    assertTrue( child instanceof JsonScalarNode );
     
     // Boolean (true)
     
@@ -153,7 +153,7 @@ public class TestObjectParser {
     assertEquals( "f", child.name );
     assertEquals( DataType.BOOLEAN, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof FieldNode );
+    assertTrue( child instanceof JsonScalarNode );
     
     // Boolean (false)
     
@@ -161,7 +161,7 @@ public class TestObjectParser {
     assertEquals( "g", child.name );
     assertEquals( DataType.BOOLEAN, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof FieldNode );
+    assertTrue( child instanceof JsonScalarNode );
     
     // List (single type)
     
@@ -169,13 +169,13 @@ public class TestObjectParser {
     assertEquals( "h", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    SchemaNode member = ((ArrayNode) child).member;
+    JsonSchemaNode member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( member.nullable );
-    assertTrue( member instanceof FieldNode );  
+    assertTrue( member instanceof JsonScalarNode );  
     
     // List (empty)
     
@@ -183,13 +183,13 @@ public class TestObjectParser {
     assertEquals( "i", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    member = ((ArrayNode) child).member;
+    member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.UNDEFINED, member.type );
     assertFalse( member.nullable );
-    assertTrue( member instanceof FieldNode );
+    assertTrue( member instanceof JsonScalarNode );
 
     // List of List of single type
     
@@ -197,19 +197,19 @@ public class TestObjectParser {
     assertEquals( "j", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    member = ((ArrayNode) child).member;
+    member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.LIST, member.type );
     assertFalse( member.nullable );
-    assertTrue( member instanceof ArrayNode );
+    assertTrue( member instanceof JsonArrayNode );
     
-    SchemaNode member2 = ((ArrayNode) member).member;
+    JsonSchemaNode member2 = ((JsonArrayNode) member).member;
     assertNull( member2.name );
     assertEquals( DataType.STRING, member2.type );
     assertFalse( member2.nullable );
-    assertTrue( member2 instanceof FieldNode );
+    assertTrue( member2 instanceof JsonScalarNode );
     
     // Variant list
     
@@ -217,13 +217,13 @@ public class TestObjectParser {
     assertEquals( "k", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    member = ((ArrayNode) child).member;
+    member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.VARIANT, member.type );
     assertFalse( member.nullable );
-    assertTrue( member instanceof FieldNode );
+    assertTrue( member instanceof JsonScalarNode );
     
     // List with Nulls
     
@@ -231,13 +231,13 @@ public class TestObjectParser {
     assertEquals( "l", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    member = ((ArrayNode) child).member;
+    member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.STRING, member.type );
     assertTrue( member.nullable );
-    assertTrue( member instanceof FieldNode );
+    assertTrue( member instanceof JsonScalarNode );
     
     // Nested lists, leaf nulls
     
@@ -245,19 +245,19 @@ public class TestObjectParser {
     assertEquals( "m", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    member = ((ArrayNode) child).member;
+    member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.LIST, member.type );
     assertFalse( member.nullable );
-    assertTrue( member instanceof ArrayNode );
+    assertTrue( member instanceof JsonArrayNode );
     
-    member2 = ((ArrayNode) member).member;
+    member2 = ((JsonArrayNode) member).member;
     assertNull( member2.name );
     assertEquals( DataType.STRING, member2.type );
     assertTrue( member2.nullable );
-    assertTrue( member2 instanceof FieldNode );
+    assertTrue( member2 instanceof JsonScalarNode );
     
     // Nested lists, leaf variant
     
@@ -265,19 +265,19 @@ public class TestObjectParser {
     assertEquals( "n", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    member = ((ArrayNode) child).member;
+    member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.LIST, member.type );
     assertFalse( member.nullable );
-    assertTrue( member instanceof ArrayNode );
+    assertTrue( member instanceof JsonArrayNode );
     
-    member2 = ((ArrayNode) member).member;
+    member2 = ((JsonArrayNode) member).member;
     assertNull( member2.name );
     assertEquals( DataType.VARIANT, member2.type );
     assertFalse( member2.nullable );
-    assertTrue( member2 instanceof FieldNode );
+    assertTrue( member2 instanceof JsonScalarNode );
     
     // Nested lists, with null lists
     
@@ -285,19 +285,19 @@ public class TestObjectParser {
     assertEquals( "o", child.name );
     assertEquals( DataType.LIST, child.type );
     assertFalse( child.nullable );
-    assertTrue( child instanceof ArrayNode );
+    assertTrue( child instanceof JsonArrayNode );
     
-    member = ((ArrayNode) child).member;
+    member = ((JsonArrayNode) child).member;
     assertNull( member.name );
     assertEquals( DataType.LIST, member.type );
     assertTrue( member.nullable );
-    assertTrue( member instanceof ArrayNode );
+    assertTrue( member instanceof JsonArrayNode );
     
-    member2 = ((ArrayNode) member).member;
+    member2 = ((JsonArrayNode) member).member;
     assertNull( member2.name );
     assertEquals( DataType.STRING, member2.type );
     assertFalse( member2.nullable );
-    assertTrue( member2 instanceof FieldNode );   
+    assertTrue( member2 instanceof JsonScalarNode );   
   }
   
   @Test
@@ -321,9 +321,9 @@ public class TestObjectParser {
         .build( );
     
     ObjectParser parser = new ObjectParser( new FieldValueFactory( ) );
-    TupleNode tuple1 = parser.parseObject( obj1 );
-    TupleNode tuple2 = parser.parseObject( obj2 );
-    TupleNode tuple3 = tuple1.mergeTuple( tuple2 );
+    JsonObjectNode tuple1 = parser.parseObject( obj1 );
+    JsonObjectNode tuple2 = parser.parseObject( obj2 );
+    JsonObjectNode tuple3 = tuple1.mergeTuple( tuple2 );
     
     assertEquals( 8, tuple3.children.size() );
     assertEquals( "w", tuple3.children.get( 0 ).name );

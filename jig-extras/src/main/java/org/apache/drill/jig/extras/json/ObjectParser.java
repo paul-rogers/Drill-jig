@@ -17,17 +17,24 @@ import org.apache.drill.jig.types.FieldValueFactory;
 
 public class ObjectParser {
   
-  public abstract class SchemaNode {
+  public enum JsonNodeType { OBJECT, ARRAY, SCALAR };
+  
+  /**
+   * Represents a logical description of one aspect of a schema inferred
+   * from a set of JSON nodes. Focuses on the JSON structure itself.
+   */
+  
+  public abstract class JsonSchemaNode {
     public DataType type;   
     public String name;
     public boolean nullable = false;
     
-    public SchemaNode( DataType type ) {
+    public JsonSchemaNode( DataType type ) {
       this.type = type;
       nullable = type == DataType.NULL;
     }
     
-    public SchemaNode merge(SchemaNode other, FieldValueFactory factory) {
+    public JsonSchemaNode merge(JsonSchemaNode other, FieldValueFactory factory) {
       if ( other.type == DataType.UNDEFINED )
         return this;
       if ( this.type == DataType.UNDEFINED )
@@ -43,30 +50,40 @@ public class ObjectParser {
       if ( this.getClass() != other.getClass() ) {
         throw new ValueConversionError( "Incompatible types: " + type  + " and " +other.type );
       }
-      SchemaNode result = doMerge( other, factory );
+      JsonSchemaNode result = doMerge( other, factory );
       result.nullable |= other.nullable;
       return result;                       
     }
 
-    protected abstract SchemaNode doMerge(SchemaNode other, FieldValueFactory factory);
+    protected abstract JsonSchemaNode doMerge(JsonSchemaNode other, FieldValueFactory factory);
+    public abstract JsonNodeType nodeType( );
   }
 
-  public class TupleNode extends SchemaNode {
-    List<SchemaNode> children = new ArrayList<>( );
+  /**
+   * Represents an inferred JSON object. This is the union of all JSON
+   * objects seen in the input set. That is, if the first object is
+   * <code>{ a: 10 }<code>, and the second is <code>{ "b": "foo" }</code>
+   * then the inferred schema is ( a: number, nullable, b: string, nullable ).
+   */
+  
+  // TODO: Detect missing fields & set them nullable
+  
+  public class JsonObjectNode extends JsonSchemaNode {
+    List<JsonSchemaNode> children = new ArrayList<>( );
 
-    public TupleNode( ) {
+    public JsonObjectNode( ) {
       super(DataType.TUPLE);
     }
 
     @Override
-    public SchemaNode doMerge(SchemaNode other, FieldValueFactory factory) {
-      if ( ! ( other instanceof FieldNode ) ) {
+    public JsonSchemaNode doMerge(JsonSchemaNode other, FieldValueFactory factory) {
+      if ( ! ( other instanceof JsonScalarNode ) ) {
         throw new ValueConversionError( "Incompatible types: " + type  + " and " +other.type );
       }
-      return mergeTuple( (TupleNode) other );
+      return mergeTuple( (JsonObjectNode) other );
     }
 
-    public TupleNode mergeTuple(TupleNode other) {
+    public JsonObjectNode mergeTuple(JsonObjectNode other) {
       
       // Build a name-to-position index for the other tuple.
       
@@ -94,10 +111,10 @@ public class ObjectParser {
       
       // Build the merged schema.
       
-      List<SchemaNode> merged = new ArrayList<>( );
+      List<JsonSchemaNode> merged = new ArrayList<>( );
       int copyIndex = 0;
       for ( int i = 0;  i < children.size( );  i++ ) {
-        SchemaNode child = children.get( i );
+        JsonSchemaNode child = children.get( i );
         int matchIndex = matches[i];
         
         // If this node has a match, Then insert all unmatched other
@@ -128,33 +145,58 @@ public class ObjectParser {
       children = merged;
       return this;
     }
+
+    @Override
+    public JsonNodeType nodeType() {
+      return JsonNodeType.OBJECT;
+    }
   }
   
-  public class FieldNode extends SchemaNode {
+  /**
+   * Describes a JSON scalar value (null, boolean, number or string.)
+   */
+  
+  public class JsonScalarNode extends JsonSchemaNode {
     
-    public FieldNode( DataType type ) {
+    public JsonScalarNode( DataType type ) {
       super( type );
     }
 
     @Override
-    public SchemaNode doMerge(SchemaNode other, FieldValueFactory factory) {
-      type = factory.mergeTypes( type, ((FieldNode) other).type );
+    public JsonSchemaNode doMerge(JsonSchemaNode other, FieldValueFactory factory) {
+      type = factory.mergeTypes( type, ((JsonScalarNode) other).type );
       return this;
+    }
+
+    @Override
+    public JsonNodeType nodeType() {
+      return JsonNodeType.SCALAR;
     }
   }
   
-  public class ArrayNode extends SchemaNode {
-    SchemaNode member;
+  /**
+   * Describes a JSON array, including its inferred member type. The member
+   * type can be {@link DataType#UNDEFINED UNDEFINED} if all instances of the
+   * sampled array are empty.
+   */
+  
+  public class JsonArrayNode extends JsonSchemaNode {
+    JsonSchemaNode member;
     
-    public ArrayNode( SchemaNode member ) {
+    public JsonArrayNode( JsonSchemaNode member ) {
       super(DataType.LIST);
       this.member = member;
     }
 
     @Override
-    public SchemaNode doMerge(SchemaNode other, FieldValueFactory factory) {
-      member = member.merge( ((ArrayNode) other).member, factory);
+    public JsonSchemaNode doMerge(JsonSchemaNode other, FieldValueFactory factory) {
+      member = member.merge( ((JsonArrayNode) other).member, factory);
       return this;
+    }
+
+    @Override
+    public JsonNodeType nodeType() {
+      return JsonNodeType.ARRAY;
     }
   }
   
@@ -164,37 +206,39 @@ public class ObjectParser {
     this.factory = factory;
   }
 
-  public TupleNode parseObject( JsonObject obj ) {
-    TupleNode tuple = new TupleNode( );
+  public JsonObjectNode parseObject( JsonObject obj ) {
+    JsonObjectNode tuple = new JsonObjectNode( );
     for ( String key : obj.keySet() ) {
       JsonValue value = obj.get( key );
-      SchemaNode child = parseValue( value );
+      JsonSchemaNode child = parseValue( value );
       child.name = key;
       tuple.children.add( child );
     }
     return tuple;
   }
   
-  private SchemaNode parseValue(JsonValue value) {
+  private JsonSchemaNode parseValue(JsonValue value) {
     DataType type = parseType( value );
-    SchemaNode child;
+    JsonSchemaNode child;
     if ( type == DataType.TUPLE ) {
       child = parseObject( (JsonObject) value );
     } else if ( type == DataType.LIST ) {
       child = buildArray( (JsonArray) value );
     } else {
-      child = new FieldNode( type );
+      child = new JsonScalarNode( type );
     }
     return child;
   }
 
   public static DataType parseType( JsonValue value ) {
+    if ( value == null )
+      return DataType.NULL;
     switch ( value.getValueType() ) {
     case TRUE:
     case FALSE:
       return DataType.BOOLEAN;
     case NULL:
-      return DataType.VARIANT;
+      return DataType.NULL;
     case NUMBER:
       JsonNumber number = (JsonNumber) value;
       if ( number.isIntegral() ) {
@@ -214,11 +258,11 @@ public class ObjectParser {
     }
   }
 
-  private SchemaNode buildArray(JsonArray array) {
-    SchemaNode member = null;
+  private JsonSchemaNode buildArray(JsonArray array) {
+    JsonSchemaNode member = null;
     for ( int i = 0;  i < array.size( );  i++ ) {
       JsonValue value = array.get( i );
-      SchemaNode thisMember = parseValue( value );
+      JsonSchemaNode thisMember = parseValue( value );
       if ( member == null ) {
         member = thisMember;
       } else {
@@ -226,8 +270,8 @@ public class ObjectParser {
       }
     }
     if ( member == null ) {
-      member = new FieldNode( DataType.UNDEFINED );
+      member = new JsonScalarNode( DataType.UNDEFINED );
     }
-    return new ArrayNode( member );
+    return new JsonArrayNode( member );
   }
 }

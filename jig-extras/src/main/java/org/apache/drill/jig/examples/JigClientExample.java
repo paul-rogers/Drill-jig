@@ -120,7 +120,7 @@ public class JigClientExample {
       // Not pretty or efficient, but fine for an example.
       
       while ( tupleSet.next() ) {
-        TupleValue tuple = tupleSet.getTuple();
+        TupleValue tuple = tupleSet.tuple();
         for ( int i = 0; i < n;  i++ ) {
           if ( i > 0 ) System.out.print( ", " );
           System.out.print(

@@ -63,7 +63,7 @@ public class TestLists {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareLists( list1, array );
@@ -71,7 +71,7 @@ public class TestLists {
     assertEquals( list1.get( 0 ), array.get(0).getString() );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     Helpers.compareLists( list2, tuple.field( 0 ).getArray() );
     
     assertFalse( tupleSet.next() );
@@ -114,7 +114,7 @@ public class TestLists {
     assertTrue( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareLists( list1, array );
     
@@ -158,12 +158,12 @@ public class TestLists {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     ArrayValue array = tuple.field( 0 ).getArray();
     Helpers.compareLists( list1, array );  
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -203,7 +203,7 @@ public class TestLists {
     assertFalse( member.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( DataType.LIST, tuple.field( 0 ).type() );
     ArrayValue array = tuple.field( 0 ).getArray();
     assertEquals( 0, array.size() );

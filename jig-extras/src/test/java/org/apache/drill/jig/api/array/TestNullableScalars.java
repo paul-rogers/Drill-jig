@@ -38,12 +38,12 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertTrue( tuple.field( 0 ).getBoolean() );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -70,12 +70,12 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -102,12 +102,12 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -135,12 +135,12 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( (int) 10, tuple.field( 0 ).getInt( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -167,11 +167,11 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( (long) 10, tuple.field( 0 ).getLong( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -198,12 +198,12 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( (float) 10, tuple.field( 0 ).getFloat( ), 0.001 );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -230,11 +230,11 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertEquals( (double) 10, tuple.field( 0 ).getDouble( ), 0.001 );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );
@@ -261,12 +261,12 @@ public class TestNullableScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( "str", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     
     assertFalse( tupleSet.next() );

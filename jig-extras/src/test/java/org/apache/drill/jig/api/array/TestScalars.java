@@ -39,7 +39,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.BOOLEAN, tuple.field( 0 ).type() );
     assertTrue( tuple.field( 0 ).getBoolean() );
@@ -53,7 +53,7 @@ public class TestScalars {
     assertEquals( "true", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 0, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 0, tuple.field( 0 ).getShort( ) );
@@ -89,7 +89,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.INT8, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -103,7 +103,7 @@ public class TestScalars {
     assertEquals( "0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -140,7 +140,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.INT16, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -154,7 +154,7 @@ public class TestScalars {
     assertEquals( "0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -166,7 +166,7 @@ public class TestScalars {
     assertEquals( "10", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( Short.MAX_VALUE, tuple.field( 0 ).getShort( ) );
      
     assertFalse( tupleSet.next() );
@@ -196,7 +196,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.INT32, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -210,7 +210,7 @@ public class TestScalars {
     assertEquals( "0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -222,7 +222,7 @@ public class TestScalars {
     assertEquals( "10", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( Integer.MAX_VALUE, tuple.field( 0 ).getInt( ) );
     
     assertFalse( tupleSet.next() );
@@ -251,7 +251,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.INT64, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -265,7 +265,7 @@ public class TestScalars {
     assertEquals( "0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -277,7 +277,7 @@ public class TestScalars {
     assertEquals( "10", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( Long.MAX_VALUE, tuple.field( 0 ).getLong( ) );
     
     assertFalse( tupleSet.next() );
@@ -306,7 +306,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.FLOAT32, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -320,7 +320,7 @@ public class TestScalars {
     assertEquals( "0.0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -332,7 +332,7 @@ public class TestScalars {
     assertEquals( "10.0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( 22.5f, tuple.field( 0 ).getFloat( ), 0.001 );
     assertEquals( 23, tuple.field( 0 ).getInt( ) );
     
@@ -362,7 +362,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.FLOAT64, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -376,7 +376,7 @@ public class TestScalars {
     assertEquals( "0.0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -388,7 +388,7 @@ public class TestScalars {
     assertEquals( "10.0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( 22.5d, tuple.field( 0 ).getDouble( ), 0.001 );
     assertEquals( 23, tuple.field( 0 ).getInt( ) );
     
@@ -417,7 +417,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.DECIMAL, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -431,7 +431,7 @@ public class TestScalars {
     assertEquals( "0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -468,7 +468,7 @@ public class TestScalars {
     assertFalse( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).isNull() );
     assertEquals( DataType.STRING, tuple.field( 0 ).type() );
     assertFalse( tuple.field( 0 ).getBoolean() );
@@ -482,7 +482,7 @@ public class TestScalars {
     assertEquals( "0", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertFalse( tuple.field( 0 ).getBoolean() );
     assertEquals( (byte) 10, tuple.field( 0 ).getByte( ) );
     assertEquals( (short) 10, tuple.field( 0 ).getShort( ) );
@@ -494,7 +494,7 @@ public class TestScalars {
     assertEquals( "10", tuple.field( 0 ).getString( ) );
     
     assertTrue( tupleSet.next() );
-    tuple = tupleSet.getTuple();
+    tuple = tupleSet.tuple();
     assertEquals( "true", tuple.field( 0 ).getString( ) );
     assertTrue( tuple.field( 0 ).getBoolean( ) );
     
@@ -522,7 +522,7 @@ public class TestScalars {
     assertTrue( field.nullable() );
     
     assertTrue( tupleSet.next() );
-    TupleValue tuple = tupleSet.getTuple();
+    TupleValue tuple = tupleSet.tuple();
     assertTrue( tuple.field( 0 ).isNull() );
     assertEquals( DataType.NULL, tuple.field( 0 ).type() );
     

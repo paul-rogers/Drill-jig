@@ -53,7 +53,7 @@ public class DrillResultCollection implements ResultCollection
     }
 
     @Override
-    public TupleValue getTuple() {
+    public TupleValue tuple() {
       return tuple;
     }
 

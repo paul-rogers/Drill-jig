@@ -49,9 +49,9 @@ public class TestDirectJsonData
   public static void validateTupleSet(TupleSet tuples) throws JigException
   {
     assertTrue( tuples.next() );
-    validateTuple1( tuples.getTuple() );    
+    validateTuple1( tuples.tuple() );    
     assertTrue( tuples.next() );
-    validateTuple2( tuples.getTuple() );
+    validateTuple2( tuples.tuple() );
     assertFalse( tuples.next( ) );
   }
 
@@ -165,7 +165,7 @@ public class TestDirectJsonData
     TupleSet tuples = scanner.getTuples( );
     
     assertTrue( tuples.next() );
-    TupleValue tuple = tuples.getTuple();
+    TupleValue tuple = tuples.tuple();
     {
       FieldValue field = tuple.field("index");
       assertEquals( 1, field.asScalar( ).getInt() );

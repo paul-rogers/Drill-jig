@@ -33,7 +33,7 @@ public class SimpleSerdeTest
     TupleSetSerializer serializer = new TupleSetSerializer( tuples.schema() );
     serializer.serializeSchema( buf );
     while ( tuples.next() ) {
-      serializer.serializeTuple( buf, tuples.getTuple() );
+      serializer.serializeTuple( buf, tuples.tuple() );
     }
   }
 

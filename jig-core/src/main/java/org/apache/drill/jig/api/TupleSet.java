@@ -32,5 +32,5 @@ public interface TupleSet
   TupleSchema schema( );
   int getIndex( );
   boolean next( ) throws JigException;
-  TupleValue getTuple( );
+  TupleValue tuple( );
 }
