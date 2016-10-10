@@ -201,9 +201,22 @@ public class ObjectParser {
   }
   
   private FieldValueFactory factory;
+  private JsonObjectNode jsonSchema;
   
   public ObjectParser( FieldValueFactory factory ) {
     this.factory = factory;
+  }
+  
+  public void addObject( JsonObject obj ) {
+    JsonObjectNode thisSchema = parseObject( obj );
+    if ( jsonSchema == null )
+      jsonSchema = thisSchema;
+    else
+      jsonSchema = jsonSchema.mergeTuple( thisSchema );
+  }
+  
+  public JsonObjectNode getJsonSchema( ) {
+    return jsonSchema;
   }
 
   public JsonObjectNode parseObject( JsonObject obj ) {

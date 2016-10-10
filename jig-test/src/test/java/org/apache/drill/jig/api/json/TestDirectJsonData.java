@@ -19,7 +19,7 @@ import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.exception.ValueConversionError;
-import org.apache.drill.jig.extras.json.JsonScanner;
+import org.apache.drill.jig.extras.json.JsonResultCollection;
 import org.junit.Test;
 
 public class TestDirectJsonData
@@ -27,18 +27,18 @@ public class TestDirectJsonData
   @Test
   public void testFlatSchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "flat.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     validateFlatData( scanner );
   }
   
   @Test
   public void testFlatArraySchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "flatArray.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     validateFlatData( scanner );
   }
 
-  private void validateFlatData(JsonScanner scanner) throws Exception {
+  private void validateFlatData(JsonResultCollection scanner) throws Exception {
     assertTrue( scanner.next( ) );
     validateTupleSet( scanner.getTuples( ) );
     
@@ -160,7 +160,7 @@ public class TestDirectJsonData
   @Test
   public void testArraySchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "array.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     assertTrue( scanner.next( ) );
     TupleSet tuples = scanner.getTuples( );
     

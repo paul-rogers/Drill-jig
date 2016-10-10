@@ -1,6 +1,7 @@
 package org.apache.drill.jig.extras.json;
 
 import java.io.Reader;
+import java.io.StringReader;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -17,7 +18,7 @@ import org.apache.drill.jig.extras.json.reader.JsonScannerException;
 import org.apache.drill.jig.extras.json.reader.NullRecordReader;
 import org.glassfish.json.CustomJsonReader;
 
-public class JsonScanner implements AutoCloseable, ResultCollection
+public class JsonResultCollection implements AutoCloseable, ResultCollection
 {
   private final BufferingTupleReader recordReader;
   private int tupleSetIndex = -1;
@@ -25,7 +26,7 @@ public class JsonScanner implements AutoCloseable, ResultCollection
   private JsonTupleSet tupleSet;
   
   @SuppressWarnings("resource")
-  public JsonScanner( Reader in ) throws JsonScannerException {
+  public JsonResultCollection( Reader in ) {
     JsonReader reader = new CustomJsonReader( in );
     JsonStructure struct;
     struct = reader.read();
@@ -50,6 +51,10 @@ public class JsonScanner implements AutoCloseable, ResultCollection
     }  
   }
   
+  public JsonResultCollection( String input ) {
+    this( new StringReader( input ) );
+  }
+  
   @Override
   public int getIndex() {
     return tupleSetIndex;
@@ -72,9 +77,9 @@ public class JsonScanner implements AutoCloseable, ResultCollection
     }
     else {
       tupleSetIndex++;
-      JsonTupleSet oldSet = tupleSet;
+//      JsonTupleSet oldSet = tupleSet;
       tupleSet = new JsonTupleSet( recordReader );
-      tupleSet.evolveSchema( oldSet.inputSchema );
+//      tupleSet.evolveSchema( oldSet.inputSchema );
     }
     return true;
   }

@@ -21,6 +21,24 @@ import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.types.FieldValueFactory;
 import org.apache.drill.jig.types.NullAccessor;
 
+/**
+ * Builds a set of accessors to translate a JSON object of a particular schema
+ * into the Jig API format.
+ * <ul>
+ * <li>A JSON object represents the tuple.<li>
+ * <li>The member of the tuple object represent fields. Fields are accessed
+ * by key in the tuple objects. Fields may be either non-existent or a JSON
+ * NULL value; both are treated as a null value (and the field schema must
+ * be nullable.)</li>
+ * <li>A simple JSON value is represented as a Jig scalar.</li>
+ * <li>A JSON array is represented as a Jig List.</li>
+ * <li>Non-root tuples can be represented either as a Jig map, or flattened
+ * <li>into the root tuple. In this case, a name of form "a.b" means the
+ * value a in the root tuple object (which must be a JSON object), then
+ * the value b in the nested object.</li>
+ * </ul>
+ */
+
 public class SchemaBuilder3 {
 
   public static class Context {
@@ -333,6 +351,10 @@ public class SchemaBuilder3 {
       values[i] = fieldDefs[i].container;
     }
     return new FieldValueContainerSet( values );
+  }
+
+  public TupleObjectAccessor rootAccessor() {
+    return (TupleObjectAccessor) tuple.accessor;
   }
   
 }

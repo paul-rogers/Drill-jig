@@ -13,7 +13,7 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
-import org.apache.drill.jig.extras.json.JsonScanner;
+import org.apache.drill.jig.extras.json.JsonResultCollection;
 import org.junit.Test;
 
 public class TestDirectJsonSchema
@@ -21,7 +21,7 @@ public class TestDirectJsonSchema
   @Test
   public void testEmptySchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "empty.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     assertFalse( scanner.next( ) );
     scanner.close( );
   }
@@ -29,18 +29,18 @@ public class TestDirectJsonSchema
   @Test
   public void testFlatSchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "flat.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     validateFlatSchema( scanner );
   }
   
   @Test
   public void testFlatArraySchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "flatArray.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     validateFlatSchema( scanner );
   }
   
-  public void validateFlatSchema( JsonScanner scanner ) throws Exception
+  public void validateFlatSchema( JsonResultCollection scanner ) throws Exception
   {
     assertTrue( scanner.next( ) );
     TupleSet tuples = scanner.getTuples( );
@@ -118,7 +118,7 @@ public class TestDirectJsonSchema
   @Test
   public void testArraySchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "array.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     assertTrue( scanner.next( ) );
     TupleSet tuples = scanner.getTuples( );
     TupleSchema schema = tuples.schema( );
@@ -192,7 +192,7 @@ public class TestDirectJsonSchema
   @Test
   public void testMapSchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "map.json" );
-    JsonScanner scanner = new JsonScanner( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     assertTrue( scanner.next( ) );
     TupleSet tuples = scanner.getTuples( );
     TupleSchema schema = tuples.schema( );
