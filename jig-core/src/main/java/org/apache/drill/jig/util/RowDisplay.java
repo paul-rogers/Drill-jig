@@ -28,7 +28,7 @@ public class RowDisplay
   
   public static void printResults( ResultCollection results, PrintWriter out ) throws JigException {
     while( results.next() ) {
-      TupleSet tupleSet = results.getTuples();
+      TupleSet tupleSet = results.tuples();
       RowDisplay.printSchema( tupleSet.schema(), out );
       while ( tupleSet.next() )
         RowDisplay.printRow( tupleSet.tuple(), out );

@@ -77,7 +77,7 @@ public class ObjectParser {
 
     @Override
     public JsonSchemaNode doMerge(JsonSchemaNode other, FieldValueFactory factory) {
-      if ( ! ( other instanceof JsonScalarNode ) ) {
+      if ( ! ( other instanceof JsonObjectNode ) ) {
         throw new ValueConversionError( "Incompatible types: " + type  + " and " +other.type );
       }
       return mergeTuple( (JsonObjectNode) other );

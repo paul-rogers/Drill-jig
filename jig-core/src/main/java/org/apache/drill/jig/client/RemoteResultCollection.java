@@ -110,7 +110,7 @@ public class RemoteResultCollection implements ResultCollection
   }
 
   @Override
-  public int getIndex() {
+  public int index() {
     return tupleSetIndex;
   }
 
@@ -219,7 +219,7 @@ public class RemoteResultCollection implements ResultCollection
   }
 
   @Override
-  public TupleSet getTuples() {
+  public TupleSet tuples() {
     switch ( state ) {
     case END_OF_BUFFER:
     case ROWS:

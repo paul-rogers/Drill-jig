@@ -26,7 +26,7 @@ public class ArrayResultCollection implements ResultCollection {
   }
 
   @Override
-  public int getIndex() {
+  public int index() {
     return index;
   }
 
@@ -42,7 +42,7 @@ public class ArrayResultCollection implements ResultCollection {
   }
 
   @Override
-  public TupleSet getTuples() {
+  public TupleSet tuples() {
     return tupleSet;
   }
 

@@ -162,7 +162,7 @@ public TupleValue tuple() {
     return tuple;
   }
 
-  public void inferSchema() {
+  public void inferSchema(boolean flatten) {
     ObjectParser parser = new ObjectParser( factory );
     @SuppressWarnings("resource")
     CapturingTupleReader captureReader = new CapturingTupleReader( recordReader );
@@ -175,10 +175,11 @@ public TupleValue tuple() {
         }
         break;
       }
-      parser.parseObject( obj );
+      parser.addObject( obj );
     }
     inputSchema = parser.getJsonSchema( );
     SchemaBuilder3 schemaBuilder = new SchemaBuilder3( inputSchema );
+    schemaBuilder.flatten( flatten );
     TupleSchema schema = schemaBuilder.build( );
     FieldValueContainerSet container = schemaBuilder.fieldValues( );
     TupleObjectAccessor tupleAccessor = schemaBuilder.rootAccessor( );

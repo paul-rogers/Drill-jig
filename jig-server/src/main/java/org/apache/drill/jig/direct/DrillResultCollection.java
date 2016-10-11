@@ -116,7 +116,7 @@ public class DrillResultCollection implements ResultCollection
   }
 
   @Override
-  public int getIndex() {
+  public int index() {
     return reader.getBatchIndex();
   }
 
@@ -153,7 +153,7 @@ public class DrillResultCollection implements ResultCollection
   }
 
   @Override
-  public TupleSet getTuples() {
+  public TupleSet tuples() {
     if ( state == State.SCHEMA_CHANGE  ||  state == State.ROWS ) {
       tupleSet.reset( );
       return tupleSet;

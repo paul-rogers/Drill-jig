@@ -33,10 +33,10 @@ public class TestArrayImpl {
     };
     
     ArrayResultCollection results = new ArrayResultCollection( batches );
-    assertEquals( -1, results.getIndex() );
+    assertEquals( -1, results.index() );
     assertTrue( results.next() );
-    assertEquals( 0, results.getIndex() );
-    TupleSet tupleSet = results.getTuples();
+    assertEquals( 0, results.index() );
+    TupleSet tupleSet = results.tuples();
     assertNotNull( tupleSet );
     assertEquals( -1, tupleSet.getIndex() );
     TupleSchema schema = tupleSet.schema();
@@ -95,7 +95,7 @@ public class TestArrayImpl {
   
   public static void validateTypesResults( ResultCollection results ) throws JigException {
     assertTrue( results.next( ) );
-    TupleSet tuples = results.getTuples();
+    TupleSet tuples = results.tuples();
     assertTrue( tuples.next() );
     TupleValue tuple = tuples.tuple();
     assertEquals( "first", tuple.field( 0 ).getString() );

@@ -40,7 +40,7 @@ public class TestDirectJsonData
 
   private void validateFlatData(JsonResultCollection scanner) throws Exception {
     assertTrue( scanner.next( ) );
-    validateTupleSet( scanner.getTuples( ) );
+    validateTupleSet( scanner.tuples( ) );
     
     assertFalse( scanner.next( ) );
     scanner.close( );
@@ -162,7 +162,7 @@ public class TestDirectJsonData
     InputStream in = getClass( ).getResourceAsStream( "array.json" );
     JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     assertTrue( scanner.next( ) );
-    TupleSet tuples = scanner.getTuples( );
+    TupleSet tuples = scanner.tuples( );
     
     assertTrue( tuples.next() );
     TupleValue tuple = tuples.tuple();

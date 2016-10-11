@@ -21,42 +21,61 @@ import org.glassfish.json.CustomJsonReader;
 public class JsonResultCollection implements AutoCloseable, ResultCollection
 {
   private final BufferingTupleReader recordReader;
+  private final boolean flatten;
   private int tupleSetIndex = -1;
   private boolean isEof;
   private JsonTupleSet tupleSet;
   
-  @SuppressWarnings("resource")
   public JsonResultCollection( Reader in ) {
+    recordReader = prepareReader( in );
+    flatten = false;
+  }
+  
+  @SuppressWarnings("resource")
+  private BufferingTupleReader prepareReader( Reader in ) {
+    BufferingTupleReader objectReader;
     JsonReader reader = new CustomJsonReader( in );
     JsonStructure struct;
     struct = reader.read();
     if ( struct == null ) {
-      recordReader = new BufferingTupleReader( new NullRecordReader( ) );
+      objectReader = new BufferingTupleReader( new NullRecordReader( ) );
       reader.close( );
       isEof = true;
     }
     else if ( struct.getValueType() == ValueType.ARRAY ) {
-      recordReader = new BufferingTupleReader( 
+      objectReader = new BufferingTupleReader( 
           new JsonArrayReader( (JsonArray) struct ) );
       reader.close( );
     }
     else if ( struct.getValueType() == ValueType.OBJECT ) {
-      recordReader = new BufferingTupleReader( new JsonRecordReader( reader ) );
-      recordReader.push( (JsonObject) struct );
+      objectReader = new BufferingTupleReader( new JsonRecordReader( reader ) );
+      objectReader.push( (JsonObject) struct );
     }
     else {
       throw new JsonScannerException( "Found unexpected JSON type " +
           struct.getValueType( ).toString() +
           " for first tuple" );
-    }  
+    }
+    return objectReader;
   }
   
   public JsonResultCollection( String input ) {
     this( new StringReader( input ) );
   }
   
+  public JsonResultCollection(
+      JsonResultCollectionBuilder builder) {
+    if ( builder.reader != null )
+      recordReader = prepareReader( builder.reader );
+    else if ( builder.input != null )
+      recordReader = prepareReader( new StringReader( builder.input ) );
+    else
+      throw new IllegalArgumentException( "Reader or string required." );
+    flatten = builder.flatten;
+  }
+
   @Override
-  public int getIndex() {
+  public int index() {
     return tupleSetIndex;
   }
 
@@ -68,7 +87,7 @@ public class JsonResultCollection implements AutoCloseable, ResultCollection
     if ( tupleSet == null ) {
       tupleSetIndex++;
       tupleSet = new JsonTupleSet( recordReader );
-      tupleSet.inferSchema( );
+      tupleSet.inferSchema( flatten );
     }
     else if ( tupleSet.isEOF() ) {
       tupleSet = null;
@@ -85,7 +104,7 @@ public class JsonResultCollection implements AutoCloseable, ResultCollection
   }
 
   @Override
-  public TupleSet getTuples() {
+  public TupleSet tuples() {
     return tupleSet;
   }
 

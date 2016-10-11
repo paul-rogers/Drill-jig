@@ -10,9 +10,9 @@ import org.apache.drill.jig.exception.JigException;
 
 public interface ResultCollection extends AutoCloseable
 {
-  int getIndex( );
+  int index( );
   boolean next( ) throws JigException;
-  TupleSet getTuples( );
+  TupleSet tuples( );
   @Override
   void close( ) throws JigException;
 }

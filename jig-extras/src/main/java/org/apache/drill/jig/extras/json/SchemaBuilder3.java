@@ -73,6 +73,7 @@ public class SchemaBuilder3 {
     protected abstract FieldSchemaImpl defineField( Context context );
     public abstract void buildAccessor( ObjectAccessor input );
     public abstract void buildDef( );
+    public abstract JsonSchemaNode getJsonNode( );
     
     public void collectFields(DataDef[] fieldDefs) {
       fieldDefs[fieldSchema.index()] = defn;
@@ -104,6 +105,11 @@ public class SchemaBuilder3 {
         node.collectFields( fieldDefs );
       }
     }
+
+    @Override
+    public JsonSchemaNode getJsonNode() {
+      return jsonNode;
+    }
   }
   
   public class TupleNode extends ObjectNode {
@@ -130,7 +136,8 @@ public class SchemaBuilder3 {
       ObjectAccessor tupleAccessor = new TupleObjectAccessor( );
       accessor = tupleAccessor;
       for ( SchemaNode node : children ) {
-        node.buildAccessor( tupleAccessor );
+        ObjectAccessor memberAccessor = new JsonObjectMemberAccessor( tupleAccessor, node.getJsonNode( ).name );
+        node.buildAccessor( memberAccessor );
       }
     }
   }
@@ -156,10 +163,10 @@ public class SchemaBuilder3 {
 
     @Override
     public void buildAccessor(ObjectAccessor input) {
-      ObjectAccessor hiddenAccessor = new JsonObjectMemberAccessor( input, jsonNode.name );
-      accessor = hiddenAccessor;
+      accessor = input;
       for ( SchemaNode node : children ) {
-        node.buildAccessor( hiddenAccessor );
+        ObjectAccessor memberAccessor = new JsonObjectMemberAccessor( input, node.getJsonNode( ).name );
+        node.buildAccessor( memberAccessor );
       }
     }
 
@@ -201,6 +208,11 @@ public class SchemaBuilder3 {
     public void buildDef( ) {
       defn = new MapDef( fieldSchema.nullable(), (MapValueAccessor) accessor );
     }
+
+    @Override
+    public JsonSchemaNode getJsonNode() {
+      return jsonNode;
+    }
   }
   
   public class ArrayNode extends SchemaNode {
@@ -239,6 +251,11 @@ public class SchemaBuilder3 {
       member.buildDef( );
       defn = new ListDef( fieldSchema.nullable(), member.defn, (ArrayAccessor) accessor );
     }
+
+    @Override
+    public JsonSchemaNode getJsonNode() {
+      return jsonNode;
+    }
   }
   
   public class ScalarNode extends SchemaNode {
@@ -273,6 +290,11 @@ public class SchemaBuilder3 {
     @Override
     public void buildDef( ) {
       defn = new ScalarDef( fieldSchema.type(), fieldSchema.nullable(), accessor );
+    }
+
+    @Override
+    public JsonSchemaNode getJsonNode() {
+      return jsonNode;
     }
   }
 

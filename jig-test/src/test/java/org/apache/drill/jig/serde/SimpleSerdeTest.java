@@ -17,7 +17,7 @@ public class SimpleSerdeTest
   public void testScalar() throws Exception {
     ArrayResultCollection results = new ArrayResultCollection( TestArrayImpl.makeTypesBatch( ) );
     assertTrue( results.next( ) );
-    TupleSet tuples = results.getTuples( );    
+    TupleSet tuples = results.tuples( );    
 
     ByteBuffer buf = ByteBuffer.allocate( 4096 );
     loadBuffer( tuples, buf );

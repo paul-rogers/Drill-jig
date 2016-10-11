@@ -65,7 +65,7 @@ public class QuerySerializer
     case SCHEMA:
     case START:
       if ( results.next() ) {
-        tupleSet = results.getTuples();
+        tupleSet = results.tuples();
         return schemaResponse( );
       }
       

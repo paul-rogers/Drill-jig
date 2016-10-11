@@ -44,7 +44,7 @@ public class JigJdbcStatement implements Statement
       results = stmt.execute();
       if ( ! results.next() )
         return null;
-      resultSet = new JigJdbcResultSet( this, results.getTuples() );
+      resultSet = new JigJdbcResultSet( this, results.tuples() );
       conn.startResultSet( this );
       return resultSet;
     } catch (JigException e) {
@@ -180,7 +180,7 @@ public class JigJdbcStatement implements Statement
       close( );
       throw translateException( e );
     }
-    resultSet = new JigJdbcResultSet( this, results.getTuples() );
+    resultSet = new JigJdbcResultSet( this, results.tuples() );
     return true;
   }
 

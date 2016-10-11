@@ -52,7 +52,7 @@ public class SimpleBufferResultSet implements ResultCollection
   }
   
   @Override
-  public int getIndex() {
+  public int index() {
     return tupleSetIndex;
   }
 
@@ -68,7 +68,7 @@ public class SimpleBufferResultSet implements ResultCollection
   }
 
   @Override
-  public TupleSet getTuples() {
+  public TupleSet tuples() {
     return tupleSet;
   }
 

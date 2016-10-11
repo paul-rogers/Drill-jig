@@ -41,7 +41,7 @@ public class TestNestedLists {
     
     ResultCollection results = new ArrayResultCollection( batch );
     assertTrue( results.next() );
-    TupleSet tupleSet = results.getTuples();
+    TupleSet tupleSet = results.tuples();
     
     TupleSchema schema = tupleSet.schema();
     FieldSchema field = schema.field( 0 );
@@ -93,7 +93,7 @@ public class TestNestedLists {
     
     ResultCollection results = new ArrayResultCollection( batch );
     assertTrue( results.next() );
-    TupleSet tupleSet = results.getTuples();
+    TupleSet tupleSet = results.tuples();
     
     TupleSchema schema = tupleSet.schema();
     FieldSchema field = schema.field( 0 );
@@ -149,7 +149,7 @@ public class TestNestedLists {
     
     ResultCollection results = new ArrayResultCollection( batch );
     assertTrue( results.next() );
-    TupleSet tupleSet = results.getTuples();
+    TupleSet tupleSet = results.tuples();
     
     TupleSchema schema = tupleSet.schema();
     FieldSchema field = schema.field( 0 );
@@ -201,7 +201,7 @@ public class TestNestedLists {
     
     ResultCollection results = new ArrayResultCollection( batch );
     assertTrue( results.next() );
-    TupleSet tupleSet = results.getTuples();
+    TupleSet tupleSet = results.tuples();
     
     TupleSchema schema = tupleSet.schema();
     FieldSchema field = schema.field( 0 );

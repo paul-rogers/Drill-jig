@@ -43,7 +43,7 @@ public class TestDirectJsonSchema
   public void validateFlatSchema( JsonResultCollection scanner ) throws Exception
   {
     assertTrue( scanner.next( ) );
-    TupleSet tuples = scanner.getTuples( );
+    TupleSet tuples = scanner.tuples( );
     TupleSchema schema = tuples.schema( );
     assertEquals( 6, schema.count() );
     
@@ -120,7 +120,7 @@ public class TestDirectJsonSchema
     InputStream in = getClass( ).getResourceAsStream( "array.json" );
     JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     assertTrue( scanner.next( ) );
-    TupleSet tuples = scanner.getTuples( );
+    TupleSet tuples = scanner.tuples( );
     TupleSchema schema = tuples.schema( );
     assertEquals( 4, schema.count() );
     
@@ -194,7 +194,7 @@ public class TestDirectJsonSchema
     InputStream in = getClass( ).getResourceAsStream( "map.json" );
     JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
     assertTrue( scanner.next( ) );
-    TupleSet tuples = scanner.getTuples( );
+    TupleSet tuples = scanner.tuples( );
     TupleSchema schema = tuples.schema( );
     assertEquals( 3, schema.count() );
     

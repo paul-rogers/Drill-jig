@@ -102,7 +102,7 @@ public class JigClientExample {
       
       // Get the next result set: a collection of tuples (records).
       
-      TupleSet tupleSet = results.getTuples();
+      TupleSet tupleSet = results.tuples();
       
       // Each tuple set has a distinct schema.
       // Display the column names
