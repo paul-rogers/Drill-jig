@@ -6,13 +6,17 @@ import java.nio.ByteBuffer;
 public class TupleWriterV1 implements TupleWriter
 {
   private ByteBuffer buf;
-  private int startPosn;
 
   @Override
-  public void startBlock( ByteBuffer buf ) {
+  public void bind( ByteBuffer buf ) {
     this.buf = buf;
-    startPosn = buf.position( );
+  }
+
+  @Override
+  public int startBlock( ) {
+    int startPosn = buf.position( );
     buf.putInt( 0 ); // To be backpatched with length
+    return startPosn;
   }
   
   @Override
@@ -33,25 +37,41 @@ public class TupleWriterV1 implements TupleWriter
   @Override
   public void writeLongEncoded( long n )
   {
+    // Rotate the sign to the lowest-order bit,
+    // Reverse the sign to map negative values (mostly 1's) to small
+    // values (mostly 0's).
+    
+//    long high = n & 0x0400_0000_0000_0000L;
+    int sign = (n<0) ? 1 : 0;
+    n = (n<0) ? -n - 1 : n;
+    n = n << 1 | sign;
+    
     // 0xxx xxxx (1 byte)
     
-    if ( n < 0x7F )
+    if ( (n & ~0x7FL) == 0 )
       buf.put( (byte) n );
     
     // 10xx xxxx | B (2 bytes)
     
-    else if ( n < 0x3FFF )
+    else if ( (n & ~0x3FFF) == 0 )
       buf.putShort( (short) ( 0x8000 | n ) );
     
     // 110x xxxx | BBB (4 bytes)
     
-    else if ( n < 0x1FFF_FFFF )
+    else if ( (n & ~0x1FFF_FFFF) == 0 )
       buf.putInt( (int) ( 0xC000_0000 | n ) );
+        
+    // 1110 xxxx | BBB BBBB (8 bytes)
     
-    // 1110 0000 | BBBB BBBB (9 bytes)
+    else if ( (n & ~0x0FFF_FFFF_FFFF_FFFFL) == 0 ) {
+      buf.putLong( 0xE000_0000_0000_0000L | n );
+    }
+    
+    // 1111 000x | BBBB BBBB (9 bytes)
     
     else {
-      buf.put( (byte) 0xE0 );
+//      buf.put( (byte) (0xF0 & ((high == 0) ? 0 : 1)) );
+      buf.put( (byte) 0xF0 );
       buf.putLong( n );
     }
   }
@@ -92,9 +112,15 @@ public class TupleWriterV1 implements TupleWriter
   }
 
   @Override
-  public void endBlock( ) {
+  public void endBlock( int startPosn ) {
     int end = buf.position();
     int length = end - startPosn - 4;
     buf.putInt( startPosn, length );
+  }
+
+  @Override
+  public void writeBytes(byte[] nullBits, int length) {
+    // TODO Auto-generated method stub
+    
   }
 }

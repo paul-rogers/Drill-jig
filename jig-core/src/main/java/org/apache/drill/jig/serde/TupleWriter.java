@@ -5,9 +5,11 @@ import java.nio.ByteBuffer;
 
 public interface TupleWriter
 {
-  void startBlock(ByteBuffer buf);
+  void bind(ByteBuffer buf);
+  int startBlock();
 
   void writeHeader(boolean isNull[], boolean isRepeated[]);
+  void writeBytes(byte[] nullBits, int length);
 
   void writeString(String value);
 
@@ -24,5 +26,5 @@ public interface TupleWriter
 
   void writeDecimal(BigDecimal value);
 
-  void endBlock();
+  void endBlock(int start);
 }

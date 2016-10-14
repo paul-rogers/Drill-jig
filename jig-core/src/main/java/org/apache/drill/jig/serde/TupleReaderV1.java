@@ -10,8 +10,12 @@ public class TupleReaderV1 implements TupleReader
   private int blockLen;
 
   @Override
-  public boolean startBlock( ByteBuffer buf ) {
+  public void bind( ByteBuffer buf ) {
     this.buf = buf;
+  }
+
+  @Override
+  public boolean startBlock( ) {
     if ( buf.position( ) == buf.limit() )
       return false;
     blockLen = buf.getInt();
@@ -52,15 +56,22 @@ public class TupleReaderV1 implements TupleReader
   @Override
   public long readLongEncoded( )
   {
+    long n = readRawEncoded( );
+    int sign = (int) n & 0x01;
+    n = (n >> 1) & ~0x8000_0000_0000_0000L;
+    return ( sign == 0 ) ? n : -n - 1;
+  }
+  
+  private long readRawEncoded( ) {
     byte b = buf.get( );
     if ( (b & 0x80) == 0 ) {
       // 0xxx xxxx (1 byte)
       return (b & 0x7F);
     }
     
-    if ( (b & 0xE0 ) == 0xE0 ) {
+    if ( (b & 0xF0 ) == 0xF0 ) {
       
-      // 1110 0000 | BBBB BBBB (9 bytes)
+      // 1111 0000 | BBBB BBBB (9 bytes)
       
       return buf.getLong();
     }
@@ -73,9 +84,14 @@ public class TupleReaderV1 implements TupleReader
       return buf.getShort() & 0x3FFF;
     }
     
-    // 110x xxxx | BBB (4 bytes)
+    if ( (b & 0xE0) == 0xC0 ) {
+      // 110x xxxx | BBB (4 bytes)
+      return buf.getInt() & 0x1FFF_FFFF;
+    }
     
-    return buf.getInt() & 0x1FFF_FFFF;
+    // 1110 xxxx | BBB BBBB (8 bytes)
+    
+    return buf.getLong() & 0x0FFF_FFFF_FFFF_FFFFL;
   }
   
   @Override

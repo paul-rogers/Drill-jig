@@ -11,5 +11,6 @@ public interface ArrayValue
 {
   int size( );
   DataType memberType( );
+  boolean memberIsNullable();
   FieldValue get( int i );
 }

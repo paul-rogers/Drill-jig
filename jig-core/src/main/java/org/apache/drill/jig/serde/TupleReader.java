@@ -5,7 +5,8 @@ import java.nio.ByteBuffer;
 
 public interface TupleReader
 {
-  boolean startBlock(ByteBuffer buf);
+  void bind(ByteBuffer buf);
+  boolean startBlock( );
 
   void readHeader(boolean isNull[], boolean isRepeated[]);
 
