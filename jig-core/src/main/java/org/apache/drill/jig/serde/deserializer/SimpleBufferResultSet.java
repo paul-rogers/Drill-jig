@@ -1,4 +1,4 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.deserializer;
 
 import java.nio.ByteBuffer;
 

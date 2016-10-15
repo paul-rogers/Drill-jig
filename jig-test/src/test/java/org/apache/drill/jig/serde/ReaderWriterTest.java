@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 
+import org.apache.drill.jig.serde.deserializer.TupleReaderV1;
+import org.apache.drill.jig.serde.serializer.TupleWriterV1;
 import org.junit.Test;
 
 public class ReaderWriterTest {

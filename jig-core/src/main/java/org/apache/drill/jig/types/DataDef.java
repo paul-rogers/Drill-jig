@@ -99,7 +99,7 @@ public abstract class DataDef {
       member.build( factory );
       if ( arrayValueAccessor == null ) {
         if ( arrayValue == null ) {
-          ArrayValueImpl impl = new ArrayValueImpl( member.type, member.container );
+          ArrayValueImpl impl = new ArrayValueImpl( member.type, member.nullable, member.container );
           impl.bind( arrayAccessor );
           arrayValue = impl;
         }

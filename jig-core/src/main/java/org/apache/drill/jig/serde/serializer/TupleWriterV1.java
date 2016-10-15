@@ -1,7 +1,9 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.serializer;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+
+import org.apache.drill.jig.serde.SerdeUtils;
 
 public class TupleWriterV1 implements TupleWriter
 {

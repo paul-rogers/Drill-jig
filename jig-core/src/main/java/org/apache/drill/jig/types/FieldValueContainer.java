@@ -1,7 +1,6 @@
 package org.apache.drill.jig.types;
 
 import org.apache.drill.jig.api.FieldValue;
-import org.apache.drill.jig.types.FieldAccessor.IndexedAccessor;
 
 /**
  * Wraps one or more field values for a field, allowing the field value to

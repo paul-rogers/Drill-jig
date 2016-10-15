@@ -1,7 +1,9 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.deserializer;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+
+import org.apache.drill.jig.serde.SerdeUtils;
 
 public class TupleReaderV1 implements TupleReader
 {

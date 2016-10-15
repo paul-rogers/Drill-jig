@@ -6,6 +6,19 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
 
+/**
+ * Array accessor for arrays backed by a Java array. The Java array can be a primitive
+ * array (of int, say) or of Java objects. If of Java objects, the array can include
+ * objects all of a single type (Integer, say), or of varying types.
+ * <p>
+ * This accessor needs access to the Java array object, which it obtains from a
+ * Java object accessor. The input accessor can fetch the object, build it or do
+ * whatever else is needed to get the array.
+ * <p>
+ * Use these classes when building a {@link DataDef.ArrayDef}, which will build the
+ * various array value and array member accessors, and the {@link FieldValue}.
+ */
+
 public abstract class JavaArrayAccessor implements ArrayAccessor {
   
   protected abstract class AbstractMemberAccessor implements IndexedAccessor
@@ -68,51 +81,6 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
     return array;
   }
   
-//  public static class JavaListAccessor extends ArrayAccessor implements ObjectAccessor {
-//
-//    public JavaListAccessor( ObjectAccessor listAccessor ) {
-//      super( listAccessor );
-//    }   
-//    
-//    @Override
-//    public boolean isNull() {
-//      return getObject( ) == null;
-//    }
-//    
-//    @Override
-//    public Object getObject() {
-//      List<? extends Object> list = getList( );
-//      if ( list == null )
-//        return null;
-//      if ( memberIndex < 0  ||  memberIndex <= list.size( ) )
-//        return null;
-//      return list.get( memberIndex );
-//    }
-//
-//    @Override
-//    public int size() {
-//      List<? extends Object> list = getList( );
-//      if ( list == null )
-//        return 0;
-//      return list.size( );
-//    }
-//
-//    @SuppressWarnings("unchecked")
-//    private List<? extends Object> getList( ) {
-//      if ( arrayAccessor.isNull( ) )
-//        return null;
-//      return (List<? extends Object>) arrayAccessor.getObject( );
-//    }
-//  }
-  
-//  public static abstract class JavaArrayAccessor extends ArrayAccessor {
-//
-//    public JavaArrayAccessor(ObjectAccessor arrayAccessor) {
-//      super(arrayAccessor);
-//    }
-//
-//  }
-  
   public static class ObjectArrayAccessor extends JavaArrayAccessor {
     
     private class ObjectArrayMemberAccessor extends AbstractMemberAccessor implements ObjectAccessor {
@@ -132,12 +100,6 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
       super( arrayAccessor );
       memberAccessor = new ObjectArrayMemberAccessor( );
     }
-
-//    @Override
-//    public FieldAccessor memberAccessor( int i ) {
-//      memberAccessor.bind( i );
-//      return memberAccessor;
-//    }
   }
   
   public static class PrimitiveArrayAccessor extends JavaArrayAccessor {
@@ -235,25 +197,4 @@ public abstract class JavaArrayAccessor implements ArrayAccessor {
       }
     }
   }
-
-//    public PrimitiveArrayAccessor(ObjectAccessor arrayAccessor) {
-//      super(arrayAccessor);
-//    }
-//
-//    @Override
-//    public boolean isNull() {
-//      return false;
-//    }
-//    
-//    @Override
-//    protected Object getArray( ) {
-//      Object array = getArray( );
-//      if ( array == null )
-//        throw new ValueConversionError( "Array is null ");
-//      if ( memberIndex < 0  ||  memberIndex <= Array.getLength( array ) )
-//        throw new ValueConversionError( "Index out of bounds: " + memberIndex + ", size = " + Array.getLength( array ) );
-//      return array;
-//    }
-//  }
-    
 }

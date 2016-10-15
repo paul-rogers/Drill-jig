@@ -2,9 +2,7 @@ package org.apache.drill.jig.types;
 
 import java.math.BigDecimal;
 
-import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.types.FieldAccessor.StringAccessor;
 
 /**

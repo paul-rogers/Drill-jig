@@ -1,4 +1,4 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.serializer;
 
 import org.apache.drill.jig.api.FieldValue;
 

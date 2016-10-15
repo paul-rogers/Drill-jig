@@ -8,6 +8,8 @@ import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.array.TestArrayImpl;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.extras.array.ArrayResultCollection;
+import org.apache.drill.jig.serde.deserializer.SimpleBufferResultSet;
+import org.apache.drill.jig.serde.serializer.TupleSetSerializer;
 import org.junit.Test;
 
 public class SimpleSerdeTest

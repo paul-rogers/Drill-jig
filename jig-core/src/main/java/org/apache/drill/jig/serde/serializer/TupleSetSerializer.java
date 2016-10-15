@@ -1,4 +1,4 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.serializer;
 
 import java.nio.ByteBuffer;
 
@@ -8,6 +8,8 @@ import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.TupleValue;
+import org.apache.drill.jig.serde.BaseTupleSetSerde;
+import org.apache.drill.jig.serde.SerdeUtils;
 import org.apache.drill.jig.api.TupleSchema;
 
 /**

@@ -16,7 +16,7 @@ import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.SchemaResponse;
 import org.apache.drill.jig.protocol.DataResponse;
-import org.apache.drill.jig.serde.TupleSetDeserializer;
+import org.apache.drill.jig.serde.deserializer.TupleSetDeserializer;
 
 public class RemoteResultCollection implements ResultCollection
 {

@@ -1,4 +1,4 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.deserializer;
 
 import java.nio.ByteBuffer;
 
@@ -10,6 +10,7 @@ import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.impl.FieldSchemaImpl;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
+import org.apache.drill.jig.serde.BaseTupleSetSerde;
 
 public class TupleSetDeserializer extends BaseTupleSetSerde
 {
@@ -42,41 +43,42 @@ public class TupleSetDeserializer extends BaseTupleSetSerde
   protected DeserializedTupleAccessor tuple = new DeserializedTupleAccessor( );
   private FieldValue accessors[];
     
-  public void deserializeAndPrepareSchema( ByteBuffer buf ) {
-    TupleSchemaImpl schemaImpl = new TupleSchemaImpl( );
-    schema = schemaImpl;
-    reader.startBlock( buf );
-    fieldCount = reader.readIntEncoded( );
-    fieldTypeCodes = new int[ fieldCount ];
-    accessors = new FieldValue[ fieldCount ];
-    for ( int i = 0;  i < fieldCount;  i++ ) {
-      String name = reader.readString( );
-      fieldTypeCodes[i] = reader.readByte( );
-      DataType type = DataType.typeForCode( fieldTypeCodes[i] );
-      FieldSchemaImpl field = new FieldSchemaImpl( name, type, SerdeUtils.decode( reader.readByte() ) );
-      schemaImpl.add( field );
-      assert false;
-      // TODO: Fix this
-//      BufferFieldAccessor accessor = BufferFieldAccessor.makeAccessor( field );
-//      accessor.bind( this, i );
-//      accessors[i] = accessor;
-    }
-    prepare( fieldCount );
-    fieldIndexes = new int[ fieldCount ];
-  }
+//  public void deserializeAndPrepareSchema( ByteBuffer buf ) {
+//    TupleSchemaImpl schemaImpl = new TupleSchemaImpl( );
+//    schema = schemaImpl;
+//    reader.bind( buf );
+//    reader.startBlock( );
+//    fieldCount = reader.readIntEncoded( );
+//    fieldTypeCodes = new int[ fieldCount ];
+//    accessors = new FieldValue[ fieldCount ];
+//    for ( int i = 0;  i < fieldCount;  i++ ) {
+//      String name = reader.readString( );
+//      fieldTypeCodes[i] = reader.readByte( );
+//      DataType type = DataType.typeForCode( fieldTypeCodes[i] );
+//      FieldSchemaImpl field = new FieldSchemaImpl( name, type, SerdeUtils.decode( reader.readByte() ) );
+//      schemaImpl.add( field );
+//      assert false;
+//      // TODO: Fix this
+////      BufferFieldAccessor accessor = BufferFieldAccessor.makeAccessor( field );
+////      accessor.bind( this, i );
+////      accessors[i] = accessor;
+//    }
+//    prepare( fieldCount );
+//    fieldIndexes = new int[ fieldCount ];
+//  }
   
-  public void deserializeSchema( ByteBuffer buf ) {
-    TupleSchemaImpl schemaImpl = new TupleSchemaImpl( );
-    schema = schemaImpl;
-    reader.startBlock( buf );
-    fieldCount = reader.readIntEncoded( );
-    for ( int i = 0;  i < fieldCount;  i++ ) {
-      String name = reader.readString( );
-      DataType type = DataType.typeForCode( reader.readByte( ) );
-      FieldSchemaImpl field = new FieldSchemaImpl( name, type, SerdeUtils.decode( reader.readByte() ) );
-      schemaImpl.add( field );
-    }
-  }
+//  public void deserializeSchema( ByteBuffer buf ) {
+//    TupleSchemaImpl schemaImpl = new TupleSchemaImpl( );
+//    schema = schemaImpl;
+//    reader.startBlock( buf );
+//    fieldCount = reader.readIntEncoded( );
+//    for ( int i = 0;  i < fieldCount;  i++ ) {
+//      String name = reader.readString( );
+//      DataType type = DataType.typeForCode( reader.readByte( ) );
+//      FieldSchemaImpl field = new FieldSchemaImpl( name, type, SerdeUtils.decode( reader.readByte() ) );
+//      schemaImpl.add( field );
+//    }
+//  }
   
   public void prepareSchema( TupleSchema schema ) {
     this.schema = schema;
@@ -105,7 +107,8 @@ public class TupleSetDeserializer extends BaseTupleSetSerde
    */
   
   public boolean deserializeTuple( ByteBuffer buf ) {
-    if ( ! reader.startBlock( buf ) )
+    reader.bind( buf );
+    if ( ! reader.startBlock( ) )
       return false;
     reader.readHeader( isNull, isRepeated );
     buildFieldIndex( );
@@ -156,5 +159,21 @@ public class TupleSetDeserializer extends BaseTupleSetSerde
 
   public TupleValue getTuple() {
     return tuple;
+  }
+  
+  public TupleReader reader( ) {
+    return reader;
+  }
+  
+  public boolean isNull( int index ) {
+    return isNull[ index ];
+  }
+  
+  public void seek( int index ) {
+    reader.seek( fieldIndexes[ index ] );
+  }
+  
+  public void seekVariant( int index ) {
+    reader.seek( fieldIndexes[ index ] + 1 );
   }
 }

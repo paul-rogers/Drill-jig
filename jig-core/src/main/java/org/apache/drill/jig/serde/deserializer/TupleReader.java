@@ -1,4 +1,4 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.deserializer;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -13,6 +13,7 @@ public interface TupleReader
   boolean readBoolean();
   byte readByte( );
   short readShort( );
+  int readInt( );
   int readIntEncoded();
   long readLongEncoded();
   long readLong( );

@@ -75,7 +75,7 @@
  * <li>BIG_DECIMAL: converted to String, then written as STRING.</li>
  * <li>STRING: (variable-length) length, followed by characters encoded as UTF-8.</li>
  * <li>NULL: Never written, encoded in the null bit for the field.</li>
- * <li>ANY: Encoded as a 1-byte type, followed by the data for that type as described
+ * <li>VARIANT: Encoded as a 1-byte type, followed by the data for that type as described
  * above.</li>
  * </ul>
  * <p>
@@ -85,9 +85,12 @@
  * 0xxx xxxx (1 byte)
  * 10xx xxxx | B (2 bytes)
  * 110x xxxx | BBB (4 bytes)
- * 1110 0000 | BBBB BBBB (9 bytes)
+ * 1110 xxxx | BBB BBBB (8 bytes)
+ * 1111 0000 | BBBB BBBB (9 bytes)
  * </pre>
- * Where 0, 1 and x are bits, B is a byte.
+ * Where 0, 1 and x are bits, B is a byte. Negative numbers are encoded by rotating
+ * the bits upward by one, wrapping the sign bit into the low-order bit. This ensues
+ * efficient encoding of both negative and positive values.
  * <p>
  * String fields are variable, encoded as:
  * <pre>

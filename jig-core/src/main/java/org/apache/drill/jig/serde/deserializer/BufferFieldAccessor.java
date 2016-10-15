@@ -1,4 +1,4 @@
-package org.apache.drill.jig.serde;
+package org.apache.drill.jig.serde.deserializer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,13 +9,35 @@ import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ScalarValue;
-import org.apache.drill.jig.serde.TupleSetDeserializer.DeserializedTupleAccessor;
+import org.apache.drill.jig.types.FieldAccessor;
+import org.apache.drill.jig.types.FieldAccessor.BooleanAccessor;
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
+import org.apache.drill.jig.serde.deserializer.TupleSetDeserializer.DeserializedTupleAccessor;
 
-public abstract class BufferFieldAccessor // implements FieldValue
+public abstract class BufferFieldAccessor implements FieldAccessor
 {
+//  protected int fieldIndex;
+//  
+//  public void bind( int fieldIndex ) {
+//    this.fieldIndex = fieldIndex;
+//  }
+//  
+//  @Override
+//  public boolean isNull() {
+//    // TODO Auto-generated method stub
+//    return false;
+//  }
+
+  public static class BooleanBufferAccessor extends BufferFieldAccessor implements BooleanAccessor
+  {
+    @Override
+    public boolean getBoolean() {
+      seek( );
+      return reader.readBoolean();
+    }   
+  }
 //  private abstract static class BufferScalarAccessor extends BufferFieldAccessor implements ScalarValue
 //  {
 ////    @Override
@@ -110,55 +132,58 @@ public abstract class BufferFieldAccessor // implements FieldValue
 //    }
 //  }
 //  
+
+  public static class BufferInt8Accessor extends BufferFieldAccessor implements Int8Accessor
+  {
 //  private static class BufferInt8Accessor extends BufferScalarAccessor
 //  {
-//    @Override
-//    public byte getByte() {
-//      seek( );
-//      return reader.readByte();
-//    }
+    @Override
+    public byte getByte() {
+      seek( );
+      return reader.readByte();
+    }
 //    
 //    @Override
 //    public Object getValue() {
 //      return getByte( );
 //    }
-//  }
+  }
 //  
-//  private static class BufferInt16Accessor extends BufferScalarAccessor
-//  {
-//    @Override
-//    public short getShort() {
-//      seek( );
-//      return reader.readShort();
-//    }
+  private static class BufferInt16Accessor extends BufferFieldAccessor implements Int16Accessor
+  {
+    @Override
+    public short getShort() {
+      seek( );
+      return reader.readShort();
+    }
 //    
 //    @Override
 //    public Object getValue() {
 //      return getShort( );
 //    }
-//  }
+  }
 //  
-//  private static class BufferInt32Accessor extends BufferScalarAccessor
-//  {
-//    @Override
-//    public int getInt() {
-//      seek( );
-//      return reader.readIntEncoded();
-//    }
+  private static class BufferInt32Accessor extends BufferFieldAccessor implements Int32Accessor
+  {
+    @Override
+    public int getInt() {
+      seek( );
+      return reader.readIntEncoded();
+    }
 //    
 //    @Override
 //    public Object getValue() {
 //      return getInt( );
 //    }
-//  }
-//  
-//  private static class BufferInt64Accessor extends BufferScalarAccessor
-//  {
-//    @Override
-//    public long getLong() {
-//      seek( );
-//      return reader.readLongEncoded();
-//    }
+  }
+  
+  private static class BufferInt64Accessor extends BufferFieldAccessor implements Int64Accessor
+  {
+    @Override
+    public long getLong() {
+      seek( );
+      return reader.readLongEncoded();
+    }
 //    
 //    @Override
 //    public int getInt() {
@@ -169,64 +194,64 @@ public abstract class BufferFieldAccessor // implements FieldValue
 //    public Object getValue() {
 //      return getLong( );
 //    }
-//  }
-//  
-//  private static class BufferFloat32Accessor extends BufferScalarAccessor
-//  {
-//    @Override
-//    public float getFloat() {
-//      seek( );
-//      return reader.readFloat();
-//    }
+  }
+  
+  private static class BufferFloat32Accessor extends BufferFieldAccessor implements Float32Accessor
+  {
+    @Override
+    public float getFloat() {
+      seek( );
+      return reader.readFloat();
+    }
 //    
 //    @Override
 //    public Object getValue() {
 //      return getFloat( );
 //    }
-//  }
-//  
-//  private static class BufferFloat64Accessor extends BufferScalarAccessor
-//  {
-//    @Override
-//    public double getDouble() {
-//      seek( );
-//      return reader.readDouble();
-//    }
+  }
+  
+  private static class BufferFloat64Accessor extends BufferFieldAccessor implements Float64Accessor
+  {
+    @Override
+    public double getDouble() {
+      seek( );
+      return reader.readDouble();
+    }
 //    
 //    @Override
 //    public Object getValue() {
 //      return getDouble( );
 //    }
-//  }
-//  
-//  private static class BufferDecimalAccessor extends BufferScalarAccessor
-//  {
-//    @Override
-//    public BigDecimal getDecimal() {
-//      seek( );
-//      return reader.readDecimal();
-//    }
-//    
+  }
+  
+  private static class BufferDecimalAccessor extends BufferFieldAccessor implements DecimalAccessor
+  {
+    @Override
+    public BigDecimal getDecimal() {
+      seek( );
+      return reader.readDecimal();
+    }
+    
 //    @Override
 //    public Object getValue() {
 //      return getDecimal( );
 //    }
-//  }
-//  
-//  private static class BufferStringAccessor extends BufferScalarAccessor
-//  {
-//    @Override
-//    public String getString() {
-//      seek( );
-//      return reader.readString();
-//    }
+  }
+  
+  private static class BufferStringAccessor extends BufferFieldAccessor implements StringAccessor
+  {
+    @Override
+    public String getString() {
+      seek( );
+      return reader.readString();
+    }
 //    
 //    @Override
 //    public Object getValue() {
 //      return getString( );
 //    }
-//  }
-//  
+  }
+//  ,
 ////  private static class BufferAnyAccessor extends BufferFieldAccessor implements AnyAccessor
 ////  {
 ////    @Override
@@ -357,19 +382,19 @@ public abstract class BufferFieldAccessor // implements FieldValue
 ////    }
 ////  }
 //  
-//  int index;
+  int index;
 //  private FieldSchema schema;
 //  DeserializedTupleAccessor tuple;
-//  TupleSetDeserializer deserializer;
-//  TupleReader reader;
+  TupleSetDeserializer deserializer;
+  TupleReader reader;
 //  
-//  public void bind( TupleSetDeserializer deserializer, int index ) {
-//    this.deserializer = deserializer;
-//    this.index = index;
+  public void bind( TupleSetDeserializer deserializer, int index ) {
+    this.deserializer = deserializer;
+    this.index = index;
 //    tuple = deserializer.tuple;
 //    schema = tuple.schema( ).field( index );
-//    reader = deserializer.reader;
-//  }
+    reader = deserializer.reader;
+  }
 //  
 //  @Override
 //  public DataType type() {
@@ -381,10 +406,10 @@ public abstract class BufferFieldAccessor // implements FieldValue
 ////    return schema.getCardinality();
 ////  }
 //
-//  @Override
-//  public boolean isNull() {
-//    return deserializer.isNull[ index ];
-//  }
+  @Override
+  public boolean isNull() {
+    return deserializer.isNull[ index ];
+  }
 //
 ////  @Override
 ////  public ScalarValue asScalar() {
@@ -406,14 +431,14 @@ public abstract class BufferFieldAccessor // implements FieldValue
 //                " to " + type );
 //  }
 //  
-//  public void verifyNotNull( ) {
-//    if ( isNull( ) )
-//      throw new ValueConversionError( "Field is null: " + schema.name( ) );
-//  }
-//  
-//  protected void seek( ) {
-//    reader.seek( deserializer.fieldIndexes[ index ] );
-//  }
+  public void verifyNotNull( ) {
+    if ( isNull( ) )
+      throw new ValueConversionError( "Field is null: " + schema.name( ) );
+  }
+  
+  protected void seek( ) {
+    reader.seek( deserializer.fieldIndexes[ index ] );
+  }
 //  
 //  public static BufferFieldAccessor makeAccessor( FieldSchema schema ) {
 //    if ( schema.type() == DataType.LIST ) {
@@ -425,35 +450,35 @@ public abstract class BufferFieldAccessor // implements FieldValue
 //    }
 //    return makeScalarAccessor( schema );
 //  }
-//  
-//  private static BufferFieldAccessor makeScalarAccessor( FieldSchema schema )
-//  {
-//    switch ( schema.type( ) ) {
-//    case BOOLEAN:
-//      return new BufferBooleanAccessor( );
-//    case INT8:
-//      return new BufferInt8Accessor( );
-//    case INT16:
-//      return new BufferInt16Accessor( );
-//    case INT32:
-//      return new BufferInt32Accessor( );
-//    case INT64:
-//      return new BufferInt64Accessor( );
-//    case FLOAT32:
-//      return new BufferFloat32Accessor( );
-//    case FLOAT64:
-//      return new BufferFloat64Accessor( );
-//    case DECIMAL:
-//      return new BufferDecimalAccessor( );
-//    case STRING:
-//      return new BufferStringAccessor( );
-////    case ANY: // Any is "any scalar"
-////      return new BufferAnyAccessor( );
-//    default:
-//      assert false;
-//      return null;
-//    }
-//  }
+  
+  private static BufferFieldAccessor makeScalarAccessor( FieldSchema schema )
+  {
+    switch ( schema.type( ) ) {
+    case BOOLEAN:
+      return new BufferBooleanAccessor( );
+    case INT8:
+      return new BufferInt8Accessor( );
+    case INT16:
+      return new BufferInt16Accessor( );
+    case INT32:
+      return new BufferInt32Accessor( );
+    case INT64:
+      return new BufferInt64Accessor( );
+    case FLOAT32:
+      return new BufferFloat32Accessor( );
+    case FLOAT64:
+      return new BufferFloat64Accessor( );
+    case DECIMAL:
+      return new BufferDecimalAccessor( );
+    case STRING:
+      return new BufferStringAccessor( );
+//    case ANY: // Any is "any scalar"
+//      return new BufferAnyAccessor( );
+    default:
+      assert false;
+      return null;
+    }
+  }
 
 //  interface BufferFieldHandle
 //  {
