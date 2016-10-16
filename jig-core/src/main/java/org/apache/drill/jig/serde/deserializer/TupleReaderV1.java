@@ -111,6 +111,9 @@ public class TupleReaderV1 implements TupleReader
   }
 
   @Override
+  public int readInt() { return buf.getInt( ); }
+
+  @Override
   public long readLong( ) { return buf.getLong( ); }
   
   @Override

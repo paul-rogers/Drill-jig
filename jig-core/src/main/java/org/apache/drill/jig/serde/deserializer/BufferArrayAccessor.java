@@ -1,5 +1,12 @@
 package org.apache.drill.jig.serde.deserializer;
 
+import java.math.BigDecimal;
+
+import org.apache.drill.jig.api.DataType;
+import org.apache.drill.jig.serde.deserializer.BufferScalarAccessor.BufferMemberAccessor;
+import org.apache.drill.jig.types.AbstractFieldValue;
+import org.apache.drill.jig.types.FieldValueCache;
+import org.apache.drill.jig.types.FieldValueFactory;
 import org.apache.drill.jig.types.FieldAccessor.*;
 
 public abstract class BufferArrayAccessor implements ObjectAccessor, Resetable {
@@ -27,17 +34,32 @@ public abstract class BufferArrayAccessor implements ObjectAccessor, Resetable {
     deserializer.seek( index );
   }
   
-  protected int readSize( ) {
+  /**
+   * If the array is a top-level field, it starts with a field
+   * length, whch we skip here.
+   */
+  
+  protected void skipHeader( ) {
     deserializer.seek( index );
-    TupleReader reader = deserializer.reader( );
-    reader.readInt( ); // Skip field length
-    return reader.readIntEncoded();
+    deserializer.reader( ).readInt( ); // Skip field length
+  }
+  
+  /**
+   * Whether the array is top-level or embedded in another array,
+   * each array has an element count which we read here.
+   * @return
+   */
+  
+  protected int readSize( ) {
+    return deserializer.reader( ).readIntEncoded();
   }
   
   @Override
   public Object getObject() {
-    if ( cached == null )
+    if ( cached == null ) {
+      skipHeader( );
       cached = buildArray( );
+    }
     return cached;
   }
   
@@ -143,6 +165,88 @@ public abstract class BufferArrayAccessor implements ObjectAccessor, Resetable {
       double array[] = new double[ size ];
       for ( int i = 0;  i < size;  i++ ) {
         array[i] = reader.readDouble();
+      }
+      return array;
+    }  
+  }
+  
+  public static class DecimalArrayAccessor extends BufferArrayAccessor {
+
+    @Override
+    protected Object buildArray() {
+      int size = readSize( );
+      TupleReader reader = deserializer.reader( );
+      BigDecimal array[] = new BigDecimal[ size ];
+      for ( int i = 0;  i < size;  i++ ) {
+        array[i] = reader.readDecimal();
+      }
+      return array;
+    }  
+  }
+  
+  public static class StringArrayAccessor extends BufferArrayAccessor {
+
+    @Override
+    protected Object buildArray() {
+      int size = readSize( );
+      TupleReader reader = deserializer.reader( );
+      String array[] = new String[ size ];
+      for ( int i = 0;  i < size;  i++ ) {
+        array[i] = reader.readString();
+      }
+      return array;
+    }  
+  }
+  
+  public static class VariantArrayAccessor extends BufferArrayAccessor {
+
+    private final FieldValueCache valueCache;
+    private BufferMemberAccessor accessor;
+    
+    public VariantArrayAccessor( FieldValueFactory factory ) {
+      valueCache = new FieldValueCache( factory );
+      accessor = new BufferMemberAccessor( );
+    }
+
+    public void bind( TupleSetDeserializer deserializer, int index ) {
+      super.bind( deserializer, index );
+      accessor.bind( deserializer.reader );
+    }
+
+    @Override
+    protected Object buildArray() {
+      int size = readSize( );
+      TupleReader reader = deserializer.reader( );
+      Object array[] = new Object[ size ];
+      for ( int i = 0;  i < size;  i++ ) {
+        DataType type = DataType.typeForCode( reader.readByte() );
+        AbstractFieldValue value = valueCache.get( type );
+        value.bind( accessor );
+        array[i] = value.getValue( );
+      }
+      return array;
+    }  
+  }
+  
+  public static class ArrayOfArrayAccessor extends BufferArrayAccessor {
+
+    private BufferArrayAccessor innerAccessor;
+    
+    public ArrayOfArrayAccessor( BufferArrayAccessor innerAccessor ) {
+      this.innerAccessor = innerAccessor;
+    }
+
+    public void bind( TupleSetDeserializer deserializer, int index ) {
+      super.bind( deserializer, index );
+      innerAccessor.bind( deserializer, 0 );
+    }
+
+    @Override
+    protected Object buildArray() {
+      int size = readSize( );
+      Object array[] = new Object[ size ];
+      for ( int i = 0;  i < size;  i++ ) {
+        array[i] = innerAccessor.buildArray();
       }
       return array;
     }  

@@ -4,19 +4,30 @@ import java.nio.ByteBuffer;
 
 import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.TupleValue;
+import org.apache.drill.jig.api.impl.AbstractTupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 
 public class SimpleBufferResultSet implements ResultCollection
 {
-  public class SimpleBufferTupleSet implements TupleSet
+  public static class SimpleBufferTupleSet implements TupleSet
   {
-    boolean isEof = false;
-    int tupleIndex = -1;
+    private boolean isEof = false;
+    private int tupleIndex = -1;
+    private final ByteBuffer buf;
+    private final TupleSetDeserializer deserializer;
+    private final AbstractTupleValue tuple;
+    
+    public SimpleBufferTupleSet( TupleSchema schema, ByteBuffer buf ) {
+      this.buf = buf;
+      deserializer = new TupleSetDeserializer( schema );
+      TupleBuilder builder = new TupleBuilder( deserializer );
+      tuple = builder.build( schema );
+    }
     
     @Override
     public TupleSchema schema() {
-      return deserializer.getSchema( );
+      return tuple.schema( );
     }
 
     @Override
@@ -31,24 +42,22 @@ public class SimpleBufferResultSet implements ResultCollection
       if ( tupleIndex > -1 )
         deserializer.endTuple();
       tupleIndex++;
-      isEof = ! deserializer.deserializeTuple( buf );
+      tuple.reset();
+      isEof = ! deserializer.startTuple( buf );
       return ! isEof;
     }
 
     @Override
     public TupleValue tuple() {
-      return deserializer.getTuple( );
+      return tuple;
     }
   }
 
-  TupleSetDeserializer deserializer;
-  int tupleSetIndex = -1;
-  private ByteBuffer buf;
-  SimpleBufferTupleSet tupleSet = new SimpleBufferTupleSet( );
+  private int tupleSetIndex = -1;
+  private final SimpleBufferTupleSet tupleSet;
   
-  public SimpleBufferResultSet( ByteBuffer buf ) {
-    deserializer = new TupleSetDeserializer( );
-    this.buf = buf;
+  public SimpleBufferResultSet( TupleSchema schema, ByteBuffer buf ) {
+    tupleSet = new SimpleBufferTupleSet( schema, buf );
   }
   
   @Override
@@ -63,7 +72,6 @@ public class SimpleBufferResultSet implements ResultCollection
     tupleSetIndex++;
     if ( tupleSetIndex > 0 )
       return false;
-    deserializer.deserializeAndPrepareSchema( buf );
     return true;
   }
 

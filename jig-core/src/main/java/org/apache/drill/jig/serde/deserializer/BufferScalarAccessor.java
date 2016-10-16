@@ -98,4 +98,9 @@ public abstract class BufferScalarAccessor extends BufferAccessor
       deserializer.seekVariant( index );
     }
   }
+  
+  public static class BufferMemberAccessor extends BufferScalarFieldAccessor {
+    
+    protected void seek( ) { }
+  }
 }

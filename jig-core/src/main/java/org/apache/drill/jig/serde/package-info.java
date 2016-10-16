@@ -26,42 +26,29 @@
  * <h4>Serialization Format</h4>
  * The serialization format is the following:
  * <pre>
- * Message 1: [schema]
+ * Message 1: [schema] (as a protobuf)
  * Message 2: [msg length][tuple 1][tuple 2]...
- * Message 3: [msg length][tuple i][tuple i+1] ...
- * </pre>
+ * Message 3: [msg length][tuple i][tuple i+1] ...</pre>
+ * <p>
  * The first message provides the schema (only) so that the client can prepare its
  * deserializer. Subsequent messages include n tuples in a message limited by size.
  * The message field lets the client know how many bytes to read for each message.
- * <h4>Schema</h4>
- * Each schema is serialized as:
- * <pre>
- * [length][field count][field 1][field 2]...
- * </pre>
- * Length is encoded as 4-byte big-endian integer.
- * <p>
- * Each field is serialized as:
- * <pre>
- * [name][type][cardinality]
- * </pre>
- * The name is encoded as for string fields. The type and cardinality are one byte
- * each, encoded using the constants defined in {@link SerdeUtils}.
  * <h4>Tuple</h4>
  * Each tuple is serialized as:
  * <pre>
- * [length][header][fields]
- * </pre>
- * A value of 0 means the end of the tuple set (EOF).
+ * [length][header][fields]</pre>
+ * <p>
+ * A length value of 0 means the end of the tuple set (EOF).
  * <h4>Tuple Header</h4>
  * The header comprises an array of two-bit markers for each field:
  * <pre>
- * aabb ccdd | eeff gghh | ... | zz00 0000
- * </pre>
+ * aabb ccdd | eeff gghh | ... | zz00 0000</pre>
+ * <p>
  * Unused bit fields are set to zero. For each field the two bit
  * fields are:
  * <pre>
- * [null flag][repeat flag]
- * </pre>
+ * [null flag][repeat flag]</pre>
+ * <p>
  * The null flag indicates that the field is null (and so no value appears
  * in the serialized tuple.) The repeat flag means that the value is the same
  * as the previous tuple and so the field is again omitted. Because of the repeat
@@ -70,7 +57,7 @@
  * Fields are either fixed-length or variable length. Numeric fields Big Endian.
  * <ul>
  * <li>BOOLEAN: 1-byte (true=1, false=0)</li>
- * <li>LONG: variable length, encoded as above.</li>
+ * <li>INT, LONG: variable length, encoded as below.</li>
  * <li>DOUBLE: 8-bytes</li>
  * <li>BIG_DECIMAL: converted to String, then written as STRING.</li>
  * <li>STRING: (variable-length) length, followed by characters encoded as UTF-8.</li>
@@ -86,24 +73,34 @@
  * 10xx xxxx | B (2 bytes)
  * 110x xxxx | BBB (4 bytes)
  * 1110 xxxx | BBB BBBB (8 bytes)
- * 1111 0000 | BBBB BBBB (9 bytes)
- * </pre>
+ * 1111 0000 | BBBB BBBB (9 bytes)</pre>
+ * <p>
  * Where 0, 1 and x are bits, B is a byte. Negative numbers are encoded by rotating
  * the bits upward by one, wrapping the sign bit into the low-order bit. This ensues
  * efficient encoding of both negative and positive values.
  * <p>
  * String fields are variable, encoded as:
  * <pre>
- * [length][bytes, encoded as UTF-8]
- * </pre>
+ * [length][bytes, encoded as UTF-8]</pre>
  * Size is encoded in the compressed integer format described above.
- * <p>
+ * <h4>Lists</h4>
  * Arrays are encoded as:
  * <pre>
- * [size][item 0][item 1]...
- * </pre>
- * Size is encoded in compressed integer format. Items are encoded as described
- * for fields.
+ * [size][count][item 0][item 1]...</pre>
+ * Size is the entire field length, in bytes, encoded as a 4-byte integer.
+ * <p>
+ * Count is encoded in compressed integer format.
+ * <p>Items are encoded as described for fields. If an array is of a fixed
+ * type, then just the field value is written. If the array allows variant
+ * members, then the type is written, then the value. This format handles
+ * lists of lists.
+ * <h4>Maps</h4>
+ * Maps are written as:<br>
+ * <pre>[size][count][key 0][type 0][value 0]...</pre>
+ * <p>
+ * The size and count are the same as for a List. The key is always a string.
+ * The value is a variant and is encoded as a type/value pair.
+ * 
  */
 
 package org.apache.drill.jig.serde;

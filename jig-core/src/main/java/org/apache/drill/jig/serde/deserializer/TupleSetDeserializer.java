@@ -2,99 +2,19 @@ package org.apache.drill.jig.serde.deserializer;
 
 import java.nio.ByteBuffer;
 
-import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldValue;
-import org.apache.drill.jig.api.FieldSchema;
-import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
-import org.apache.drill.jig.api.impl.FieldSchemaImpl;
-import org.apache.drill.jig.api.impl.TupleSchemaImpl;
 import org.apache.drill.jig.serde.BaseTupleSetSerde;
 
 public class TupleSetDeserializer extends BaseTupleSetSerde
 {
-  protected class DeserializedTupleAccessor implements TupleValue
-  {
-    @Override
-    public TupleSchema schema() {
-      return schema;
-    }
-
-    @Override
-    public FieldValue field(int i) {
-      if ( i < 0  ||  i >= accessors.length )
-        return null;
-      return accessors[i];
-    }
-
-    @Override
-    public FieldValue field(String name) {
-      FieldSchema field = schema.field( name );
-      if ( field == null )
-        return null;
-      return accessors[ field.index() ];
-    }    
-  }
-    
   protected TupleReader reader = new TupleReaderV1( );
-  private int fieldTypeCodes[];
-  protected int fieldIndexes[];
-  protected DeserializedTupleAccessor tuple = new DeserializedTupleAccessor( );
-  private FieldValue accessors[];
-    
-//  public void deserializeAndPrepareSchema( ByteBuffer buf ) {
-//    TupleSchemaImpl schemaImpl = new TupleSchemaImpl( );
-//    schema = schemaImpl;
-//    reader.bind( buf );
-//    reader.startBlock( );
-//    fieldCount = reader.readIntEncoded( );
-//    fieldTypeCodes = new int[ fieldCount ];
-//    accessors = new FieldValue[ fieldCount ];
-//    for ( int i = 0;  i < fieldCount;  i++ ) {
-//      String name = reader.readString( );
-//      fieldTypeCodes[i] = reader.readByte( );
-//      DataType type = DataType.typeForCode( fieldTypeCodes[i] );
-//      FieldSchemaImpl field = new FieldSchemaImpl( name, type, SerdeUtils.decode( reader.readByte() ) );
-//      schemaImpl.add( field );
-//      assert false;
-//      // TODO: Fix this
-////      BufferFieldAccessor accessor = BufferFieldAccessor.makeAccessor( field );
-////      accessor.bind( this, i );
-////      accessors[i] = accessor;
-//    }
-//    prepare( fieldCount );
-//    fieldIndexes = new int[ fieldCount ];
-//  }
+  private final int fieldTypeCodes[];
+  protected final int fieldIndexes[];
   
-//  public void deserializeSchema( ByteBuffer buf ) {
-//    TupleSchemaImpl schemaImpl = new TupleSchemaImpl( );
-//    schema = schemaImpl;
-//    reader.startBlock( buf );
-//    fieldCount = reader.readIntEncoded( );
-//    for ( int i = 0;  i < fieldCount;  i++ ) {
-//      String name = reader.readString( );
-//      DataType type = DataType.typeForCode( reader.readByte( ) );
-//      FieldSchemaImpl field = new FieldSchemaImpl( name, type, SerdeUtils.decode( reader.readByte() ) );
-//      schemaImpl.add( field );
-//    }
-//  }
-  
-  public void prepareSchema( TupleSchema schema ) {
-    this.schema = schema;
-    fieldCount = schema.count();
+  public TupleSetDeserializer( TupleSchema schema ) {
+    super( schema );
     fieldTypeCodes = new int[ fieldCount ];
-    accessors = new FieldValue[ fieldCount ];
-    for ( int i = 0;  i < fieldCount;  i++ ) {
-      FieldSchema field = schema.field( i );
-      fieldTypeCodes[i] = field.type().typeCode();
-      assert false;
-      // TODO: Fix this
-//      BufferFieldAccessor accessor = BufferFieldAccessor.makeAccessor( field );
-//      accessor.bind( this, i );
-//      accessors[i] = accessor;
-    }
-    prepare( fieldCount );
     fieldIndexes = new int[ fieldCount ];
   }
   
@@ -106,7 +26,7 @@ public class TupleSetDeserializer extends BaseTupleSetSerde
    * to the next tuple in the same buffer.
    */
   
-  public boolean deserializeTuple( ByteBuffer buf ) {
+  public boolean startTuple( ByteBuffer buf ) {
     reader.bind( buf );
     if ( ! reader.startBlock( ) )
       return false;
@@ -153,14 +73,6 @@ public class TupleSetDeserializer extends BaseTupleSetSerde
     }
   }
 
-  public TupleSchema getSchema() {
-    return schema;
-  }
-
-  public TupleValue getTuple() {
-    return tuple;
-  }
-  
   public TupleReader reader( ) {
     return reader;
   }

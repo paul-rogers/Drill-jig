@@ -6,14 +6,16 @@ import org.apache.drill.jig.types.FieldValueContainerSet;
 
 public class BufferTupleValue extends AbstractTupleValue {
 
-  public BufferTupleValue(FieldValueContainerSet containers) {
+  private TupleSchema schema;
+
+  public BufferTupleValue(TupleSchema schema, FieldValueContainerSet containers) {
     super(containers);
+    this.schema = schema;
   }
 
   @Override
   public TupleSchema schema() {
-    // TODO Auto-generated method stub
-    return null;
+    return schema;
   }
 
 }

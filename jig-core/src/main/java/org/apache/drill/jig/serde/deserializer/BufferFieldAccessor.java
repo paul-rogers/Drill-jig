@@ -408,7 +408,7 @@ public abstract class BufferFieldAccessor implements FieldAccessor
 //
   @Override
   public boolean isNull() {
-    return deserializer.isNull[ index ];
+    return deserializer.isNull( index );
   }
 //
 ////  @Override
@@ -431,10 +431,10 @@ public abstract class BufferFieldAccessor implements FieldAccessor
 //                " to " + type );
 //  }
 //  
-  public void verifyNotNull( ) {
-    if ( isNull( ) )
-      throw new ValueConversionError( "Field is null: " + schema.name( ) );
-  }
+//  public void verifyNotNull( ) {
+//    if ( isNull( ) )
+//      throw new ValueConversionError( "Field is null: " + schema.name( ) );
+//  }
   
   protected void seek( ) {
     reader.seek( deserializer.fieldIndexes[ index ] );

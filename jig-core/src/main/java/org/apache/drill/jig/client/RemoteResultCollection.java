@@ -70,7 +70,7 @@ public class RemoteResultCollection implements ResultCollection
 //            throw new IllegalArgumentException( "Unexpected get results type: " + response.type );
 //          }
         case ROWS:
-          if ( deserializer.deserializeTuple( buffer ) ) {
+          if ( deserializer.startTuple( buffer ) ) {
             index++;
             return true;
           }

@@ -73,7 +73,7 @@ public class ResultsIterator
     }
     
     public boolean next( ) {
-      return deserializer.deserializeTuple( buffer );
+      return deserializer.startTuple( buffer );
 //      if ( index + 1 >= count )
 //        return false;
 //      posn += recLen;
