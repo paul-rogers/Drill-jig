@@ -1,5 +1,6 @@
 package org.apache.drill.jig.types;
 
+import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.types.FieldAccessor.TypeAccessor;
 
@@ -25,7 +26,9 @@ public class VariantFieldValueContainer implements FieldValueContainer {
   
   @Override
   public FieldValue get() {
-    AbstractFieldValue value = valueCache.get( accessor.getType( ) );
+    // Map null fields to the Null type.
+    DataType type = (accessor.isNull()) ? DataType.NULL : accessor.getType();
+    AbstractFieldValue value = valueCache.get( type );
     value.bind( accessor );
     return value;
   }

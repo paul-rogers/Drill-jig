@@ -53,4 +53,26 @@ public abstract class AbstractScalarFieldValue implements AbstractFieldValue {
   private ValueConversionError typeError(String dest) {
     return new ValueConversionError("Can't convert scalar to " + dest);
   }
+  
+  @Override
+  public String toString( ) {
+    StringBuilder buf = new StringBuilder( );
+    buf.append( "[Field Value: null=" );
+    buf.append( isNull( ) );
+    buf.append( ", type=" );
+    buf.append( type( ) );
+    if ( ! isNull( ) ) {
+      buf.append( ", value=" );
+      Object value = getValue( );
+      if ( value instanceof String ) {
+        buf.append( "\"" );
+      }
+      buf.append( value );
+      if ( value instanceof String ) {
+        buf.append( "\"" );
+      }
+    }
+    buf.append( "]" );
+    return buf.toString( );
+  }
 }
