@@ -17,16 +17,17 @@ public class BufferMapAccessor implements ObjectAccessor, Resetable {
   protected int index;
   protected TupleSetDeserializer deserializer;
   private final FieldValueCache valueCache;
-  private BufferMemberAccessor accessor;
+  private BufferMemberAccessor valueAccessor;
   
   public BufferMapAccessor( FieldValueFactory factory ) {
     valueCache = new FieldValueCache( factory );
-    accessor = new BufferMemberAccessor( );
+    valueAccessor = new BufferMemberAccessor( );
   }
   
   public void bind( TupleSetDeserializer deserializer, int index ) {
     this.deserializer = deserializer;
     this.index = index;
+    valueAccessor.bind( deserializer, 0 );
   }
   
   @Override
@@ -60,7 +61,7 @@ public class BufferMapAccessor implements ObjectAccessor, Resetable {
       String key = reader.readString();
       DataType type = DataType.typeForCode( reader.readByte() );
       AbstractFieldValue value = valueCache.get( type );
-      value.bind( accessor );
+      value.bind( valueAccessor );
       map.put( key, value.getValue( ) );
     }
     return map;

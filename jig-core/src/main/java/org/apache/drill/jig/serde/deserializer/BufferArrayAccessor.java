@@ -170,31 +170,82 @@ public abstract class BufferArrayAccessor implements ObjectAccessor, Resetable {
     }  
   }
   
-  public static class DecimalArrayAccessor extends BufferArrayAccessor {
+  public abstract static class BufferObjectArrayAccessor extends BufferArrayAccessor {
+
+    private boolean nullable;
+    
+    public BufferObjectArrayAccessor( boolean nullable ) {
+      this.nullable = nullable;
+    }    
 
     @Override
     protected Object buildArray() {
+      if ( nullable )
+        return buildNullableArray( );
+      else
+        return buildNonNullableArray( );
+    }
+    
+    protected Object buildNonNullableArray() {
       int size = readSize( );
       TupleReader reader = deserializer.reader( );
-      BigDecimal array[] = new BigDecimal[ size ];
+      Object array[] = new Object[ size ];
       for ( int i = 0;  i < size;  i++ ) {
-        array[i] = reader.readDecimal();
+        array[i] = readObject( reader );
       }
       return array;
     }  
-  }
-  
-  public static class StringArrayAccessor extends BufferArrayAccessor {
 
-    @Override
-    protected Object buildArray() {
+    protected Object buildNullableArray() {
       int size = readSize( );
       TupleReader reader = deserializer.reader( );
-      String array[] = new String[ size ];
+      boolean isNull[] = readNullFlags( reader, size );
+      Object array[] = new Object[ size ];
       for ( int i = 0;  i < size;  i++ ) {
-        array[i] = reader.readString();
+        if ( !isNull[i] )
+          array[i] = readObject( reader );
       }
       return array;
+    }
+    
+    protected abstract Object readObject( TupleReader reader );
+    
+    protected boolean[] readNullFlags( TupleReader reader, int n ) {
+      boolean isNull[] = new boolean[n];
+      int byteCount = (n+7)/8;
+      int posn = 0;
+      for ( int i = 0;  i < byteCount;  i++ ) {
+        int flags = reader.readByte();
+        for ( int j = 0;  j < 8  &&  posn < n;  j++ ) {
+          isNull[posn++] = (flags & 0x80) != 0;
+          flags <<= 1;
+        }
+      }
+      return isNull;     
+    }
+  }
+  
+  public static class DecimalArrayAccessor extends BufferObjectArrayAccessor {
+
+    public DecimalArrayAccessor(boolean nullable) {
+      super(nullable);
+    }
+
+    @Override
+    protected Object readObject(TupleReader reader) {
+      return reader.readDecimal();
+    }  
+  }
+  
+  public static class StringArrayAccessor extends BufferObjectArrayAccessor {
+
+    public StringArrayAccessor(boolean nullable) {
+      super(nullable);
+    }
+
+    @Override
+    protected Object readObject(TupleReader reader) {
+      return reader.readString();
     }  
   }
   

@@ -68,6 +68,12 @@ public class TupleSetDeserializer extends BaseTupleSetSerde
       fieldLen = reader.readIntEncoded();
       reader.skip( fieldLen );
     }
+    else if ( fieldLen == org.apache.drill.jig.api.Constants.BLOCK_LENGTH_AND_VALUE ) {
+      fieldLen = reader.readInt();
+      reader.skip( fieldLen );
+    }
+    else if ( fieldLen == org.apache.drill.jig.api.Constants.NOT_IMPLEMENTED )
+      throw new IllegalStateException( "Unsupported type: " + type );
     else if ( fieldLen == org.apache.drill.jig.api.Constants.TYPE_AND_VALUE ) {
       skipFieldOfType( reader.readByte() );
     }

@@ -98,7 +98,18 @@ public class TupleSetSerializer extends BaseTupleSetSerde
   }
   
   /**
-   * An Any type is special: the serialized form includes the type, then the
+   * Null serializer for arrays and maps.
+   */
+  
+  public static class SerializeNull implements FieldSerializer
+  {
+    @Override
+    public void serialize(TupleWriter writer, FieldValue field) {
+    }   
+  }
+  
+  /**
+   * Variant is special: the serialized form includes the type, then the
    * value serialized in the format for that type.
    */
   
@@ -139,6 +150,12 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     
   }
   
+  /**
+   * Serializes a variant array. A variant array, even if nullable, does not
+   * use null flags. Instead, each member is preceded by a type. The NULL
+   * type is written for null values (but no data follows the type.)
+   */
+  
   public static class SerializeVariantArray implements FieldSerializer
   {
     @Override
@@ -147,14 +164,8 @@ public class TupleSetSerializer extends BaseTupleSetSerde
       ArrayValue array = field.getArray();
       int n = array.size( );
       writer.writeIntEncoded( n );
-      if ( array.memberIsNullable( ) ) {
-        writeNullFlags( writer, array );
-      }
       for ( int i = 0;  i < n;  i++ ) {
-        FieldValue member = array.get(i);
-        if ( member.isNull() )
-          continue;
-        writeVariant( writer, member );
+        writeVariant( writer, array.get(i) );
       }
       writer.endBlock( startPosn );
     }
@@ -216,6 +227,8 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     serializers[ DataType.STRING.ordinal() ] = new SerializeString( );
     serializers[ DataType.VARIANT.ordinal() ] = new SerializeVariant( );
     serializers[ DataType.NUMBER.ordinal() ] = new SerializeVariant( );
+    serializers[ DataType.NULL.ordinal() ] = new SerializeNull( );
+    serializers[ DataType.UNDEFINED.ordinal() ] = new SerializeNull( );
 //    serializers[ DataType.LIST.ordinal() ] = new SerializeArray( serializers );
     serializers[ DataType.MAP.ordinal() ] = new SerializeMap( );
     return serializers;
@@ -296,16 +309,27 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     }
   }
   
+  /**
+   * Writes null flags for the array members. Flags are of the
+   * form:<br>
+   * <pre>[ n0 n1 ... n6 n7 ][ n8 0 ... 0 ]</pre></br>
+   * That is, flags are packed starting with the high-order
+   * bit downwards, with unused low-order bits set to 0.
+   * 
+   * @param writer
+   * @param array
+   */
   protected static void writeNullFlags( TupleWriter writer, ArrayValue array ) {
     int n = array.size( );
     int byteCount = (n+7)/8;
     int posn = 0;
     for ( int i = 0;  i < byteCount;  i++ ) {
+      int mask = 0x80;
       int flags = 0;
-      for ( int j = 0;  j < 8;  j++ ) {
-        flags <<= 1;
+      for ( int j = 0;  j < 8  &&  posn < n;  j++ ) {
         if ( array.get(posn++).isNull())
-          flags |= 1;
+          flags |= mask;
+        mask >>= 1;
       }
       writer.writeByte( (byte) flags );
     }

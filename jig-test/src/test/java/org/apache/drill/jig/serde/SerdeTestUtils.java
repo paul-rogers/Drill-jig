@@ -127,11 +127,18 @@ public class SerdeTestUtils {
     assertEquals( expected.isNull(), actual.isNull() );
     assertEquals( expected.type(), actual.type( ) );
     
+    // Sanity check: non-nullable fields should not be null.
+    // This will fail only if the expected results are also wrong.
+    
+    assertTrue( schema.nullable() || ! actual.isNull() );
+    
     // Sanity check. The container system should ensure that null
     // values are presented as the NULL field value.
     
-    if ( expected.isNull() )
+    if ( expected.isNull() ) {
       assertEquals( DataType.NULL, actual.type( ) );
+      return;
+    }
     
     // Sanity check: Non-variant, non-null values should have the
     // type declared in the schema.
@@ -139,10 +146,6 @@ public class SerdeTestUtils {
     else if ( ! schema.type().isVariant() )
       assertEquals( schema.type(), actual.type( ) );
     
-    // Sanity check: non-nullable fields should not be null.
-    // This will fail only if the expected results are also wrong.
-    
-    assertTrue( schema.nullable() || ! actual.isNull() );
     switch ( schema.type() ) {
     case BLOB:
       throw new IllegalStateException( "Unsupported type: " + schema.type() );
@@ -180,7 +183,11 @@ public class SerdeTestUtils {
     Collections.sort( actualKeys );
     assertEquals( expectedKeys, actualKeys );
     for ( String key : expectedKeys ) {
-      assertEquals( expected.get( key ), actual.get( key ) );
+      FieldValue expectedValue = expected.get( key );
+      FieldValue actualValue = actual.get( key );
+      assertEquals( expectedValue.isNull(), actualValue.isNull() );
+      assertEquals( expectedValue.type(), actualValue.type() );
+      assertEquals( expectedValue.getValue(), actualValue.getValue() );
     }
   }
 }

@@ -107,105 +107,13 @@ public class TupleBuilder {
     return new ScalarDef( field.type(), field.nullable(), accessor );
   }
 
-  public enum ListType { PRIMITIVE, TYPED_OBJECT, VARIANT };
-  
   private DataDef buildList(FieldSchema field) {
     FieldSchema member = field.member();
-    DataType memberType = member.type();
-    DataDef memberDef = buildDef( member );
-    BufferArrayAccessor accessor;
-    ListType listType;
-    switch ( memberType ) {
-    case BOOLEAN:
-      accessor = new BooleanArrayAccessor( );
-      listType = ListType.PRIMITIVE;
-      break;
-    case DECIMAL:
-      accessor = new DecimalArrayAccessor( );
-      listType = ListType.TYPED_OBJECT;
-      break;
-    case FLOAT32:
-      accessor = new Float32ArrayAccessor( );
-      listType = ListType.PRIMITIVE;
-      break;
-    case FLOAT64:
-      accessor = new Float64ArrayAccessor( );
-      listType = ListType.PRIMITIVE;
-      break;
-    case INT16:
-      accessor = new Int16ArrayAccessor( );
-      listType = ListType.PRIMITIVE;
-      break;
-    case INT32:
-      accessor = new Int32ArrayAccessor( );
-      listType = ListType.PRIMITIVE;
-      break;
-    case INT64:
-      accessor = new Int64ArrayAccessor( );
-      listType = ListType.PRIMITIVE;
-      break;
-    case INT8:
-      accessor = new Int8ArrayAccessor( );
-      listType = ListType.PRIMITIVE;
-      break;
-    case LIST:
-      break;
-    case STRING:
-      accessor = new StringArrayAccessor( );
-      listType = ListType.TYPED_OBJECT;
-      break;
-    case NUMBER:
-    case VARIANT:
-      accessor = new VariantArrayAccessor( factory );
-      listType = ListType.VARIANT;
-      break;
-    case BLOB:
-    case DATE:
-    case DATE_TIME_SPAN:
-    case LOCAL_DATE_TIME:
-    case MAP:
-    case NULL:
-    case TUPLE:
-    case UNDEFINED:
-    case UTC_DATE_TIME:
-      throw new IllegalStateException( "Unsupported array type: " + member.type() );
-    default:
-      throw new IllegalStateException( "Unexpected array type: " + member.type( ) );   
-    }
-    resets.add( accessor );
-    JavaArrayAccessor arrayAccessor;
-    switch ( listType ) {
-    case PRIMITIVE:
-      arrayAccessor = new PrimitiveArrayAccessor( accessor, member.type( ) );
-      break;
-    case TYPED_OBJECT:
-      arrayAccessor = new ObjectArrayAccessor( accessor );
-      if ( memberType.isVariant() ) {
-        accessor = new VariantBoxedAccessor( objAccessor, factory );
-      } else {
-        accessor = new BoxedAccessor( objAccessor );
-      }      memberDef.buildFieldAccessor( (ObjectAccessor) arrayAccessor.memberAccessor(), factory );
-      break;
-    case VARIANT:
-      break;
-    default:
-      break;
-    
-    }
-    return new ListDef( field.nullable(), new Ja);
-  }
-
-  private DataDef buildList(FieldSchema field) {
-    FieldSchema member = field.member();
-    DataType memberType = member.type();
-    DataDef memberDef = buildDef( member );
-    BufferArrayAccessor accessor;
-    ListType listType;
-    switch ( memberType ) {
+    switch ( member.type() ) {
     case BOOLEAN:
       return primitiveArray( new BooleanArrayAccessor( ), field );
     case DECIMAL:
-      return typedObjectArray( new DecimalArrayAccessor( ), field );
+      return typedObjectArray( new DecimalArrayAccessor( member.nullable() ), field );
     case FLOAT32:
       return primitiveArray( new Float32ArrayAccessor( ), field );
     case FLOAT64:
@@ -221,7 +129,7 @@ public class TupleBuilder {
     case LIST:
       return arrayArray( field );
     case STRING:
-      return typedObjectArray( new StringArrayAccessor( ), field );
+      return typedObjectArray( new StringArrayAccessor( member.nullable() ), field );
     case NUMBER:
     case VARIANT:
       return variantArray( field );
@@ -240,30 +148,125 @@ public class TupleBuilder {
     }
   }
 
+  /**
+   * Jig types that correspond to primitive Java types are deserialized into a
+   * Java primitive array of the proper type. Then we use a Java primitive array
+   * accessor to present the primitive Java array as a Jig array.
+   * 
+   * @param arrayAccessor array deserializer of the proper type
+   * @param field
+   * @return
+   */
+  
   private DataDef primitiveArray( BufferArrayAccessor arrayAccessor, FieldSchema field ) {
+    
+    // The array accessor builds a primitive Java array of the proper type
+    // and presents it as a Java object.
+    
+    arrayAccessor.bind( deserializer, field.index() );
+    
+    // The deserialized array is cached per-tuple, so add a reset to clear the
+    // cached value.
+    
     resets.add( arrayAccessor );
+    
+    // Build a Java primitive array accessor to present our primitive array as
+    // a Jig array.
+    
     FieldSchema member = field.member();
     PrimitiveArrayAccessor accessor = new PrimitiveArrayAccessor( arrayAccessor, member.type() );
+    
+    // Define the member and array data elements. The definitions will build the
+    // field values and field value containers.
+    
     DataDef memberDef = new ScalarDef( member.type(), member.nullable(), accessor.memberAccessor( ) );
     return new ListDef( field.nullable(), memberDef, accessor );
   }
 
+  /**
+   * Represents a serialized array as an array of Java objects. Used for Strings
+   * and Decimals. The array is deserialized into a Java object array, which is
+   * then presented as an object to a Java Object array accessor, which presents
+   * the array to the client using the Jig Array API.
+   * 
+   * @param arrayAccessor accessor that deserializes teh array to the proper
+   * type
+   * @param field
+   * @return
+   */
   private DataDef typedObjectArray(BufferArrayAccessor arrayAccessor,
       FieldSchema field) {
+    
+    // The provided array accessor deserializes the array into a Java object
+    // array, and presents it as a Java object.
+    
+    arrayAccessor.bind( deserializer, field.index() );
+    
+    // The array deserializer caches the deserialized Java array, so add it
+    // as a per-tuple rest.
+    
     resets.add( arrayAccessor );
-    FieldSchema member = field.member();
+    
+    // Create the accessor that presents the Java object array using the Jig
+    // Array API.
+    
     ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( arrayAccessor );
+    
+    // The member values are "boxed" Java objects. (Not really boxed for String
+    // and decimal, but the idea also works for boxed Integers, etc.)
+    // The important bit is that we expect all members to be of the
+    // declared member type
+    
     BoxedAccessor memberAccessor = new BoxedAccessor( (ObjectAccessor) objArrayAccessor.memberAccessor() );
+    
+    // Build the data element definitions that will build the array and member
+    // field values and field value containers.
+    
+    FieldSchema member = field.member();
     DataDef memberDef = new ScalarDef( member.type(), member.nullable(), memberAccessor );
     return new ListDef( field.nullable(), memberDef, objArrayAccessor );
   }
 
+  /**
+   * Create a variant array. A variant array is an array that holds any kind
+   * of scalar value. Each value is written as a type/value pair. (Nulls are
+   * written as the NULL type with no value.) This array is deserialized as a
+   * Java object array what is then wrapped in a Java array accessor which
+   * presents the variant array as a Jig array.
+   * 
+   * @param field
+   * @return
+   */
+  
   private DataDef variantArray(FieldSchema field) {
+    
+    // Create an accessor to deserialize a variant array. Since variants
+    // carry their own type information, no type information is require
+    // for array members.
+    
     FieldSchema member = field.member();
     VariantArrayAccessor arrayAccessor = new VariantArrayAccessor( factory );
+    arrayAccessor.bind( deserializer, field.index() );
+    
+    // The constructed object array is cached, so add a reset to clear
+    // the cache on each tuple.
+    
     resets.add( arrayAccessor );
+    
+    // The variant array accessor is presented as an object accessor to
+    // a Java object array accessor.
+    
     ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( arrayAccessor );
+    
+    // The member accessor is one that reads type/object pairs as
+    // "boxed" Java objects. (That is, ints are stored as Integers, etc.)
+    
     BoxedAccessor memberAccessor = new VariantBoxedAccessor( (ObjectAccessor) objArrayAccessor.memberAccessor(), factory );
+    
+    // Create the data element definition that will create the FieldValue API
+    // objects and the corresponding variant container to provide the correct
+    // FieldValue object for each data item type.
+    
     DataDef memberDef = new ScalarDef( member.type(), member.nullable(), memberAccessor );
     return new ListDef( field.nullable(), memberDef, objArrayAccessor );
   }
@@ -273,9 +276,30 @@ public class TupleBuilder {
     return null;
   }
 
+  /**
+   * Maps are deserialized into a Java map, then we use a Java map accessor to
+   * present the Java map as a Jig map.
+   * 
+   * @param field
+   * @return
+   */
+  
   private DataDef buildMap(FieldSchema field) {
+    
+    // The buffer map accessor deserializes the map to a Java map,
+    // which is presented as a Java object.
+    
     BufferMapAccessor accessor = new BufferMapAccessor( factory );
+    accessor.bind( deserializer, field.index() );
+    
+    // The buffer map accessor caches the value for each tuple,
+    // add a reset to clear the cached value on each new tuple.
+    
     resets.add( accessor );
+    
+    // Use a Java map accessor to present the deserialized map to the
+    // client via the Jig map API.
+    
     return new MapDef( field.nullable(), new JavaMapAccessor( accessor, factory ) );
   }
 

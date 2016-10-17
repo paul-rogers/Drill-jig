@@ -30,8 +30,8 @@ public enum DataType
   LOCAL_DATE_TIME( 13, true, "Local-Date-Time", Constants.NOT_IMPLEMENTED ), 
   UTC_DATE_TIME( 14, true, "UTC-Date-Time", Constants.NOT_IMPLEMENTED ), 
   DATE_TIME_SPAN( 15, true, "Date-Time-Span", Constants.NOT_IMPLEMENTED ), 
-  LIST( 16, false, "List", Constants.NOT_IMPLEMENTED ),
-  MAP( 17, false, "Map", Constants.NOT_IMPLEMENTED ),
+  LIST( 16, false, "List", Constants.BLOCK_LENGTH_AND_VALUE ),
+  MAP( 17, false, "Map", Constants.BLOCK_LENGTH_AND_VALUE ),
   
   /**
    * Represents a field that can take on any scalar value.

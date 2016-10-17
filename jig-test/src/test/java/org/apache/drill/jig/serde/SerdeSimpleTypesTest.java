@@ -14,7 +14,7 @@ import org.junit.Test;
  * traffic.
  */
 
-public class SerdeTypesTest {
+public class SerdeSimpleTypesTest {
 
   @Test
   public void testBoolean() throws JigException {
