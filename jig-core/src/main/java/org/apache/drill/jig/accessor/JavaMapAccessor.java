@@ -1,12 +1,14 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.accessor;
 
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.MapValue;
-import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
-import org.apache.drill.jig.types.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.container.VariantFieldValueContainer;
+import org.apache.drill.jig.types.FieldValueFactory;
 
 /**
  * MapValueAccessor (and corresponding MapValue) for a Java

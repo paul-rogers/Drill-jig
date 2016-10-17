@@ -1,4 +1,4 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.accessor;
 
 import java.math.BigDecimal;
 

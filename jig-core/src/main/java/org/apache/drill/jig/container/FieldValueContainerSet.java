@@ -1,4 +1,4 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.container;
 
 import org.apache.drill.jig.api.FieldValue;
 

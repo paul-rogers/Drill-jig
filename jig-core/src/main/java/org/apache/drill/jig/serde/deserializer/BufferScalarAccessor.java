@@ -2,8 +2,8 @@ package org.apache.drill.jig.serde.deserializer;
 
 import java.math.BigDecimal;
 
+import org.apache.drill.jig.accessor.FieldAccessor.*;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.types.FieldAccessor.*;
 
 public abstract class BufferScalarAccessor extends BufferAccessor
     implements BooleanAccessor, Int8Accessor, Int16Accessor, Int32Accessor,

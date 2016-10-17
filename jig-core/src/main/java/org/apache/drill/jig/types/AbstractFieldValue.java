@@ -1,5 +1,6 @@
 package org.apache.drill.jig.types;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.api.FieldValue;
 
 /**

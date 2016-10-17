@@ -3,29 +3,29 @@ package org.apache.drill.jig.extras.array;
 import java.lang.reflect.Array;
 import java.util.List;
 
+import org.apache.drill.jig.accessor.BoxedAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.JavaListAccessor;
+import org.apache.drill.jig.accessor.JavaMapAccessor;
+import org.apache.drill.jig.accessor.NullAccessor;
+import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
+import org.apache.drill.jig.accessor.JavaArrayAccessor.ObjectArrayAccessor;
+import org.apache.drill.jig.accessor.JavaArrayAccessor.PrimitiveArrayAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.impl.ArrayFieldSchemaImpl;
+import org.apache.drill.jig.api.impl.DataDef;
 import org.apache.drill.jig.api.impl.FieldSchemaImpl;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
+import org.apache.drill.jig.api.impl.DataDef.*;
+import org.apache.drill.jig.container.FieldValueContainer;
+import org.apache.drill.jig.container.FieldValueContainerSet;
 import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.extras.array.ArrayFieldHandle.ArrayTupleHandle;
-import org.apache.drill.jig.types.BoxedAccessor;
-import org.apache.drill.jig.types.BoxedAccessor.VariantBoxedAccessor;
-import org.apache.drill.jig.types.DataDef;
-import org.apache.drill.jig.types.DataDef.*;
-import org.apache.drill.jig.types.FieldAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
-import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
-import org.apache.drill.jig.types.FieldValueContainer;
-import org.apache.drill.jig.types.FieldValueContainerSet;
 import org.apache.drill.jig.types.FieldValueFactory;
-import org.apache.drill.jig.types.JavaArrayAccessor.ObjectArrayAccessor;
-import org.apache.drill.jig.types.JavaArrayAccessor.PrimitiveArrayAccessor;
-import org.apache.drill.jig.types.JavaListAccessor;
-import org.apache.drill.jig.types.JavaMapAccessor;
-import org.apache.drill.jig.types.NullAccessor;
 
 /**
  * Create the schema and field value/accessor tree for a result

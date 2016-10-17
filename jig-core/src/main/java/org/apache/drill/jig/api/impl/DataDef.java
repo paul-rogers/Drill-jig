@@ -1,11 +1,21 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.api.impl;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ArrayValueAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
+import org.apache.drill.jig.container.FieldValueContainer;
+import org.apache.drill.jig.container.NullableFieldValueContainer;
+import org.apache.drill.jig.container.SingleFieldValueContainer;
+import org.apache.drill.jig.container.VariantFieldValueContainer;
+import org.apache.drill.jig.types.AbstractFieldValue;
+import org.apache.drill.jig.types.ArrayFieldValue;
+import org.apache.drill.jig.types.ArrayValueImpl;
+import org.apache.drill.jig.types.FieldValueFactory;
+import org.apache.drill.jig.types.MapFieldValue;
 import org.apache.drill.jig.types.ArrayFieldValue.SimpleArrayValueAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ArrayValueAccessor;
-import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
 
 /**
  * Definition of the a field used to build the field values that correspond

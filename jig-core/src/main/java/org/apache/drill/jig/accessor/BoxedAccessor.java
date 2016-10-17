@@ -1,9 +1,10 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.accessor;
 
 import java.math.BigDecimal;
 
+import org.apache.drill.jig.accessor.FieldAccessor.*;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.types.FieldAccessor.*;
+import org.apache.drill.jig.types.FieldValueFactory;
 
 /**
  * Field value accessor backed by a Java object. The caller is responsible

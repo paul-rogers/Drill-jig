@@ -2,7 +2,7 @@ package org.apache.drill.jig.extras.array;
 
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.impl.AbstractTupleValue;
-import org.apache.drill.jig.types.FieldValueContainerSet;
+import org.apache.drill.jig.container.FieldValueContainerSet;
 
 public class ArrayTupleValue extends AbstractTupleValue {
 

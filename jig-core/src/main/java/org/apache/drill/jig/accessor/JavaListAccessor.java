@@ -1,9 +1,10 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.accessor;
 
 import java.util.List;
 
-import org.apache.drill.jig.types.BoxedAccessor.VariantBoxedAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.types.FieldValueFactory;
 
 public class JavaListAccessor implements ArrayAccessor {
   

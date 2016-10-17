@@ -98,7 +98,7 @@ public class TupleSetSerializer extends BaseTupleSetSerde
   }
   
   /**
-   * Null serializer for arrays and maps.
+   * Null serializer for array and map elements.
    */
   
   public static class SerializeNull implements FieldSerializer
@@ -123,7 +123,43 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     }   
   }
   
-  public static class SerializeScalarArray implements FieldSerializer
+  /**
+   * Serializes an array or map. This class defines structures as nestable. Outer
+   * structures are written as:<br>
+   * <pre>[ size contents ]</pre>
+   * Where the size is an unencoded int32 of the entire array
+   * contents. The structure contents are defined by the subclasses.
+   * <p>
+   * When nested, the serializer omits the size argument, just writing
+   * the structure contents (which always includes an element count, not to
+   * be confused with the byte size.)
+   */
+  
+  public static abstract class StructureSerializer implements FieldSerializer
+  {    
+    @Override
+    public void serialize(TupleWriter writer, FieldValue field) {
+      int startPosn = writer.startBlock( );
+      serializeContents( writer, field );
+      writer.endBlock( startPosn );
+    }
+    
+    protected abstract void serializeContents(TupleWriter writer, FieldValue field);
+  }
+  
+  /**
+   * Writes a scalar array as:<br>
+   * <pre>[ size | count | null flags | values ]</pre>
+   * Where the size is an unencoded int32, the count is an
+   * encoded in32, the null flags are options, and the
+   * values are written in the form required for the element
+   * type. Null flags are written only if the array elements
+   * are nullable, and indicate the nullability of each element.
+   * If an element is null, then no value is written for that
+   * element.
+   */
+  
+  public static class SerializeScalarArray extends StructureSerializer
   {
     private FieldSerializer serializer;
     
@@ -132,8 +168,7 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     }  
     
     @Override
-    public void serialize(TupleWriter writer, FieldValue field) {
-      int startPosn = writer.startBlock( );
+    public void serializeContents(TupleWriter writer, FieldValue field) {
       ArrayValue array = field.getArray();
       int n = array.size( );
       writer.writeIntEncoded( n );
@@ -145,9 +180,7 @@ public class TupleSetSerializer extends BaseTupleSetSerde
         if ( ! member.isNull() )
           serializer.serialize( writer, member );
       }
-      writer.endBlock( startPosn );
-    }
-    
+    }    
   }
   
   /**
@@ -156,33 +189,108 @@ public class TupleSetSerializer extends BaseTupleSetSerde
    * type is written for null values (but no data follows the type.)
    */
   
-  public static class SerializeVariantArray implements FieldSerializer
+  public static class SerializeVariantArray extends StructureSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldValue field) {
-      int startPosn = writer.startBlock( );
+    public void serializeContents(TupleWriter writer, FieldValue field) {
       ArrayValue array = field.getArray();
       int n = array.size( );
       writer.writeIntEncoded( n );
       for ( int i = 0;  i < n;  i++ ) {
         writeVariant( writer, array.get(i) );
       }
-      writer.endBlock( startPosn );
     }
   }
   
-  public static class SerializeMap implements FieldSerializer
+  /**
+   * Serializes an array of maps as:<br>
+   * <pre>[ size count [ map0 ] [ map1 ] ... ]</pre>
+   * Where the size is an unencoded int32, the count is the element
+   * count, and each map is serialized in the map format (without
+   * the size header.) If the maps can be null, then writes a
+   * null bit mask first and omits null elements.
+   */
+  
+  public static class SerializeMapArray extends StructureSerializer
   {
     @Override
-    public void serialize(TupleWriter writer, FieldValue field) {
-      int startPosn = writer.startBlock( );
+    public void serializeContents(TupleWriter writer, FieldValue field) {
+      ArrayValue array = field.getArray();
+      int n = array.size( );
+      writer.writeIntEncoded( n );
+      if ( array.memberIsNullable( ) ) {
+        writeNullFlags( writer, array );
+      }
+      SerializeMap elementSerializer = (SerializeMap) getScalarSerializer( DataType.MAP );
+      for ( int i = 0;  i < n;  i++ ) {
+        FieldValue element = array.get( i );
+        if ( ! element.isNull( ) ) {
+          elementSerializer.serializeContents( writer, element );
+        }
+      }
+    }
+  }
+  
+  /**
+   * Serializes an array of arrays using the member element serializer
+   * provided. Only the top-level array carries the field size, the
+   * nested arrays are written without sizes for each member, just the
+   * element count. That is, the format is:<br>
+   * <pre>[ size count
+   *       [ count0 element0.0 element0.1 ... ]
+   *       [ count1 element1.0 element1.1 ... ]
+   *       ... ]</pre>
+   *  Where size is an unencoded int32, count is an encoded int32,
+   *  and the serialized contents of the arrays are as defined by
+   *  the selected array serializer.
+   *  <p>
+   *  This class is, itself, a nestable array, though Drill allows
+   *  only 2-D arrays, not 3-D or higher.
+   */
+  
+  public static class SerializeArrayOfStructure extends StructureSerializer
+  {
+    private StructureSerializer elementSerializer;
+
+    public SerializeArrayOfStructure( StructureSerializer elementSerializer ) {
+      this.elementSerializer = elementSerializer;
+    }
+    
+    @Override
+    public void serializeContents(TupleWriter writer, FieldValue field) {
+      ArrayValue array = field.getArray();
+      int n = array.size( );
+      writer.writeIntEncoded( n );
+      if ( array.memberIsNullable( ) ) {
+        writeNullFlags( writer, array );
+      }
+      for ( int i = 0;  i < n;  i++ ) {
+        FieldValue element = array.get( i );
+        if ( ! element.isNull( ) ) {
+          elementSerializer.serializeContents( writer, element );
+        }
+      }
+    }
+  }
+  
+  /**
+   * Writes a map as:<br>
+   * <pre>[ size count | key1 type1 value1 | key2 type2 value2 | ... ]</pre>
+   * Where the size is an unencoded int 32,
+   * count is an encoded int32, the key is a string
+   * and the value is stored in variant (type + value) format.
+   */
+  
+  public static class SerializeMap extends StructureSerializer
+  {
+    @Override
+    public void serializeContents(TupleWriter writer, FieldValue field) {
       MapValue map = field.getMap();
       writer.writeIntEncoded( map.size() );
       for ( String key : map.keys() ) {
         writer.writeString( key );
         writeVariant( writer, map.get( key ) );
       }
-      writer.endBlock( startPosn );
     }
   }
   
@@ -229,6 +337,10 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     serializers[ DataType.NUMBER.ordinal() ] = new SerializeVariant( );
     serializers[ DataType.NULL.ordinal() ] = new SerializeNull( );
     serializers[ DataType.UNDEFINED.ordinal() ] = new SerializeNull( );
+    
+    // List serializers are not listed here because they must be selected
+    // based on the type of the list elements.
+    
 //    serializers[ DataType.LIST.ordinal() ] = new SerializeArray( serializers );
     serializers[ DataType.MAP.ordinal() ] = new SerializeMap( );
     return serializers;
@@ -245,8 +357,13 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     FieldSchema member = field.member();
     if ( member.type( ).isVariant() )
       return new SerializeVariantArray( );
-    else
+    else if ( member.type( ) == DataType.LIST ) {
+      return new SerializeArrayOfStructure( (StructureSerializer) serializerForSchema( member ) );
+    } else if ( member.type( ) == DataType.MAP ) {
+      return new SerializeArrayOfStructure( (StructureSerializer) getScalarSerializer( DataType.MAP ) );
+    } else {
       return new SerializeScalarArray( serializerForSchema( member ) );
+    }
   }
 
   /**

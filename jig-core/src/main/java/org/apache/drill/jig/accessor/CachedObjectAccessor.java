@@ -1,6 +1,6 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.accessor;
 
-import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
 
 public class CachedObjectAccessor implements ObjectAccessor {
   
@@ -19,5 +19,4 @@ public class CachedObjectAccessor implements ObjectAccessor {
   public Object getObject() {
     return cachedValue;
   }
-
 }

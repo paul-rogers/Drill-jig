@@ -1,10 +1,10 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.accessor;
 
 import java.lang.reflect.Array;
 
+import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
-import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
 
 /**
  * Array accessor for arrays backed by a Java array. The Java array can be a primitive

@@ -2,7 +2,7 @@ package org.apache.drill.jig.serde.deserializer;
 
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.impl.AbstractTupleValue;
-import org.apache.drill.jig.types.FieldValueContainerSet;
+import org.apache.drill.jig.container.FieldValueContainerSet;
 
 public class BufferTupleValue extends AbstractTupleValue {
 

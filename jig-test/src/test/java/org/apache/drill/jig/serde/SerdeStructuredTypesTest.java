@@ -251,7 +251,7 @@ public class SerdeStructuredTypesTest {
               new int[] {100, 200}
               } },
           { new Object[ ] { 
-              new int[] {11, 21, 31, 40},
+              new int[] {11, 21, 31, 41},
               } }
         }
       );

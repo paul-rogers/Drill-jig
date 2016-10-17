@@ -1,6 +1,6 @@
 package org.apache.drill.jig.extras.array;
 
-import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
 
 /**
  * Accesses a field within an array. Uses a tuple handle to point

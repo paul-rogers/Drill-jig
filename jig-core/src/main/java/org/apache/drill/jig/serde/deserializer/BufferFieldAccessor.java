@@ -5,12 +5,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.BooleanAccessor;
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ScalarValue;
-import org.apache.drill.jig.types.FieldAccessor;
-import org.apache.drill.jig.types.FieldAccessor.BooleanAccessor;
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;

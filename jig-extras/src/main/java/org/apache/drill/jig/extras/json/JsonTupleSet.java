@@ -7,13 +7,13 @@ import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.impl.AbstractTupleValue;
+import org.apache.drill.jig.container.FieldValueContainerSet;
 import org.apache.drill.jig.extras.json.JsonAccessor.TupleObjectAccessor;
 import org.apache.drill.jig.extras.json.ObjectParser.JsonObjectNode;
 import org.apache.drill.jig.extras.json.reader.CapturingTupleReader;
 import org.apache.drill.jig.extras.json.reader.JsonScannerException;
 import org.apache.drill.jig.extras.json.reader.JsonTupleReader;
 import org.apache.drill.jig.extras.json.reader.ReplayTupleReader;
-import org.apache.drill.jig.types.FieldValueContainerSet;
 import org.apache.drill.jig.types.FieldValueFactory;
 
 public class JsonTupleSet implements TupleSet

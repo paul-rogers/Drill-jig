@@ -1,10 +1,11 @@
 package org.apache.drill.jig.types;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.exception.ValueConversionError;
-import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
 
 public class MapFieldValue extends AbstractStructuredValue {
 

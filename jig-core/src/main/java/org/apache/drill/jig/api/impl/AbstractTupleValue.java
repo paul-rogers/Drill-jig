@@ -1,10 +1,10 @@
 package org.apache.drill.jig.api.impl;
 
+import org.apache.drill.jig.accessor.FieldAccessor.Resetable;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.TupleValue;
-import org.apache.drill.jig.types.FieldAccessor.Resetable;
-import org.apache.drill.jig.types.FieldValueContainerSet;
+import org.apache.drill.jig.container.FieldValueContainerSet;
 
 public abstract class AbstractTupleValue implements TupleValue {
 

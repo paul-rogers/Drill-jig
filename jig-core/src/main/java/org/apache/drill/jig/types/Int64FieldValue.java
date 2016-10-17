@@ -2,8 +2,9 @@ package org.apache.drill.jig.types;
 
 import java.math.BigDecimal;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.Int64Accessor;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.types.FieldAccessor.Int64Accessor;
 
 /**
  * Field value backed by a long value.

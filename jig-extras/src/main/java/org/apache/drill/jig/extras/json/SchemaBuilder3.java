@@ -3,23 +3,23 @@ package org.apache.drill.jig.extras.json;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.NullAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.impl.ArrayFieldSchemaImpl;
+import org.apache.drill.jig.api.impl.DataDef;
 import org.apache.drill.jig.api.impl.FieldSchemaImpl;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
+import org.apache.drill.jig.api.impl.DataDef.*;
+import org.apache.drill.jig.container.FieldValueContainer;
+import org.apache.drill.jig.container.FieldValueContainerSet;
 import org.apache.drill.jig.extras.json.ObjectParser.*;
 import org.apache.drill.jig.extras.json.JsonAccessor.*;
-import org.apache.drill.jig.types.DataDef;
-import org.apache.drill.jig.types.DataDef.*;
-import org.apache.drill.jig.types.FieldAccessor;
-import org.apache.drill.jig.types.FieldValueContainer;
-import org.apache.drill.jig.types.FieldValueContainerSet;
-import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
-import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.types.FieldValueFactory;
-import org.apache.drill.jig.types.NullAccessor;
 
 /**
  * Builds a set of accessors to translate a JSON object of a particular schema

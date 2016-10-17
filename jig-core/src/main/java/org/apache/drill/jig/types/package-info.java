@@ -62,3 +62,6 @@
  * </ul>
  */
 package org.apache.drill.jig.types;
+
+import org.apache.drill.jig.api.impl.DataDef;
+import org.apache.drill.jig.container.FieldValueContainer;

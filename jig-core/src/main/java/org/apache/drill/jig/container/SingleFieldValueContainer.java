@@ -1,6 +1,8 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.container;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.api.FieldValue;
+import org.apache.drill.jig.types.AbstractFieldValue;
 
 /**
  * Field value container for a single field value. Used for non-null, non-variant

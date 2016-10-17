@@ -1,8 +1,12 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.container;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.TypeAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldValue;
-import org.apache.drill.jig.types.FieldAccessor.TypeAccessor;
+import org.apache.drill.jig.types.AbstractFieldValue;
+import org.apache.drill.jig.types.FieldValueCache;
+import org.apache.drill.jig.types.FieldValueFactory;
 
 /**
  * Field value container for a variant field. The container holds a cache

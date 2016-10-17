@@ -9,22 +9,22 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
+import org.apache.drill.jig.accessor.CachedObjectAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.BooleanAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.DecimalAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.Int64Accessor;
+import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.StringAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.TypeAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.MapValue;
+import org.apache.drill.jig.container.VariantFieldValueContainer;
 import org.apache.drill.jig.extras.json.JsonTupleSet.JsonTupleValue;
-import org.apache.drill.jig.types.CachedObjectAccessor;
-import org.apache.drill.jig.types.FieldAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ArrayAccessor;
-import org.apache.drill.jig.types.FieldAccessor.BooleanAccessor;
-import org.apache.drill.jig.types.FieldAccessor.DecimalAccessor;
-import org.apache.drill.jig.types.FieldAccessor.Int64Accessor;
-import org.apache.drill.jig.types.FieldAccessor.MapValueAccessor;
-import org.apache.drill.jig.types.FieldAccessor.ObjectAccessor;
-import org.apache.drill.jig.types.FieldAccessor.StringAccessor;
-import org.apache.drill.jig.types.FieldAccessor.TypeAccessor;
 import org.apache.drill.jig.types.FieldValueFactory;
-import org.apache.drill.jig.types.VariantFieldValueContainer;
 
 /**
  * <ul>

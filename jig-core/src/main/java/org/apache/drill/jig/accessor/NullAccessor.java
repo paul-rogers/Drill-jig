@@ -1,4 +1,4 @@
-package org.apache.drill.jig.types;
+package org.apache.drill.jig.accessor;
 
 /**
  * Trivial accessor used for fields of type Null or Undefined.

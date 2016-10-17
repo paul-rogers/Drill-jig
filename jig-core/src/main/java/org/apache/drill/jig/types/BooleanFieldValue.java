@@ -2,8 +2,9 @@ package org.apache.drill.jig.types;
 
 import java.math.BigDecimal;
 
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.BooleanAccessor;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.types.FieldAccessor.BooleanAccessor;
 
 /**
  * Field value backed by a boolean.
