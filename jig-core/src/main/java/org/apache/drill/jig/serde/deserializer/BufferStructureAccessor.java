@@ -243,6 +243,10 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
     }  
   }
   
+  /**
+   * Reads an array of Variants into a Java Object array.
+   */
+  
   public static class VariantArrayAccessor extends BufferStructureAccessor {
 
     private final FieldValueCache valueCache;
@@ -274,9 +278,19 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
     }  
   }
   
+  /**
+   * Reads an array of structured types into a Java Object array.
+   */
+  
   public static class ArrayOfStructureAccessor extends BufferStructureAccessor {
 
     private BufferStructureAccessor innerAccessor;
+    
+    /**
+     * Constructor.
+     * @param innerAccessor accesssor for the structure that appears as
+     * each element of the array.
+     */
     
     public ArrayOfStructureAccessor( BufferStructureAccessor innerAccessor ) {
       this.innerAccessor = innerAccessor;
@@ -299,6 +313,10 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       return array;
     }  
   }
+  
+  /**
+   * Reads a serialized map into a Java Map object.
+   */
   
   public static class BufferMapAccessor extends BufferStructureAccessor {
 
@@ -330,6 +348,5 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       }
       return map;
     }
-
   }
 }

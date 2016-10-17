@@ -81,6 +81,7 @@ public abstract class BufferScalarAccessor extends BufferAccessor
       return deserializer.isNull( index );
     }
     
+    @Override
     protected void seek( ) {
       deserializer.seek( index );
     }
