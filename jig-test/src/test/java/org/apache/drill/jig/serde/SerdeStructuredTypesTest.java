@@ -1,7 +1,5 @@
 package org.apache.drill.jig.serde;
 
-import static org.junit.Assert.*;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,22 +28,12 @@ public class SerdeStructuredTypesTest {
 
   @Test
   public void testFancyMap() throws JigException {
-    Map<String,Object> map1 = new HashMap<>( );
-    map1.put( "one", 1 );
-    map1.put( "two", 2L );
-    map1.put( "three", 3d );
-    map1.put( "four", BigDecimal.ONE );
-    map1.put( "five", null );
-    map1.put( "six", "mumble" );
-    Map<String,Object> map2 = new HashMap<>( );
-    map2.put( "a", "a-value" );
-    map2.put( "b", 10 );
     Batch batch = new Batch(
         new String[] { "col" },
         new Object[][] {
-          { map1 },
+          { SerdeTestUtils.map1( ) },
           { null },
-          { map2 }
+          { SerdeTestUtils.map2( ) }
         }
       );
 
@@ -258,4 +246,142 @@ public class SerdeStructuredTypesTest {
 
     SerdeTestUtils.validateSerde( batch );
   }
+
+  @Test
+  public void testArrayOfNullablePrimitiveArray() throws JigException {
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { 
+              new int[] {1, 2, 3},
+              null,
+              new int[] {100, 200}
+              } },
+          { new Object[ ] { 
+              new int[] {11, 21, 31, 41},
+              null
+              } }
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+  
+  @Test
+  public void testNullableArrayOfPrimitiveArray() throws JigException {
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { 
+              new int[] {1, 2, 3},
+              new int[] {10, 20, 30, 40},
+              new int[] {100, 200}
+              } },
+          { null },
+          { new Object[ ] { 
+              new int[] {11, 21, 31, 41},
+              } }
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+
+  @Test
+  public void testArrayOfStringArray() throws JigException {
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { 
+              new String[] {"a", "b", "c" },
+              new String[] {"d", "e" },
+              } },
+          { new Object[ ] { 
+              new String[] {"x", "y" },
+              } }
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+
+  @Test
+  public void testArrayOfMap() throws JigException {
+
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { SerdeTestUtils.map1( ), SerdeTestUtils.map2( ) } },
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+
+  @Test
+  public void testArrayOfNullableMap() throws JigException {
+
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { SerdeTestUtils.map1( ), null, SerdeTestUtils.map2( ) } },
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+
+  @Test
+  public void testNullableArrayOfMap() throws JigException {
+
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { SerdeTestUtils.map1( ), SerdeTestUtils.map2( ) } },
+          { null },
+          { new Object[ ] { SerdeTestUtils.map2( ) } }
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+  
+  @Test
+  public void testArrayOfVariantArray() throws JigException {
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { 
+              new Object[] {"a", 10, BigDecimal.ONE },
+              new Object[] {"d", null, 20 },
+              } },
+          { new Object[ ] { 
+              new Object[] {"x", 40, null },
+              } }
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+  
+  @Test
+  public void testArrayOfNullableVariantArray() throws JigException {
+    Batch batch = new Batch(
+        new String[] { "col" },
+        new Object[][] {
+          { new Object[ ] { 
+              new Object[] {"a", 10, BigDecimal.ONE },
+              null,
+              new Object[] {"d", null, 20 },
+              } },
+          { new Object[ ] { 
+              new Object[] {"x", 40, null },
+              null
+              } }
+        }
+      );
+
+    SerdeTestUtils.validateSerde( batch );
+  }
+
 }

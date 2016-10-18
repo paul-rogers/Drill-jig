@@ -5,6 +5,12 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.accessor.FieldAccessor.*;
 import org.apache.drill.jig.api.DataType;
 
+/**
+ * Accessor to read simple "scalar" values from the serialized buffer.
+ * Different forms exist for top-level and nested fields, and for
+ * top-level variant fields.
+ */
+
 public abstract class BufferScalarAccessor extends BufferAccessor
     implements BooleanAccessor, Int8Accessor, Int16Accessor, Int32Accessor,
     Int64Accessor, Float32Accessor, Float64Accessor, DecimalAccessor, StringAccessor {
@@ -65,6 +71,12 @@ public abstract class BufferScalarAccessor extends BufferAccessor
     return reader.readString();
   }
   
+  /**
+   * Reads a scalar field value. Field values are randomly accessed on
+   * demand by the client, so each read is prefaced with a seek in the
+   * buffer to the desired value position.
+   */
+  
   public static class BufferScalarFieldAccessor extends BufferScalarAccessor
   {
     protected int index;
@@ -87,6 +99,12 @@ public abstract class BufferScalarAccessor extends BufferAccessor
     }
   }
   
+  /**
+   * Accessor to read a variant. A variant is written as a combination of
+   * one-byte type code, followed by value serialized according to that
+   * type. Seeking to the value must skip the type code.
+   */
+  
   public static class BufferVariantFieldAccessor extends BufferScalarFieldAccessor implements TypeAccessor
   {
     @Override
@@ -95,13 +113,21 @@ public abstract class BufferScalarAccessor extends BufferAccessor
       return DataType.typeForCode( reader.readByte() );
     }   
     
+    @Override
     protected void seek( ) {
       deserializer.seekVariant( index );
     }
   }
   
+  /**
+   * Accessor that reads array element or map values which are stored in
+   * the buffer sequentially. No seeking is done to read the sequential
+   * values.
+   */
+  
   public static class BufferMemberAccessor extends BufferScalarFieldAccessor {
     
+    @Override
     protected void seek( ) { }
   }
 }

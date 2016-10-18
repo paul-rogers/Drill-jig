@@ -9,13 +9,16 @@ import org.apache.drill.jig.serde.BaseTupleSetSerde;
 public class TupleSetDeserializer extends BaseTupleSetSerde
 {
   protected TupleReader reader = new TupleReaderV1( );
-  private final int fieldTypeCodes[];
+  private final DataType fieldTypes[];
   protected final int fieldIndexes[];
   
   public TupleSetDeserializer( TupleSchema schema ) {
     super( schema );
-    fieldTypeCodes = new int[ fieldCount ];
+    fieldTypes = new DataType[ fieldCount ];
     fieldIndexes = new int[ fieldCount ];
+    for ( int i = 0;  i < schema.count( );  i++ ) {
+      fieldTypes[i] = schema.field(i).type( );
+    }
   }
   
   /**
@@ -44,14 +47,14 @@ public class TupleSetDeserializer extends BaseTupleSetSerde
       int index = -1;
       if ( ! isNull[i] ) {
         index = reader.position( );
-        skipField( i );
+        skipField( fieldTypes[i] );
       }
       fieldIndexes[i] = index;
     }
   }
 
-  private void skipField(int i) {
-    skipFieldOfType( fieldTypeCodes[i] );
+  private void skipField( DataType type ) {
+    skipFieldOfType( type.typeCode() );
   }
   
   private void skipFieldOfType( int type )

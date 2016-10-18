@@ -39,7 +39,7 @@ import org.apache.drill.jig.types.FieldValueFactory;
  * </ul>
  */
 
-public class SchemaBuilder3 {
+public class SchemaBuilder {
 
   public static class Context {
     String prefix;
@@ -100,6 +100,7 @@ public class SchemaBuilder3 {
       }
     }
     
+    @Override
     public void collectFields(DataDef[] fieldDefs) {
       for ( SchemaNode node : children ) {
         node.collectFields( fieldDefs );
@@ -304,7 +305,7 @@ public class SchemaBuilder3 {
   FieldValueFactory factory = new FieldValueFactory( );
   private FieldValueContainerSet fieldValues;
   
-  public SchemaBuilder3( JsonObjectNode root ) {
+  public SchemaBuilder( JsonObjectNode root ) {
     this.jsonRoot = root;
   }
   

@@ -1,13 +1,15 @@
 package org.apache.drill.jig.serde;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
-import static org.junit.Assert.*;
+import java.util.Map;
 
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
@@ -18,7 +20,6 @@ import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
-import org.apache.drill.jig.api.array.TestArrayImpl;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.extras.array.ArrayResultCollection;
 import org.apache.drill.jig.extras.array.Batch;
@@ -27,6 +28,24 @@ import org.apache.drill.jig.serde.serializer.TupleSetSerializer;
 
 public class SerdeTestUtils {
 
+  public static Map<String,Object> map1( ) {
+    Map<String,Object> map1 = new HashMap<>( );
+    map1.put( "one", 1 );
+    map1.put( "two", 2L );
+    map1.put( "three", 3d );
+    map1.put( "four", BigDecimal.ONE );
+    map1.put( "five", null );
+    map1.put( "six", "mumble" );
+    return map1;
+  }
+
+  public static Map<String,Object> map2( ) {
+    Map<String,Object> map2 = new HashMap<>( );
+    map2.put( "a", "a-value" );
+    map2.put( "b", 10 );
+    return map2;
+  }
+  
   public static ByteBuffer loadBuffer(TupleSet tuples) throws JigException {
     ByteBuffer buf = ByteBuffer.allocate( 4096 );
     TupleSetSerializer serializer = new TupleSetSerializer( tuples.schema() );

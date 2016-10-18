@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
-import org.apache.drill.jig.accessor.FieldAccessor.Resetable;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.serde.deserializer.BufferScalarAccessor.BufferMemberAccessor;
 import org.apache.drill.jig.types.AbstractFieldValue;
@@ -203,20 +202,6 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
     }
     
     protected abstract Object readObject( TupleReader reader );
-    
-    protected boolean[] readNullFlags( TupleReader reader, int n ) {
-      boolean isNull[] = new boolean[n];
-      int byteCount = (n+7)/8;
-      int posn = 0;
-      for ( int i = 0;  i < byteCount;  i++ ) {
-        int flags = reader.readByte();
-        for ( int j = 0;  j < 8  &&  posn < n;  j++ ) {
-          isNull[posn++] = (flags & 0x80) != 0;
-          flags <<= 1;
-        }
-      }
-      return isNull;     
-    }
   }
   
   public static class DecimalArrayAccessor extends BufferObjectArrayAccessor {
@@ -282,9 +267,9 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
    * Reads an array of structured types into a Java Object array.
    */
   
-  public static class ArrayOfStructureAccessor extends BufferStructureAccessor {
+  public static class ArrayOfStructureAccessor extends BufferObjectArrayAccessor {
 
-    private BufferStructureAccessor innerAccessor;
+    private final BufferStructureAccessor innerAccessor;
     
     /**
      * Constructor.
@@ -292,7 +277,8 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
      * each element of the array.
      */
     
-    public ArrayOfStructureAccessor( BufferStructureAccessor innerAccessor ) {
+    public ArrayOfStructureAccessor( BufferStructureAccessor innerAccessor, boolean nullable ) {
+      super( nullable );
       this.innerAccessor = innerAccessor;
     }
 
@@ -301,17 +287,11 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       super.bind( deserializer, index );
       innerAccessor.bind( deserializer, 0 );
     }
-
+    
     @Override
-    protected Object buildStructure() {
-      TupleReader reader = deserializer.reader( );
-      int size = reader.readIntEncoded();
-      Object array[] = new Object[ size ];
-      for ( int i = 0;  i < size;  i++ ) {
-        array[i] = innerAccessor.buildStructure();
-      }
-      return array;
-    }  
+    protected Object readObject(TupleReader reader) {
+      return innerAccessor.buildStructure();
+    }
   }
   
   /**
@@ -348,5 +328,19 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       }
       return map;
     }
+  }
+  
+  protected boolean[] readNullFlags( TupleReader reader, int n ) {
+    boolean isNull[] = new boolean[n];
+    int byteCount = (n+7)/8;
+    int posn = 0;
+    for ( int i = 0;  i < byteCount;  i++ ) {
+      int flags = reader.readByte();
+      for ( int j = 0;  j < 8  &&  posn < n;  j++ ) {
+        isNull[posn++] = (flags & 0x80) != 0;
+        flags <<= 1;
+      }
+    }
+    return isNull;     
   }
 }

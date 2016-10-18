@@ -26,7 +26,7 @@ public class TestSchemaBuilder {
     ObjectParser parser = new ObjectParser( new FieldValueFactory( ) );
     JsonObjectNode tuple = parser.parseObject( obj );
 
-    SchemaBuilder3 sb = new SchemaBuilder3( tuple );
+    SchemaBuilder sb = new SchemaBuilder( tuple );
     TupleSchema schema = sb.build();
     
     assertEquals( 8, schema.count() );
@@ -113,7 +113,7 @@ public class TestSchemaBuilder {
     ObjectParser parser = new ObjectParser( new FieldValueFactory( ) );
     JsonObjectNode tuple = parser.parseObject( obj );
 
-    SchemaBuilder3 sb = new SchemaBuilder3( tuple );
+    SchemaBuilder sb = new SchemaBuilder( tuple );
     sb.flatten( true );
     TupleSchema schema = sb.build();
     

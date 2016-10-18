@@ -8,12 +8,16 @@ import java.util.Map;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.json.JsonString;
 import javax.json.JsonValue;
 
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.types.FieldValueFactory;
+
+/**
+ * Parses a JSON object into a Jig schema, inferring Jig fields and types from
+ * the JSON fields.
+ */
 
 public class ObjectParser {
   

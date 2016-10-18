@@ -44,7 +44,7 @@ public class TestArrayImpl {
     assertEquals( 3, schema.count() );
     assertEquals( "str", schema.field( 0 ).name() );
     assertEquals( DataType.STRING, schema.field( 0 ).type() );
-    assertTrue( schema.field(0).nullable() );
+    assertFalse( schema.field(0).nullable() );
     assertEquals( "int32", schema.field( 1 ).name() );
     assertEquals( DataType.INT32, schema.field( 1 ).type() );
     assertEquals( "boolean", schema.field( 2 ).name() );

@@ -3,6 +3,11 @@ package org.apache.drill.jig.accessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.Resetable;
 
+/**
+ * Object accessor that caches the retrieved object for the duration of
+ * a tuple.
+ */
+
 public class ReadOnceObjectAccessor implements ObjectAccessor, Resetable {
   
   private final ObjectAccessor sourceAccessor;
@@ -31,5 +36,4 @@ public class ReadOnceObjectAccessor implements ObjectAccessor, Resetable {
     }
     return cachedValue;
   }
-
 }

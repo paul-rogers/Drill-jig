@@ -14,7 +14,6 @@ import org.apache.drill.jig.accessor.JavaArrayAccessor.PrimitiveArrayAccessor;
 import org.apache.drill.jig.accessor.JavaMapAccessor;
 import org.apache.drill.jig.accessor.NullAccessor;
 import org.apache.drill.jig.accessor.ReadOnceObjectAccessor;
-import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.impl.AbstractTupleValue;
@@ -28,6 +27,7 @@ import org.apache.drill.jig.serde.deserializer.BufferScalarAccessor.BufferScalar
 import org.apache.drill.jig.serde.deserializer.BufferScalarAccessor.BufferVariantFieldAccessor;
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.ArrayOfStructureAccessor;
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.BooleanArrayAccessor;
+import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.BufferMapAccessor;
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.DecimalArrayAccessor;
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.Float32ArrayAccessor;
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.Float64ArrayAccessor;
@@ -37,10 +37,34 @@ import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.Int64Arra
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.Int8ArrayAccessor;
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.StringArrayAccessor;
 import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.VariantArrayAccessor;
-import org.apache.drill.jig.serde.deserializer.BufferStructureAccessor.BufferMapAccessor;
 import org.apache.drill.jig.types.FieldValueFactory;
 
+/**
+ * Build the tuple value that deserializes fields on demand, materializing
+ * lists and maps, and caching values where needed. The tuple value is built
+ * up over several steps:
+ * <ol>
+ * <li>Start with the schema of each field.</li>
+ * <li>Create an intermediate node of the proper type. A wide range of
+ * strategies are used to deserialize data; the intermediate nodes capture
+ * that logic.</li>
+ * <li>Use the intermediate nodes and/or field types to build up the
+ * deserialization accessors that read data from an input buffer.</li>
+ * <li>For materialized arrays and maps, Java object accessors that
+ * present data as Jig types.</li>
+ * <li>{@link DataDef} nodes that define the required field values and
+ * containers.</li>
+ * <li>Finally, the assembled tuple value.</li>
+ * </ul>
+ */
+
 public class TupleBuilder {
+  
+  /**
+   * The value node represents either a field (top level within a tuple)
+   * or a nested item (in a list). The subclasses abstract out the specialized
+   * logic needed to construct each field type.
+   */
   
   public abstract static class ValueNode {
     FieldSchema field;
@@ -51,9 +75,25 @@ public class TupleBuilder {
       this.field = field;
     }
     
+    /**
+     * Bind top-level fields to the serializer and field index.
+     * @param deserializer
+     */
+    
     public abstract void bind( TupleSetDeserializer deserializer );
+    
+    /**
+     * Construct the accessors needed to present the field value.
+     * 
+     * @param factory
+     */
+    
     public abstract void buildField( FieldValueFactory factory );
   }
+  
+  /**
+   * Represents a field of type NULL or UNDEFINED.
+   */
   
   public static class NullNode extends ValueNode {
 
@@ -67,8 +107,16 @@ public class TupleBuilder {
     public void bind(TupleSetDeserializer deserializer) { }
 
     @Override
-    public void buildField(FieldValueFactory factory) { }
+    public void buildField(FieldValueFactory factory) {
+      dataDef = new ScalarDef( field.type(), field.nullable(), accessor );
+    }
   }
+  
+  /**
+  * Jig types that correspond to primitive Java types are deserialized into a
+  * Java primitive array of the proper type. Then we use a Java primitive array
+  * accessor to present the primitive Java array as a Jig array.
+  */
   
   public static class ScalarNode extends ValueNode {
 
@@ -90,14 +138,74 @@ public class TupleBuilder {
     }
   }
   
+  /**
+   * Represents a Jig type deserialized into a Java structure such as an array
+   * or Map. A deserializer accessor materializes the value as a Java
+   * structure. A caching accessor caches the value per tuple to avoid
+   * excess deserializations. A Java object accessor then presents the
+   * object as the proper Jig structure type.
+   */
+  
   public abstract static class StructureNode extends ValueNode {
     
+    /**
+     * The accessor used to deserialize the structure.
+     */
+    
     protected BufferStructureAccessor accessor;
+    
+    /**
+     * The accessor used to fetch the structure as a Java object.
+     * This accessor inserts a caching layer above the deserializer.
+     * The caching layer is used only for top-level structures, but
+     * not for structures nested inside of a list.
+     */
+    
+    protected ObjectAccessor source;
     
     public StructureNode(FieldSchema field, BufferStructureAccessor accessor ) {
       super( field );
       this.accessor = accessor;
+      
+      // The buffer structure accessor deserializes the structure to a Java Map,
+      // or array which is presented as a Java object.
+      
+      ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( accessor );
+      
+      // The read once accessor caches the value for each tuple,
+      // add a reset to clear the cached value on each new tuple.
+      
+      resetable = cache;
+      this.source = cache;
+   }
+    
+    @Override
+    public void bind(TupleSetDeserializer deserializer) {      
+      accessor.bind( deserializer, field.index() );
+    }
+
+    @Override
+    public void buildField(FieldValueFactory factory) {
+      buildJavaAccessor( source, factory );
+    }
+    
+    /**
+     * Builds the accessor to present a Java map or array. The source
+     * object accessor is the cached object accessor (for top-level fields)
+     * or the member accessor for a parent list.
+     * 
+     * @param objAccessor
+     * @param factory
+     */
+    
+    protected abstract void buildJavaAccessor( ObjectAccessor objAccessor, 
+                                               FieldValueFactory factory );
   }
+  
+  /**
+   * Represents the various Java array types used to hold deserialized
+   * lists.
+   */
   
   public abstract static class ListNode extends StructureNode {
     
@@ -107,18 +215,22 @@ public class TupleBuilder {
       super( field, accessor );
       this.member = field.member( );
     }
-   
-    @Override
-    public void bind(TupleSetDeserializer deserializer) {      
-      accessor.bind( deserializer, field.index() );
-    }
     
-    protected void define( JavaArrayAccessor arrayAccessor, FieldAccessor memberAccessor ) {
+    /**
+     * Define the field definition for a list and its elements. Used for the
+     * simple case in which the list contains scalar elements (primitives
+     * or simple objects.)
+     * 
+     * @param arrayAccessor
+     * @param elementAccessor
+     */
+    
+    protected void define( JavaArrayAccessor arrayAccessor, FieldAccessor elementAccessor ) {
       
       // Define the member and array data elements. The definitions will build the
       // field values and field value containers.
       
-      DataDef memberDef = new ScalarDef( member.type(), member.nullable(), memberAccessor );
+      DataDef memberDef = new ScalarDef( member.type(), member.nullable(), elementAccessor );
       dataDef = new ListDef( field.nullable(), memberDef, arrayAccessor );
     }
   }
@@ -142,25 +254,13 @@ public class TupleBuilder {
     }
 
     @Override
-    public void buildField(FieldValueFactory factory) {
-      
-      // The deserialized array is cached per-tuple, so add a reset to clear the
-      // cached value.
-      
-      ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( accessor );
-      resetable = cache;
+    protected void buildJavaAccessor( ObjectAccessor objAccessor, FieldValueFactory factory ) {
       
       // Build a Java primitive array accessor to present our primitive array as
       // a Jig array.
       
-      PrimitiveArrayAccessor arrayAccessor = new PrimitiveArrayAccessor( cache, member.type() );
+      PrimitiveArrayAccessor arrayAccessor = new PrimitiveArrayAccessor( objAccessor, member.type() );
       define( arrayAccessor, arrayAccessor.memberAccessor( ) );
-    }
-
-    @Override
-    protected void buildNested() {
-      // TODO Auto-generated method stub
-      
     }
   }
   
@@ -170,11 +270,12 @@ public class TupleBuilder {
    * then presented as an object to a Java Object array accessor, which presents
    * the array to the client using the Jig Array API.
    * <p>
-   * Create a variant array. A variant array is an array that holds any kind
+   * Also represents a variant array. A variant array is an array that holds any kind
    * of scalar value. Each value is written as a type/value pair. (Nulls are
    * written as the NULL type with no value.) This array is deserialized as a
    * Java object array what is then wrapped in a Java array accessor which
-   * presents the variant array as a Jig array.
+   * presents the variant array as a Jig array. Since the type of elements
+   * varies, elements are represented in boxed (object) form.
    */
   
   public static class ObjectListNode extends ListNode {
@@ -185,24 +286,22 @@ public class TupleBuilder {
     }
 
     @Override
-    public void buildField(FieldValueFactory factory) {
-      // The provided array accessor deserializes the array into a Java object
-      // array, and presents it as a Java object.
-      
-       // The array deserializer caches the deserialized Java array, so add it
-      // as a per-tuple rest.
-      
-      ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( accessor );
-      resetable = cache;
+    protected void buildJavaAccessor( ObjectAccessor objAccessor, FieldValueFactory factory ) {
       
       // Create the accessor that presents the Java object array using the Jig
       // Array API.
       
-      ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( cache );
+      ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( objAccessor );
       ObjectAccessor memberObjAccessor = (ObjectAccessor) objArrayAccessor.memberAccessor();
       
       BoxedAccessor memberAccessor;
       if ( member.type( ).isVariant( ) ) {
+        
+        // The member accessor is one that reads type/object pairs as
+        // "boxed" Java objects. (That is, ints are stored as Integers, etc.)
+        
+        memberAccessor = new VariantBoxedAccessor( memberObjAccessor, factory );
+      } else {
         
         // The member values are "boxed" Java objects. (Not really boxed for String
         // and decimal, but the idea also works for boxed Integers, etc.)
@@ -210,33 +309,39 @@ public class TupleBuilder {
         // declared member type
         
         memberAccessor = new BoxedAccessor( memberObjAccessor );
-      } else {
-        
-        // The member accessor is one that reads type/object pairs as
-        // "boxed" Java objects. (That is, ints are stored as Integers, etc.)
-        
-        memberAccessor = new VariantBoxedAccessor( memberObjAccessor, factory );
       }
       
       define( objArrayAccessor, memberAccessor );
-    }
-
-    @Override
-    protected void buildNested() {
-      // TODO Auto-generated method stub
-      
-    }
-    
+    }   
   }
+  
+  /**
+   * Represents an array of structures (list of list or list of Map).
+   * The structures are deserialized using the proper deserializer for
+   * the type of structure. Then, the deserialized structures are
+   * assembled into a Java object array, which is then presented as a Jig
+   * array.
+   */
   
   public static class StructureListNode extends ListNode {
 
-    ValueNode element;
+    StructureNode element;
     
     public StructureListNode(FieldSchema field,
         StructureNode elementNode ) {
-      super( field, new ArrayOfStructureAccessor( elementNode.accessor ) );
+      super( field, new ArrayOfStructureAccessor( elementNode.accessor,
+                                            field.member( ).nullable() ) );
       element = elementNode;
+    }
+
+    @Override
+    protected void buildJavaAccessor(ObjectAccessor objAccessor, FieldValueFactory factory) {
+      if ( source == null )
+        throw new IllegalStateException( "Lists can nest to only 1 level" );
+      ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( objAccessor );
+      ObjectAccessor memberAccessor = (ObjectAccessor) objArrayAccessor.memberAccessor();
+      element.buildJavaAccessor( memberAccessor, factory );
+      dataDef = new ListDef( field.nullable(), element.dataDef, objArrayAccessor );
     }
   }
   
@@ -252,33 +357,13 @@ public class TupleBuilder {
     }
 
     @Override
-    public void bind(TupleSetDeserializer deserializer) {
-      accessor.bind( deserializer, field.index() );
-    }
-
-    @Override
-    public void buildField(FieldValueFactory factory) {
-      // The buffer map accessor deserializes the map to a Java map,
-      // which is presented as a Java object.
-      
-      ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( accessor );
-      
-      // The buffer map accessor caches the value for each tuple,
-      // add a reset to clear the cached value on each new tuple.
-      
-      resetable = cache;
+    protected void buildJavaAccessor( ObjectAccessor objAccessor, FieldValueFactory factory ) {
       
       // Use a Java map accessor to present the deserialized map to the
       // client via the Jig map API.
       
-      dataDef = new MapDef( field.nullable(), new JavaMapAccessor( cache, factory ) );
+      dataDef = new MapDef( field.nullable(), new JavaMapAccessor( objAccessor, factory ) );
     }
-
-    private void buildNested() {
-      // TODO Auto-generated method stub
-      
-    }
-
   }
 
   private TupleSetDeserializer deserializer;
@@ -292,25 +377,9 @@ public class TupleBuilder {
   
   public AbstractTupleValue build( TupleSchema schema ) {
     int n = schema.count();
-    ValueNode nodes[] = new ValueNode[n];
-    for ( int i = 0; i < n;  i++ ) {
-      nodes[i] = buildNode( schema.field( i ) );
-      nodes[i].bind(deserializer);
-      nodes[i].buildField(factory);
-    }
-    DataDef defs[] = new DataDef[n];
-    for ( int i = 0; i < n;  i++ ) {
-      ValueNode node = nodes[i];
-      defs[i] = node.dataDef;
-      if ( node.resetable != null )
-        resets.add( node.resetable );
-    }
-    for ( int i = 0;  i < n;  i++ ) {
-      defs[i].build( factory );
-    }
     FieldValueContainer containers[] = new FieldValueContainer[n];
-    for ( int i = 0;  i < n;  i++ ) {
-      containers[i] = defs[i].container;
+    for ( int i = 0; i < n;  i++ ) {
+      containers[i] = buildContainer( schema.field( i ) );
     }
     FieldValueContainerSet containerSet = new FieldValueContainerSet( containers );
     BufferTupleValue tuple = new BufferTupleValue( schema, containerSet );
@@ -321,6 +390,26 @@ public class TupleBuilder {
     return tuple;
   }
   
+  /**
+   * Build the container of field values for the field. Builds an intermediate
+   * node based on the field type, then uses that node to build the
+   * deserializer accessors and (for structured types), the intermediate
+   * Java representations.
+   * 
+   * @param field
+   * @return
+   */
+  
+  private FieldValueContainer buildContainer(FieldSchema field) {
+    ValueNode node = buildNode( field );
+    node.bind(deserializer);
+    node.buildField(factory);
+    if ( node.resetable != null )
+      resets.add( node.resetable );
+    node.dataDef.build( factory );
+    return node.dataDef.container;
+  }
+
   private ValueNode buildNode(FieldSchema field) {
     switch ( field.type() ) {
     case BOOLEAN:
@@ -356,71 +445,18 @@ public class TupleBuilder {
     }
   }
 
-  private DataDef buildFieldDef(FieldSchema field) {
-    switch ( field.type() ) {
-    case BOOLEAN:
-    case DECIMAL:
-    case FLOAT32:
-    case FLOAT64:
-    case INT16:
-    case INT32:
-    case INT64:
-    case INT8:
-    case STRING:
-      return buildScalar( field );
-    case LIST:
-      return buildList( field );
-    case MAP:
-      return buildMap( field );
-    case NULL:
-    case UNDEFINED:
-      return buildNull( field );
-    case NUMBER:
-    case VARIANT:
-      return buildVariant( field );
-    case BLOB:
-    case DATE:
-    case DATE_TIME_SPAN:
-    case LOCAL_DATE_TIME:
-    case UTC_DATE_TIME:
-    case TUPLE:
-      throw new IllegalStateException( "Unsupported data type: " + field.type( ) );
-    default:
-      throw new IllegalStateException( "Unexpected data type: " + field.type( ) );
-    
-    }
-  }
-
-//  private ValueNode buildScalarNode(FieldSchema field) {
-//    BufferScalarFieldAccessor accessor = ;
-//  }
-
-//  private DataDef buildScalar(FieldSchema field) {
-//    BufferScalarFieldAccessor accessor = new BufferScalarFieldAccessor( );
-//    accessor.bind( deserializer, field.index() );
-//    return new ScalarDef( field.type(), field.nullable(), accessor );
-//  }
-
-//  private ValueNode buildNullNode(FieldSchema field) {
-//  }
-
-//  private DataDef buildNull(FieldSchema field) {
-//    return new ScalarDef( field.type(), field.nullable(), new NullAccessor( ) );
-//  }
-//
-//  private ValueNode buildVariantNode(FieldSchema field) {
-//    return new ScalarNode( field, new BufferVariantFieldAccessor( ) );
-//  }
-
-//  private DataDef buildVariant(FieldSchema field) {
-//    BufferVariantFieldAccessor accessor = new BufferVariantFieldAccessor( );
-//    accessor.bind( deserializer, field.index() );
-//    return new ScalarDef( field.type(), field.nullable(), accessor );
-//  }
+  /**
+   * Build a list node that depends on the type of member. Primitive members
+   * are deserialized into primitive Java arrays. Strings and decimals are
+   * deserialized into object arrays. Structured types are deserialized
+   * using their own deserializers, then held in an object array.
+   * 
+   * @param field
+   * @return
+   */
   
   private ListNode buildListNode(FieldSchema field) {
     FieldSchema member = field.member();
-    BufferStructureAccessor accessor;
     switch ( member.type() ) {
     case BOOLEAN:
       return new PrimitiveListNode( field, new BooleanArrayAccessor( ) );
@@ -439,9 +475,9 @@ public class TupleBuilder {
     case INT8:
       return new PrimitiveListNode( field, new Int8ArrayAccessor( ) );
     case LIST:
-      return new StructureListNode( field, buildListNode( field.member( ) ) );
+      return new StructureListNode( field, buildListNode( member ) );
     case MAP:
-      return new StructureListNode( field, new MapNode( field.member( ), new BufferMapAccessor( factory ) ) );
+      return new StructureListNode( field, new MapNode( member, new BufferMapAccessor( factory ) ) );
     case STRING:
       return new ObjectListNode( field, new StringArrayAccessor( member.nullable() ) );
     case NUMBER:
@@ -460,328 +496,4 @@ public class TupleBuilder {
       throw new IllegalStateException( "Unexpected array type: " + member.type( ) );   
     }
   }
-
-
-//  private DataDef buildList(FieldSchema field) {
-//    FieldSchema member = field.member();
-//    switch ( member.type() ) {
-//    case BOOLEAN:
-//      return primitiveArray( new BooleanArrayAccessor( ), field );
-//    case DECIMAL:
-//      return typedObjectArray( new DecimalArrayAccessor( member.nullable() ), field );
-//    case FLOAT32:
-//      return primitiveArray( new Float32ArrayAccessor( ), field );
-//    case FLOAT64:
-//      return primitiveArray( new Float64ArrayAccessor( ), field );
-//    case INT16:
-//      return primitiveArray( new Int16ArrayAccessor( ), field );
-//    case INT32:
-//      return primitiveArray( new Int32ArrayAccessor( ), field );
-//    case INT64:
-//      return primitiveArray( new Int64ArrayAccessor( ), field );
-//    case INT8:
-//      return primitiveArray( new Int8ArrayAccessor( ), field );
-//    case LIST:
-//    case MAP:
-//      return structureArray( field );
-//    case STRING:
-//      return typedObjectArray( new StringArrayAccessor( member.nullable() ), field );
-//    case NUMBER:
-//    case VARIANT:
-//      return variantArray( field );
-//    case BLOB:
-//    case DATE:
-//    case DATE_TIME_SPAN:
-//    case LOCAL_DATE_TIME:
-//    case NULL:
-//    case TUPLE:
-//    case UNDEFINED:
-//    case UTC_DATE_TIME:
-//      throw new IllegalStateException( "Unsupported array type: " + member.type() );
-//    default:
-//      throw new IllegalStateException( "Unexpected array type: " + member.type( ) );   
-//    }
-//  }
-
-//  /**
-//   * Jig types that correspond to primitive Java types are deserialized into a
-//   * Java primitive array of the proper type. Then we use a Java primitive array
-//   * accessor to present the primitive Java array as a Jig array.
-//   * 
-//   * @param arrayAccessor array deserializer of the proper type
-//   * @param field
-//   * @return
-//   */
-  
-//  private ListNode primitiveArrayNode( BufferStructureAccessor arrayAccessor, FieldSchema field ) {    
-//    ValueNode memberNode = new ScalarNode( field.member(), null );
-//    return new PrimitiveListNode( field, arrayAccessor );
-//  }
-
-//  private ListDef primitiveArray( BufferStructureAccessor arrayAccessor, FieldSchema field ) {
-//    
-//    // The array accessor builds a primitive Java array of the proper type
-//    // and presents it as a Java object.
-//    
-//    arrayAccessor.bind( deserializer, field.index() );
-//    
-//    
-//    // Build a Java primitive array accessor to present our primitive array as
-//    // a Jig array.
-//    
-//    FieldSchema member = field.member();
-//    PrimitiveArrayAccessor accessor = new PrimitiveArrayAccessor( cache, member.type() );
-//    
-//    // Define the member and array data elements. The definitions will build the
-//    // field values and field value containers.
-//    
-//    DataDef memberDef = new ScalarDef( member.type(), member.nullable(), accessor.memberAccessor( ) );
-//    return new ListDef( field.nullable(), memberDef, accessor );
-//  }
-
-//  /**
-//   * Represents a serialized array as an array of Java objects. Used for Strings
-//   * and Decimals. The array is deserialized into a Java object array, which is
-//   * then presented as an object to a Java Object array accessor, which presents
-//   * the array to the client using the Jig Array API.
-//   * 
-//   * @param arrayAccessor accessor that deserializes teh array to the proper
-//   * type
-//   * @param field
-//   * @return
-//   */
-//  
-//  private ListDef typedObjectArray(BufferStructureAccessor arrayAccessor,
-//      FieldSchema field) {
-//    
-//    // The provided array accessor deserializes the array into a Java object
-//    // array, and presents it as a Java object.
-//    
-//    arrayAccessor.bind( deserializer, field.index() );
-//    
-//    // The array deserializer caches the deserialized Java array, so add it
-//    // as a per-tuple rest.
-//    
-//    ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( arrayAccessor );
-//    resets.add( cache );
-//    
-//    // Create the accessor that presents the Java object array using the Jig
-//    // Array API.
-//    
-//    ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( cache );
-//    
-//    // The member values are "boxed" Java objects. (Not really boxed for String
-//    // and decimal, but the idea also works for boxed Integers, etc.)
-//    // The important bit is that we expect all members to be of the
-//    // declared member type
-//    
-//    BoxedAccessor memberAccessor = new BoxedAccessor( (ObjectAccessor) objArrayAccessor.memberAccessor() );
-//    
-//    // Build the data element definitions that will build the array and member
-//    // field values and field value containers.
-//    
-//    FieldSchema member = field.member();
-//    DataDef memberDef = new ScalarDef( member.type(), member.nullable(), memberAccessor );
-//    return new ListDef( field.nullable(), memberDef, objArrayAccessor );
-//  }
-
-//  /**
-//   * Create a variant array. A variant array is an array that holds any kind
-//   * of scalar value. Each value is written as a type/value pair. (Nulls are
-//   * written as the NULL type with no value.) This array is deserialized as a
-//   * Java object array what is then wrapped in a Java array accessor which
-//   * presents the variant array as a Jig array.
-//   * 
-//   * @param field
-//   * @return
-//   */
-//  
-//  private ListDef variantArray(FieldSchema field) {
-//    
-//    // Create an accessor to deserialize a variant array. Since variants
-//    // carry their own type information, no type information is require
-//    // for array members.
-//    
-//    FieldSchema member = field.member();
-//    VariantArrayAccessor arrayAccessor = new VariantArrayAccessor( factory );
-//    arrayAccessor.bind( deserializer, field.index() );   
-//    
-//    // The constructed object array is cached, so add a reset to clear
-//    // the cache on each tuple.
-//    
-//    ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( arrayAccessor );
-//    resets.add( cache );
-//    
-//    // The variant array accessor is presented as an object accessor to
-//    // a Java object array accessor.
-//    
-//    ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( cache );
-//    
-//    // The member accessor is one that reads type/object pairs as
-//    // "boxed" Java objects. (That is, ints are stored as Integers, etc.)
-//    
-//    BoxedAccessor memberAccessor = new VariantBoxedAccessor( (ObjectAccessor) objArrayAccessor.memberAccessor(), factory );
-//    
-//    // Create the data element definition that will create the FieldValue API
-//    // objects and the corresponding variant container to provide the correct
-//    // FieldValue object for each data item type.
-//    
-//    DataDef memberDef = new ScalarDef( member.type(), member.nullable(), memberAccessor );
-//    return new ListDef( field.nullable(), memberDef, objArrayAccessor );
-//  }
-
-//  private ListDef structureArray2(FieldSchema field) {
-//    DataDef memberDef;
-//    FieldSchema member = field.member();
-//    if ( member.type( ) == DataType.MAP ) {
-//      memberDef = buildMap( member );
-//    } else if ( member.type( ) == DataType.LIST ) {
-//      memberDef = buildList( member );
-//    } else {
-//      throw new IllegalStateException( "Not a structure type: " + member.type() );
-//    }
-//    ArrayOfStructureAccessor topAccessor = new ArrayOfStructureAccessor( memberDef.structureAccessor );
-//    topAccessor.bind( deserializer, field.index() );
-//    ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( topAccessor );
-//    resets.add( cache );
-//    ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( cache );
-//    return new ListDef( field.nullable(), memberDef.dataDef, objArrayAccessor );
-//  }
-
-  private ListDef structureArray(FieldSchema field) {
-    FieldSchema member = field.member();
-    BufferStructureAccessor innerAccessor;
-    if ( member.type() == DataType.LIST ) {
-      FieldSchema innerMember = member.member();
-      switch ( innerMember.type() ) {
-      case BOOLEAN:
-        innerAccessor = new BooleanArrayAccessor( );
-        break;
-      case DECIMAL:
-        innerAccessor = new DecimalArrayAccessor( innerMember.nullable() );
-        break;
-      case FLOAT32:
-        innerAccessor = new Float32ArrayAccessor( );
-        break;
-      case FLOAT64:
-        innerAccessor = new Float64ArrayAccessor( );
-        break;
-      case INT16:
-        innerAccessor = new Int16ArrayAccessor( );
-        break;
-      case INT32:
-        innerAccessor = new Int32ArrayAccessor( );
-        break;
-      case INT64:
-        innerAccessor = new Int64ArrayAccessor( );
-        break;
-      case INT8:
-        innerAccessor = new Int8ArrayAccessor( );
-        break;
-      case LIST:
-        throw new IllegalStateException( "Lists can nest to only 1 level" );
-      case MAP:
-        innerAccessor = new ArrayOfStructureAccessor( new BufferMapAccessor( factory ) );
-        break;
-      case STRING:
-        innerAccessor = new StringArrayAccessor( innerMember.nullable() );
-        break;
-      case NUMBER:
-      case VARIANT:
-        innerAccessor = new VariantArrayAccessor( factory );
-        break;
-      case BLOB:
-      case DATE:
-      case DATE_TIME_SPAN:
-      case LOCAL_DATE_TIME:
-      case NULL:
-      case TUPLE:
-      case UNDEFINED:
-      case UTC_DATE_TIME:
-        throw new IllegalStateException( "Unsupported array type: " + innerMember.type() );
-      default:
-        throw new IllegalStateException( "Unexpected array type: " + innerMember.type( ) );   
-      }
-    } else if ( member.type( ) == DataType.MAP ) {
-      innerAccessor = new BufferMapAccessor( factory );
-    } else {
-      throw new IllegalStateException( "Not a structure type: " + member.type() );
-    }
-    ArrayOfStructureAccessor topAccessor = new ArrayOfStructureAccessor( innerAccessor );
-    topAccessor.bind( deserializer, field.index() );
-    ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( topAccessor );
-    resets.add( cache );
-    ObjectArrayAccessor objArrayAccessor = new ObjectArrayAccessor( cache );
-    DataDef memberDef;
-    if ( member.type( ) == DataType.MAP ) {
-      memberDef = buildNestedMap( member, (ObjectAccessor) objArrayAccessor.memberAccessor() );
-    } else if ( member.type( ) == DataType.LIST ) {
-      memberDef = buildNestedList( member, (ObjectAccessor) objArrayAccessor.memberAccessor() );
-    } else {
-      throw new IllegalStateException( "Not a structure type: " + member.type() );
-    }
-    return new ListDef( field.nullable(), memberDef, objArrayAccessor );
-  }
-
-  private MapDef buildNestedMap(FieldSchema member,
-      ObjectAccessor memberAccessor) {
-    return new MapDef( member.nullable(), new JavaMapAccessor( memberAccessor, factory ) );
-  }
-
-  private ListDef buildNestedList(FieldSchema listSchema,
-      ObjectAccessor listAccessor) {
-    FieldSchema member = listSchema.member( );
-    FieldAccessor memberAccessor;
-    JavaArrayAccessor arrayAccessor;
-    if ( member.type( ).isVariant() ) {
-      arrayAccessor = new ObjectArrayAccessor( listAccessor );
-      memberAccessor = new VariantBoxedAccessor( (ObjectAccessor) arrayAccessor.memberAccessor(), factory );
-    } else if ( member.type( ).isPrimitive( ) ) {
-      arrayAccessor = new PrimitiveArrayAccessor( listAccessor, member.type() );
-      memberAccessor = arrayAccessor.memberAccessor( );
-    } else {
-      arrayAccessor = new ObjectArrayAccessor( listAccessor );
-      memberAccessor = new BoxedAccessor( (ObjectAccessor) arrayAccessor.memberAccessor() );
-    }
-    DataDef memberDef = new ScalarDef( member.type(), member.nullable(), memberAccessor );
-    return new ListDef( listSchema.nullable(), memberDef, arrayAccessor );
-  }
-
-  /**
-   * Maps are deserialized into a Java map, then we use a Java map accessor to
-   * present the Java map as a Jig map.
-   * 
-   * @param field
-   * @return
-   */
-  
-//  private ValueNode buildMapNode(FieldSchema field) {
-//    
-//    // The buffer map accessor deserializes the map to a Java map,
-//    // which is presented as a Java object.
-//    
-//    BufferMapAccessor accessor = new BufferMapAccessor( factory );
-//    return new MapNode( field, new BufferMapAccessor( factory ) );
-//  }
-
-//  private MapDef buildMap(FieldSchema field) {
-//    
-//    // The buffer map accessor deserializes the map to a Java map,
-//    // which is presented as a Java object.
-//    
-//    BufferMapAccessor accessor = new BufferMapAccessor( factory );
-//    accessor.bind( deserializer, field.index() );
-//    ReadOnceObjectAccessor cache = new ReadOnceObjectAccessor( accessor );
-//    
-//    // The buffer map accessor caches the value for each tuple,
-//    // add a reset to clear the cached value on each new tuple.
-//    
-//    resets.add( cache );
-//    
-//    // Use a Java map accessor to present the deserialized map to the
-//    // client via the Jig map API.
-//    
-//    return new MapDef( field.nullable(), new JavaMapAccessor( cache, factory ) );
-//  }
-
 }

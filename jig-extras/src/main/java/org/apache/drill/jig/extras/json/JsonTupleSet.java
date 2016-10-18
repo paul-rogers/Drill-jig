@@ -178,7 +178,7 @@ public TupleValue tuple() {
       parser.addObject( obj );
     }
     inputSchema = parser.getJsonSchema( );
-    SchemaBuilder3 schemaBuilder = new SchemaBuilder3( inputSchema );
+    SchemaBuilder schemaBuilder = new SchemaBuilder( inputSchema );
     schemaBuilder.flatten( flatten );
     TupleSchema schema = schemaBuilder.build( );
     FieldValueContainerSet container = schemaBuilder.fieldValues( );
