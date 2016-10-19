@@ -1,0 +1,53 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+# http:# www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+sourceRoot: templates
+outputRoot: ../java/org/apache/drill/jig/direct
+
+data: {
+    drillToJig : {
+        Bit : { jig: "Boolean", returnType: "boolean" }
+    	TinyInt : { jig: "Int8" },
+    	UInt1 : { jig: "Int16", returnType: "short" }
+    	SmallInt : { jig: "Int16" },
+    	UInt2 : { jig: "Int32", returnType: "int" }
+    	Int : { jig: "Int32" },
+    	UInt4 : { jig: "Int64", returnType: "long" }
+    	BigInt : { jig: "Int64" },
+    	UInt8 : { jig: "Decimal", returnType: "BigDecimal", get: "Decimal" }
+    	Float4 : { jig: "Float32" },
+    	Float8 : { jig: "Float64" },
+    	Time : { notyet: true },
+    	Interval : { notyet: true },
+    	IntervalDay : { notyet: true },
+    	IntervalYear : { notyet: true },
+    	Date : { notyet: true },
+    	TimeStamp : { notyet: true },
+    	Decimal9 : { jig: "Int32" },
+    	Decimal18 : { jig: "Int64" },
+    	Decimal28Sparse : { jig: "Decimal", returnType: "BigDecimal", get: "Decimal", asObject: true },
+   	    Decimal28Dense : { jig: "Decimal", returnType: "BigDecimal", get: "Decimal", asObject: true },
+    	Decimal38Sparse : { jig: "Decimal", returnType: "BigDecimal", get: "Decimal", asObject: true },
+   	    Decimal38Dense : { jig: "Decimal", returnType: "BigDecimal", get: "Decimal", asObject: true },
+   	    VarBinary : { notyet: true },
+   	    VarChar : { jig : "String", returnType: "String", asObject: true },
+   	    Var16Char : { jig : "String", returnType: "String", asObject: true }
+    },
+    vv: tdd(../../../../../../drill/exec/vector/src/main/codegen/data/ValueVectorTypes.tdd),
+
+}
+freemarkerLinks: {
+}
