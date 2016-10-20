@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.MapValue;
+import org.apache.drill.jig.api.TupleValue;
 
 /**
  * The field accessor provides a uniform way to access the value,
@@ -62,6 +63,18 @@ public interface FieldAccessor {
     void bind( int index );
   }
   
+  public interface ValueObjectAccessor extends FieldAccessor {
+    
+    /**
+     * Return a Java representation of the value. The value is optional and
+     * is implementation-specific.
+     * 
+     * @return
+     */
+    
+    Object getValue( );
+  }
+  
   /**
    * Interface to any array that can be presented as a
    * {@link ArrayValue}.
@@ -91,16 +104,7 @@ public interface FieldAccessor {
     
     int size( );
     
-    /**
-     * Return a Java representation of the array. The value is optional and
-     * is implementation-specific.
-     * 
-     * @return
-     */
-    
-    Object getValue( );
-    
-    /**
+     /**
      * Select the array value backing the member accessor. Allows the member
      * accessor to be static, only the index of the selected value changes
      * over time.
@@ -114,13 +118,16 @@ public interface FieldAccessor {
   public interface ArrayValueAccessor extends FieldAccessor
   {
     ArrayValue getArray( );
-    Object getValue( );
   }
   
   public interface MapValueAccessor extends FieldAccessor
   {
     MapValue getMap( );
-    Object getValue( );
+  }
+  
+  public interface TupleValueAccessor extends FieldAccessor
+  {
+    TupleValue getTuple( );
   }
   
   public interface Resetable {

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ValueObjectAccessor;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.container.VariantFieldValueContainer;
@@ -15,7 +16,7 @@ import org.apache.drill.jig.types.FieldValueFactory;
  * {@link Map} object provided by an {@link ObjectAccessor}.
  */
 
-public class JavaMapAccessor implements MapValueAccessor, MapValue {
+public class JavaMapAccessor implements MapValueAccessor, MapValue, ValueObjectAccessor {
 
   private final ObjectAccessor accessor;
   private final VariantFieldValueContainer valueContainer;

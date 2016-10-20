@@ -5,6 +5,7 @@ import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.MapValue;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.ValueConversionError;
 
 public class MapFieldValue extends AbstractStructuredValue {
@@ -34,6 +35,11 @@ public class MapFieldValue extends AbstractStructuredValue {
   @Override
   public ArrayValue getArray() {
     throw new ValueConversionError( "Cannot convert a map to a list" );
+  }
+
+  @Override
+  public TupleValue getTuple() {
+    throw new ValueConversionError( "Cannot convert a map to a tuple" );
   }
 
   @Override

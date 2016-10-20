@@ -3,6 +3,7 @@ package org.apache.drill.jig.accessor;
 import java.lang.reflect.Array;
 
 import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ValueObjectAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
 
@@ -19,7 +20,7 @@ import org.apache.drill.jig.exception.ValueConversionError;
  * various array value and array member accessors, and the {@link FieldValue}.
  */
 
-public abstract class JavaArrayAccessor implements ArrayAccessor {
+public abstract class JavaArrayAccessor implements ArrayAccessor, ValueObjectAccessor {
   
   protected abstract class AbstractMemberAccessor implements IndexedAccessor
   {

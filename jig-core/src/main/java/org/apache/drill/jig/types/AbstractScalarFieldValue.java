@@ -6,6 +6,7 @@ import java.time.Period;
 
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.MapValue;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.ValueConversionError;
 
 /**
@@ -48,6 +49,11 @@ public abstract class AbstractScalarFieldValue implements AbstractFieldValue {
   @Override
   public ArrayValue getArray() {
     throw typeError("array");
+  }
+
+  @Override
+  public TupleValue getTuple() {
+    throw typeError("tuple");
   }
   
   private ValueConversionError typeError(String dest) {

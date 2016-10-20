@@ -303,7 +303,7 @@ public class DrillTypeConversion
   private static DataType[] makeDrillToJigTable() {
     DataType table[ ] = new DataType[38];
     table[ MinorType.LATE.ordinal()] = DataType.UNDEFINED; // x
-    table[ MinorType.MAP.ordinal()] = DataType.MAP; // x
+    table[ MinorType.MAP.ordinal()] = DataType.TUPLE; // x
     table[ MinorType.TINYINT.ordinal()] = DataType.INT8; // x
     table[ MinorType.SMALLINT.ordinal()] = DataType.INT16; // x
     table[ MinorType.INT.ordinal()] = DataType.INT32; // x

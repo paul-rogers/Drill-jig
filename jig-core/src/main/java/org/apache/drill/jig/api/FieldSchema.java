@@ -6,6 +6,8 @@ package org.apache.drill.jig.api;
 
 public interface FieldSchema
 {
+  public static final String ELEMENT_NAME = "*";
+  
   String name( );
   int index();
   DataType type( );

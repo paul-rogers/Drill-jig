@@ -8,14 +8,20 @@ import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.types.Int64Conversions;
 
-public class VectorAccessor implements FieldAccessor {
+/**
+ * Accessors for the "simple" Drill types: required, optional and repeated forms.
+ * The code here is generated from the same meta-data used to generate Drill's
+ * own vector classes.
+ */
+
+public abstract class VectorAccessor implements FieldAccessor {
   
   protected VectorRecordReader reader;
   protected boolean nullable;
   protected int fieldIndex;
   private ValueVector.Accessor genericAccessor;
   
-  public void bind( VectorRecordReader reader, FieldSchema schema ) {
+  public void bindReader( VectorRecordReader reader, FieldSchema schema ) {
     this.reader = reader;
     this.nullable = schema.nullable();
     this.fieldIndex = schema.index();
@@ -38,10 +44,19 @@ public class VectorAccessor implements FieldAccessor {
     return reader.getRecordIndex();
   }
 
+  /**
+   * Base class for scalar (required or optional) vectors accessors.
+   */
+  
   public static class DrillScalarAccessor extends VectorAccessor {
     
   }
 
+  /**
+   * Base class for scalar to access individual elements within a
+   * repeated vector.
+   */
+  
   public static class DrillElementAccessor extends VectorAccessor implements IndexedAccessor {
     
     protected int elementIndex;

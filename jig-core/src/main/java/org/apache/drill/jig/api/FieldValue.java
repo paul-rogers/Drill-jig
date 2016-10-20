@@ -20,4 +20,5 @@ public interface FieldValue extends ScalarValue
   boolean isNull( );
   MapValue getMap( );
   ArrayValue getArray( );
+  TupleValue getTuple( );
 }

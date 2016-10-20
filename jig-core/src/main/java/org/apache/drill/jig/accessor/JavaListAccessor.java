@@ -4,9 +4,10 @@ import java.util.List;
 
 import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ValueObjectAccessor;
 import org.apache.drill.jig.types.FieldValueFactory;
 
-public class JavaListAccessor implements ArrayAccessor {
+public class JavaListAccessor implements ArrayAccessor, ValueObjectAccessor {
   
   public class JavaListMemberAccessor implements IndexedAccessor, ObjectAccessor {
 
