@@ -13,6 +13,10 @@ import org.apache.drill.jig.api.Statement;
 import org.apache.drill.jig.api.impl.AbstractDrillConnection;
 import org.apache.drill.jig.exception.JigException;
 
+/**
+ * Jig representation of a connection to Drill.
+ */
+
 public class DrillSession extends AbstractDrillConnection
 {
   private final DrillClient drillClient;
@@ -44,21 +48,6 @@ public class DrillSession extends AbstractDrillConnection
     }
   }
   
-//  @Override
-//  public ResultCollection executeQuery( String stmt ) throws DrillException {
-//  }
-  
-//  public QueryResults executeVectorQuery( String stmt ) throws DrillSessionException {
-//    List<QueryDataBatch> results;
-//    try {
-//      results = drillClient.runQuery(
-//          QueryType.SQL, stmt);
-//    } catch (RpcException e) {
-//      throw new DrillSessionException( "Execute failed", e );
-//    }
-//    return new QueryResults( results );
-//  }
-  
   public void startQuery( String stmt, UserResultsListener listener ) {
     drillClient.runQuery( QueryType.SQL, stmt, listener );
   }
@@ -78,5 +67,4 @@ public class DrillSession extends AbstractDrillConnection
   public Statement prepare(String stmt) {
     return new DirectStatement( this, stmt );
   }
-
 }

@@ -3,6 +3,12 @@ package org.apache.drill.jig.direct;
 import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.Statement;
 
+/**
+ * Processes a statement using the Drill client. Drill only knows
+ * how to execute a statement; no prepare, no parameters in this
+ * version.
+ */
+
 public class DirectStatement implements Statement
 {
   DrillResultCollection results;

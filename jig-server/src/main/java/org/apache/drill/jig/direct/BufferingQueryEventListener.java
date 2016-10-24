@@ -11,6 +11,12 @@ import org.apache.drill.exec.rpc.user.UserResultsListener;
 
 import com.google.common.collect.Queues;
 
+/**
+ * Drill query event listener that buffers rows into a producer-consumer
+ * queue. Allows rows to be received asynchronously, but processed by
+ * a synchronous reader.
+ */
+
 public class BufferingQueryEventListener implements UserResultsListener
 {
   public static class QueryEvent

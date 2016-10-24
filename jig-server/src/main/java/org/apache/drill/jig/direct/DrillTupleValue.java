@@ -5,6 +5,16 @@ import org.apache.drill.jig.api.impl.AbstractTupleValue;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
 import org.apache.drill.jig.container.FieldValueContainerSet;
 
+/**
+ * Jig representation of a Drill record. The tuple provides a tuple-like
+ * representation of a Drill vector bundle. In Drill, vectors are unordered
+ * within a bundle. Jig imposes an order so that field indexes work.
+ * <p>
+ * This class associates a reader with the accessor, binds accessors to
+ * vectors on each new batch, and provides the mapping from field index
+ * or name to a Field Value that represents a vector.
+ */
+
 public class DrillTupleValue extends AbstractTupleValue {
 
   private TupleSchemaImpl schema;
@@ -37,7 +47,7 @@ public class DrillTupleValue extends AbstractTupleValue {
       }
     }
        
-    private void bindVectors( ) {
+    public void bindVectors( ) {
       for ( int i = 0;  i < vectorBindings.length;  i++ ) {
         vectorBindings[i].bindVector( );
       }
@@ -45,8 +55,6 @@ public class DrillTupleValue extends AbstractTupleValue {
 
     public void start() {
       super.reset();
-      bindVectors();
     }
   }
-
 }

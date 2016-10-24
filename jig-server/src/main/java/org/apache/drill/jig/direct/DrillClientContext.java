@@ -6,6 +6,11 @@ import org.apache.drill.exec.memory.RootAllocatorFactory;
 import org.apache.drill.exec.server.Drillbit;
 import org.apache.drill.exec.server.RemoteServiceSet;
 
+/**
+ * Context for a Drill connection that supports the various Drill connection
+ * modes: embedded, direct, ZooKeeper and via the config file.
+ */
+
 public class DrillClientContext implements AutoCloseable
 {
   private static DrillClientContext instance;
@@ -53,6 +58,12 @@ public class DrillClientContext implements AutoCloseable
     return instance;
   }
   
+  /**
+   * Start an embedded Drillbit.
+   * 
+   * @throws DrillSessionException
+   */
+  
   public void startEmbedded( ) throws DrillSessionException {
     if ( embeddedDrillbit != null )
       throw new DrillSessionError( "Embedded Drillbit already started" );
@@ -80,6 +91,10 @@ public class DrillClientContext implements AutoCloseable
   public void close() throws Exception {
     stopEmbeddedDrillbit( );
   }
+  
+  /**
+   * Stop the embedded Drillbit.
+   */
   
   public void stopEmbeddedDrillbit( )
   {

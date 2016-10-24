@@ -17,6 +17,10 @@ public class TestDrillDirect
 
   @Test
   public void testDirect() throws Exception {
+    
+    // Cannot use embedded Drillbit because that version does not have
+    // employee.json on the class path.
+    
     new DrillContextFactory( )
         .build( );
     DrillSession session = new DrillConnectionFactory( )
@@ -47,5 +51,4 @@ public class TestDrillDirect
     assertTrue( CompareFiles.compareResource( "/employees-20.txt", out.toString() ) );
     results.close();
   }
-
 }

@@ -5,6 +5,13 @@ import org.apache.drill.exec.vector.complex.RepeatedValueVector.RepeatedAccessor
 import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
 
+/**
+ * Accessor for a the Jig array implied by a Drill repeated field. In
+ * Drill, the array is virtual: all that actually exists are the field
+ * values themselves. This accessor creates the array as a "useful
+ * fiction" on top of the Drill implementation.
+ */
+
 public class DrillRepeatedVectorAccessor extends VectorAccessor
     implements ArrayAccessor {
 

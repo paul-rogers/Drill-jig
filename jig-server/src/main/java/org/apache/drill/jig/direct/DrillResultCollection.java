@@ -6,6 +6,12 @@ import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.direct.DrillTupleValue.DrillRootTupleValue;
 
+/**
+ * Maps a Drill query into the Jig result set concept. Each query corresponds
+ * to a result set. Each schema change corresponds to a Tuple set. Each
+ * record corresponds to a Tuple. Each value vector corresponds to a field.
+ */
+
 public class DrillResultCollection implements ResultCollection
 {
   public class DrillTupleSet implements TupleSet
@@ -18,6 +24,7 @@ public class DrillResultCollection implements ResultCollection
     protected void buildSchema( ) {
       tuple = new TupleBuilder( reader.getSchema() ).build( );
       tuple.bindReader( reader );
+      tuple.bindVectors();
     }
 
     @Override
@@ -39,6 +46,9 @@ public class DrillResultCollection implements ResultCollection
         state = State.EOF;
         tuple.reset( );
         return false;
+      case BATCH:
+        tuple.bindVectors( );        
+        // Fall through
       case RECORD:
         state = State.RECORDS;
         tuple.start( );
@@ -58,49 +68,6 @@ public class DrillResultCollection implements ResultCollection
     }
   }
   
-//  public static class DrillTupleAccessor implements TupleValue
-//  {
-//    private DrillTupleSchema schema;
-//
-//    public DrillTupleAccessor( VectorRecordReader reader, DrillTupleSchema schema ) {
-//      this.schema = schema;
-//      
-//      int n = schema.accessors.length;
-//      for ( int i = 0;  i < n;  i++ ) {
-//        schema.accessors[i].bind( reader, schema.field( i ) );
-//      }
-//    }
-//    
-//    public void bindVectors( ) {
-//      int n = schema.accessors.length;
-//      for ( int i = 0;  i < n;  i++ ) {
-//        schema.accessors[i].bindVector( );
-//      }
-//    }
-//    
-//    @Override
-//    public TupleSchema schema() {
-//      return schema;
-//    }
-//
-//    @Override
-//    public FieldValue field(int i) {
-//      if ( i < 0  &&  i >= schema.count() )
-//        return null;
-//      return schema.accessors[i];
-//    }
-//
-//    @Override
-//    public FieldValue field(String name) {
-//      FieldSchema field = schema.field(name);
-//      if ( field == null )
-//        return null;
-//      else
-//        return schema.accessors[ field.index() ];
-//    }
-//    
-//  }
-
   private enum State { START, ROWS, SCHEMA_CHANGE, RECORDS, EOF };
   
   protected VectorRecordReader reader;
@@ -162,5 +129,4 @@ public class DrillResultCollection implements ResultCollection
       reader.close();
     reader = null;
   }
-
 }

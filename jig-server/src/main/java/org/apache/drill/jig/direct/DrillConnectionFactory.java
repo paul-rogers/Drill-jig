@@ -11,8 +11,9 @@ import org.apache.drill.exec.rpc.user.UserSession;
 import org.apache.drill.exec.server.RemoteServiceSet;
 
 /**
- * Factory for a Drillbit connection. Separate from a Middleman (direct or
- * remote) connection.
+ * Factory for a Drillbit connection. Drill has a number of ways to build
+ * connections; this factory class tries to isolate the application from the
+ * details.
  */
 
 public class DrillConnectionFactory

@@ -23,7 +23,7 @@ import org.apache.drill.jig.direct.BufferingQueryEventListener.QueryEvent;
 
 public class VectorRecordReader implements AutoCloseable
 {
-  public enum Event { SCHEMA, RECORD, EOF };
+  public enum Event { SCHEMA, BATCH, RECORD, EOF };
   
   DrillSession session;
   BufferingQueryEventListener input;
@@ -42,19 +42,22 @@ public class VectorRecordReader implements AutoCloseable
     session.startQuery( stmt, input );
   }
   
-  public VectorRecordReader.Event next( ) {
+  public Event next( ) {
+    Event okEvent = Event.RECORD;
     for ( ; ; ) {
       if ( isEof ) {
         return Event.EOF;
       }
       if ( recordIter != null  &&  recordIter.next() != null ) {
         recordCount++;
-        return Event.RECORD;
+        return okEvent;
       }
       if ( ! readBatch( ) )
         return Event.EOF;
       if ( schemaChanged )
         return Event.SCHEMA;
+      else
+        okEvent = Event.BATCH;
     }
   }
   
