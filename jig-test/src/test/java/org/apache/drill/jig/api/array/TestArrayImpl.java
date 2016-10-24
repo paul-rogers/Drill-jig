@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;

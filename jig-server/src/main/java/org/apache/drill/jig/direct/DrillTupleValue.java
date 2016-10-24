@@ -19,5 +19,34 @@ public class DrillTupleValue extends AbstractTupleValue {
   public TupleSchema schema() {
     return schema;
   }
+  
+  public static class DrillRootTupleValue extends DrillTupleValue {
+
+    public VectorAccessor[] vectorBindings;
+
+    public DrillRootTupleValue(TupleSchemaImpl schema,
+        FieldValueContainerSet containerSet,
+        VectorAccessor[] vectorBindings) {
+      super(schema, containerSet);
+      this.vectorBindings = vectorBindings;
+    }
+
+    public void bindReader(VectorRecordReader reader) {
+      for ( int i = 0;  i < vectorBindings.length;  i++ ) {
+        vectorBindings[i].bindReader(reader);
+      }
+    }
+       
+    private void bindVectors( ) {
+      for ( int i = 0;  i < vectorBindings.length;  i++ ) {
+        vectorBindings[i].bindVector( );
+      }
+    }
+
+    public void start() {
+      super.reset();
+      bindVectors();
+    }
+  }
 
 }

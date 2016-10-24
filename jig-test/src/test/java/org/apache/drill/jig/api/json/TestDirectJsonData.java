@@ -9,14 +9,13 @@ import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 
 import org.apache.drill.jig.api.ArrayValue;
-import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldValue;
-import org.apache.drill.jig.api.ScalarValue;
-import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSet;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.exception.ValueConversionError;
 import org.apache.drill.jig.extras.json.JsonResultCollection;
@@ -61,23 +60,22 @@ public class TestDirectJsonData
     {
       FieldValue field = tuple.field(0);
       assertTrue( field.type() == DataType.INT64 );
-      assertTrue( field.getCardinality() == Cardinality.OPTIONAL );
       assertFalse( field.isNull() );
       try {
-        field.asArray();
+        field.getArray();
         fail( );
       }
       catch ( ValueConversionError e ) {
         // Expected
       }
-      ScalarValue scalar = field.asScalar();
-      assertNotNull( scalar );
-      assertEquals( 10L, scalar.getLong() );
-      assertEquals( 10, scalar.getInt() );
-//      assertEquals( 10, (int) scalar.getDouble() );
-//      assertTrue( new BigDecimal( 10 ).equals( scalar.getBigDecimal() ) );
+      assertNotNull( field );
+      assertEquals( 10L, field.getLong() );
+      assertEquals( 10, field.getInt() );
+      assertEquals( 10, (int) field.getDouble() );
+      assertEquals( new BigDecimal( 10 ), field.getDecimal() );
+      assertEquals( "10", field.getString( ) );
       try {
-        scalar.getString();
+        field.getString();
         fail( );
       }
       catch ( ValueConversionError e ) {
@@ -87,17 +85,17 @@ public class TestDirectJsonData
     
     {
       FieldValue field = tuple.field( "numberField" );
-      assertEquals( 10, field.asScalar().getInt() );
+      assertEquals( 10, field.getInt() );
     }
       
     {
       FieldValue field = tuple.field( 1 );
-      assertEquals( "foo", field.asScalar().getString() );
+      assertEquals( "foo", field.getString() );
     }
     
     {
       FieldValue field = tuple.field( "stringField" );
-      assertEquals( "foo", field.asScalar().getString() );
+      assertEquals( "foo", field.getString() );
     }
     
     {
@@ -112,12 +110,12 @@ public class TestDirectJsonData
     
     {
       FieldValue field = tuple.field( "bool1" );
-      assertTrue( field.asScalar( ).getBoolean() );
+      assertTrue( field.getBoolean() );
     }
     
     {
       FieldValue field = tuple.field( "bool2" );
-      assertFalse( field.asScalar( ).getBoolean() );
+      assertFalse( field.getBoolean() );
     }
   }
 
@@ -125,34 +123,34 @@ public class TestDirectJsonData
   {
     {
       FieldValue field = tuple.field( "numberField" );
-      assertEquals( 20, field.asScalar().getInt() );
+      assertEquals( 20, field.getInt() );
     }
       
     {
       FieldValue field = tuple.field( "stringField" );
-      assertEquals( "bar", field.asScalar().getString() );
+      assertEquals( "bar", field.getString() );
     }
     
     {
       FieldValue field = tuple.field( "numberWithNullField" );
-      assertEquals( 120, field.asAny().getInt() );
-      assertEquals( DataType.INT64, field.asAny().getDataType() );
+      assertEquals( 120, field.getInt() );
+      assertEquals( DataType.INT64, field.type() );
     }
     
     {
       FieldValue field = tuple.field( "stringWithNullField" );
-      assertEquals( "mumble", field.asAny().getString() );
-      assertEquals( DataType.STRING, field.asAny().getDataType() );
+      assertEquals( "mumble", field.getString() );
+      assertEquals( DataType.STRING, field.type() );
     }
     
     {
       FieldValue field = tuple.field( "bool1" );
-      assertFalse( field.asScalar( ).getBoolean() );
+      assertFalse( field.getBoolean() );
     }
     
     {
       FieldValue field = tuple.field( "bool2" );
-      assertTrue( field.asScalar( ).getBoolean() );
+      assertTrue( field.getBoolean() );
     }
     
   }
@@ -168,37 +166,37 @@ public class TestDirectJsonData
     TupleValue tuple = tuples.tuple();
     {
       FieldValue field = tuple.field("index");
-      assertEquals( 1, field.asScalar( ).getInt() );
+      assertEquals( 1, field.getInt() );
     }
     
     {
       FieldValue field = tuple.field("numberArray");
       assertFalse( field.isNull() );
 //      assertNull( field.asScalar( ) );
-      ArrayValue array = field.asArray();
+      ArrayValue array = field.getArray();
       assertNotNull( array );
       assertEquals( 3, array.size() );
-      assertEquals( 1, array.get( 0 ).asScalar().getInt() );
-      assertEquals( 2, array.get( 1 ).asScalar().getInt() );
-      assertEquals( 3, array.get( 2 ).asScalar().getInt() );
+      assertEquals( 1, array.get( 0 ).getInt() );
+      assertEquals( 2, array.get( 1 ).getInt() );
+      assertEquals( 3, array.get( 2 ).getInt() );
       assertNull( array.get( -1 ) );
       assertNull( array.get( 4 ) );
     }
     
     {
       FieldValue field = tuple.field("stringArray");
-      ArrayValue array = field.asArray();
+      ArrayValue array = field.getArray();
       assertEquals( 3, array.size() );
-      assertEquals( "a", array.get( 0 ).asScalar().getString() );
-      assertEquals( "b", array.get( 1 ).asScalar().getString() );
-      assertEquals( "c", array.get( 2 ).asScalar().getString() );
+      assertEquals( "a", array.get( 0 ).getString() );
+      assertEquals( "b", array.get( 1 ).getString() );
+      assertEquals( "c", array.get( 2 ).getString() );
       assertNull( array.get( -1 ) );
       assertNull( array.get( 4 ) );
     }
     
     {
       FieldValue field = tuple.field("emptyArray");
-      ArrayValue array = field.asArray();
+      ArrayValue array = field.getArray();
       assertEquals( 0, array.size() );
     }
     

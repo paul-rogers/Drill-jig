@@ -4,8 +4,10 @@ import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ArrayValueAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.TupleValueAccessor;
 import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.DataType;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.container.FieldValueContainer;
 import org.apache.drill.jig.container.NullableFieldValueContainer;
 import org.apache.drill.jig.container.SingleFieldValueContainer;
@@ -15,6 +17,7 @@ import org.apache.drill.jig.types.ArrayFieldValue;
 import org.apache.drill.jig.types.ArrayValueImpl;
 import org.apache.drill.jig.types.FieldValueFactory;
 import org.apache.drill.jig.types.MapFieldValue;
+import org.apache.drill.jig.types.TupleFieldValue;
 import org.apache.drill.jig.types.ArrayFieldValue.SimpleArrayValueAccessor;
 
 /**
@@ -118,6 +121,25 @@ public abstract class DataDef {
       ArrayFieldValue value = new ArrayFieldValue( );
       value.bind( arrayValueAccessor );
       container = makeTypedContainer( value, arrayValueAccessor );
+    }
+  }
+  
+  public static class TupleDef extends DataDef {
+    
+    public final TupleValueAccessor tupleValueAccessor;
+    public final TupleValue tupleValue;
+    
+    public TupleDef( boolean nullable, TupleValueAccessor tupleValueAccessor, TupleValue tupleValue ) {
+      super( DataType.TUPLE, nullable );
+      this.tupleValueAccessor = tupleValueAccessor;
+      this.tupleValue = tupleValue;
+    }
+
+    @Override
+    public void build( FieldValueFactory factory ) {
+      TupleFieldValue value = new TupleFieldValue( );
+      value.bind( tupleValueAccessor );
+      container = makeTypedContainer( value, tupleValueAccessor );
     }
   }
 }

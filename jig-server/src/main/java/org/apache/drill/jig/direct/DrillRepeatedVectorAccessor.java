@@ -32,11 +32,6 @@ public class DrillRepeatedVectorAccessor extends VectorAccessor
   }
 
   @Override
-  public Object getValue() {
-    return null;
-  }
-
-  @Override
   public void select(int index) {
     memberAccessor.bind( index );
   }

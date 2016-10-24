@@ -22,6 +22,13 @@ public class TestDrillDirect
     DrillSession session = new DrillConnectionFactory( )
         .drillbit( "localhost" )
         .connect( );
+//    new DrillContextFactory( )
+//          .withEmbeddedDrillbit( )
+//          .build( )
+//          .startEmbedded( );
+//    DrillSession session = new DrillConnectionFactory( )
+//          .embedded( )
+//          .connect( );
     
     session.alterSession( AlterSessionKeys.MAX_WIDTH_PER_NODE, 2 );
     

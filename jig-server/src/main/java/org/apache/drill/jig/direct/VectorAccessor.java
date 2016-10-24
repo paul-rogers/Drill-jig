@@ -8,6 +8,14 @@ import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.types.Int64Conversions;
 
+//--------------------------------------------------------------
+// WARNING: This code is generated!
+// Modify src/main/codegen/templates/VectorAccessor.java
+// Then regenerate this file by:
+// $ cd src/main/codegen
+// $ fmpp
+//--------------------------------------------------------------
+
 /**
  * Accessors for the "simple" Drill types: required, optional and repeated forms.
  * The code here is generated from the same meta-data used to generate Drill's
@@ -21,10 +29,13 @@ public abstract class VectorAccessor implements FieldAccessor {
   protected int fieldIndex;
   private ValueVector.Accessor genericAccessor;
   
-  public void bindReader( VectorRecordReader reader, FieldSchema schema ) {
-    this.reader = reader;
+  public void bindSchema( FieldSchema schema ) {
     this.nullable = schema.nullable();
     this.fieldIndex = schema.index();
+  }
+
+  public void bindReader( VectorRecordReader reader ) {
+    this.reader = reader;
   }
 
   public void bindVector( ) {

@@ -1,30 +1,28 @@
 package org.apache.drill.jig.direct;
 
-import org.apache.drill.jig.api.FieldValue;
-import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ResultCollection;
-import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
+import org.apache.drill.jig.api.TupleValue;
+import org.apache.drill.jig.direct.DrillTupleValue.DrillRootTupleValue;
 
 public class DrillResultCollection implements ResultCollection
 {
   public class DrillTupleSet implements TupleSet
   {
-    private DrillTupleSchema schema;
-    private DrillTupleAccessor tuple;
+    private DrillRootTupleValue tuple;
 
     public DrillTupleSet( ) {
     }
     
     protected void buildSchema( ) {
-      schema = new DrillTupleSchemaBuilder( reader.getSchema() ).build( );
-      tuple = new DrillTupleAccessor( reader, schema );
+      tuple = new TupleBuilder( reader.getSchema() ).build( );
+      tuple.bindReader( reader );
     }
 
     @Override
     public TupleSchema schema() {
-      return schema;
+      return tuple.schema( );
     }
 
     @Override
@@ -39,9 +37,11 @@ public class DrillResultCollection implements ResultCollection
       switch ( reader.next() ) {
       case EOF:
         state = State.EOF;
+        tuple.reset( );
         return false;
       case RECORD:
         state = State.RECORDS;
+        tuple.start( );
         return true;
       case SCHEMA:
         state = State.SCHEMA_CHANGE;
@@ -56,54 +56,50 @@ public class DrillResultCollection implements ResultCollection
     public TupleValue tuple() {
       return tuple;
     }
-
-    public void reset() {
-      tuple.bindVectors();
-    }
   }
   
-  public static class DrillTupleAccessor implements TupleValue
-  {
-    private DrillTupleSchema schema;
-
-    public DrillTupleAccessor( VectorRecordReader reader, DrillTupleSchema schema ) {
-      this.schema = schema;
-      
-      int n = schema.accessors.length;
-      for ( int i = 0;  i < n;  i++ ) {
-        schema.accessors[i].bind( reader, schema.field( i ) );
-      }
-    }
-    
-    public void bindVectors( ) {
-      int n = schema.accessors.length;
-      for ( int i = 0;  i < n;  i++ ) {
-        schema.accessors[i].bindVector( );
-      }
-    }
-    
-    @Override
-    public TupleSchema schema() {
-      return schema;
-    }
-
-    @Override
-    public FieldValue field(int i) {
-      if ( i < 0  &&  i >= schema.count() )
-        return null;
-      return schema.accessors[i];
-    }
-
-    @Override
-    public FieldValue field(String name) {
-      FieldSchema field = schema.field(name);
-      if ( field == null )
-        return null;
-      else
-        return schema.accessors[ field.index() ];
-    }
-    
-  }
+//  public static class DrillTupleAccessor implements TupleValue
+//  {
+//    private DrillTupleSchema schema;
+//
+//    public DrillTupleAccessor( VectorRecordReader reader, DrillTupleSchema schema ) {
+//      this.schema = schema;
+//      
+//      int n = schema.accessors.length;
+//      for ( int i = 0;  i < n;  i++ ) {
+//        schema.accessors[i].bind( reader, schema.field( i ) );
+//      }
+//    }
+//    
+//    public void bindVectors( ) {
+//      int n = schema.accessors.length;
+//      for ( int i = 0;  i < n;  i++ ) {
+//        schema.accessors[i].bindVector( );
+//      }
+//    }
+//    
+//    @Override
+//    public TupleSchema schema() {
+//      return schema;
+//    }
+//
+//    @Override
+//    public FieldValue field(int i) {
+//      if ( i < 0  &&  i >= schema.count() )
+//        return null;
+//      return schema.accessors[i];
+//    }
+//
+//    @Override
+//    public FieldValue field(String name) {
+//      FieldSchema field = schema.field(name);
+//      if ( field == null )
+//        return null;
+//      else
+//        return schema.accessors[ field.index() ];
+//    }
+//    
+//  }
 
   private enum State { START, ROWS, SCHEMA_CHANGE, RECORDS, EOF };
   
@@ -155,7 +151,6 @@ public class DrillResultCollection implements ResultCollection
   @Override
   public TupleSet tuples() {
     if ( state == State.SCHEMA_CHANGE  ||  state == State.ROWS ) {
-      tupleSet.reset( );
       return tupleSet;
     }
     return null;
