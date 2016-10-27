@@ -18,7 +18,7 @@ import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.exception.ValueConversionError;
-import org.apache.drill.jig.extras.json.JsonResultCollection;
+import org.apache.drill.jig.extras.json.source.JsonResultCollection;
 import org.junit.Test;
 
 public class TestDirectJsonData

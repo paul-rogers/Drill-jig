@@ -11,7 +11,7 @@ import org.apache.drill.jig.api.AlterSessionKeys;
 import org.apache.drill.jig.direct.DrillClientContext;
 import org.apache.drill.jig.direct.DrillConnectionFactory;
 import org.apache.drill.jig.direct.DrillContextFactory;
-import org.apache.drill.jig.direct.DrillSession;
+import org.apache.drill.jig.direct.DirectConnection;
 import org.apache.drill.jig.direct.VectorRecord;
 import org.apache.drill.jig.direct.VectorRecordReader;
 import org.apache.drill.jig.test.CompareFiles;
@@ -31,7 +31,7 @@ public class QueryReaderTest
         .withEmbeddedDrillbit( )
         .build( )
         .startEmbedded( );
-    DrillSession session = new DrillConnectionFactory( )
+    DirectConnection session = new DrillConnectionFactory( )
         .drillbit( "localhost" )
         .connect( );
     
@@ -46,7 +46,7 @@ public class QueryReaderTest
     DrillClientContext.instance( ).stopEmbeddedDrillbit( );
   }
 
-  private void testQueryPrinter(DrillSession session, PrintWriter out ) {
+  private void testQueryPrinter(DirectConnection session, PrintWriter out ) {
     String stmt = "SELECT * FROM cp.`employee.json` LIMIT 20";
     VectorRecordReader reader = new VectorRecordReader( session, stmt );
     int count = 0;
@@ -58,12 +58,15 @@ public class QueryReaderTest
       case SCHEMA:
         showSchema( reader.getSchema(), out );
         break;
+      case BATCH:
       case RECORD:
         count++;
         if ( count < 20 ) {
           showRecord( reader.getRecord(), out );
         }
         break;
+      default:
+        assert false;
       }
     }
     reader.close();

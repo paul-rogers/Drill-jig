@@ -12,7 +12,7 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
-import org.apache.drill.jig.extras.json.JsonResultCollection;
+import org.apache.drill.jig.extras.json.source.JsonResultCollection;
 import org.junit.Test;
 
 public class TestDirectJsonSchema

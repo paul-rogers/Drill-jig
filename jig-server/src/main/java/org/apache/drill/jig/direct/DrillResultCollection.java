@@ -4,7 +4,7 @@ import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
-import org.apache.drill.jig.direct.DrillTupleValue.DrillRootTupleValue;
+import org.apache.drill.jig.direct.DirectTupleValue.DrillRootTupleValue;
 
 /**
  * Maps a Drill query into the Jig result set concept. Each query corresponds

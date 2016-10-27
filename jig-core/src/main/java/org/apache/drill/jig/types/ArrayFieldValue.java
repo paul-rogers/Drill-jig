@@ -29,12 +29,6 @@ public class ArrayFieldValue extends AbstractStructuredValue {
     public ArrayValue getArray() {
       return arrayValue;
     }
-
-    @Override
-    public Object getValue() {
-      return arrayAccessor.getValue();
-    }
-    
   }
 
   private ArrayValueAccessor accessor;
@@ -71,6 +65,6 @@ public class ArrayFieldValue extends AbstractStructuredValue {
 
   @Override
   public Object getValue() {
-    return accessor.getValue( );
+    throw new ValueConversionError( "Cannot convert a list to an object" );
   }   
 }

@@ -12,13 +12,13 @@ import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
  * fiction" on top of the Drill implementation.
  */
 
-public class DrillRepeatedVectorAccessor extends VectorAccessor
+public class RepeatedVectorAccessor extends VectorAccessor
     implements ArrayAccessor {
 
   private final DrillElementAccessor memberAccessor;
   private RepeatedAccessor accessor;
   
-  public DrillRepeatedVectorAccessor( DrillElementAccessor memberAccessor ) {
+  public RepeatedVectorAccessor( DrillElementAccessor memberAccessor ) {
     this.memberAccessor = memberAccessor;
   }
   

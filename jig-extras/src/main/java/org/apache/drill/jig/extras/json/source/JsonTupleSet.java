@@ -1,4 +1,4 @@
-package org.apache.drill.jig.extras.json;
+package org.apache.drill.jig.extras.json.source;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue.ValueType;
@@ -8,12 +8,12 @@ import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.impl.AbstractTupleValue;
 import org.apache.drill.jig.container.FieldValueContainerSet;
-import org.apache.drill.jig.extras.json.JsonAccessor.TupleObjectAccessor;
-import org.apache.drill.jig.extras.json.ObjectParser.JsonObjectNode;
 import org.apache.drill.jig.extras.json.reader.CapturingTupleReader;
 import org.apache.drill.jig.extras.json.reader.JsonScannerException;
 import org.apache.drill.jig.extras.json.reader.JsonTupleReader;
 import org.apache.drill.jig.extras.json.reader.ReplayTupleReader;
+import org.apache.drill.jig.extras.json.source.JsonAccessor.TupleObjectAccessor;
+import org.apache.drill.jig.extras.json.source.ObjectParser.JsonObjectNode;
 import org.apache.drill.jig.types.FieldValueFactory;
 
 public class JsonTupleSet implements TupleSet

@@ -39,6 +39,11 @@ public class VectorRecordIterator implements Iterator<VectorRecord>, VectorRecor
   
   
   @Override
+  public Object getValue( int fieldIndex ) {
+    return vectors[ fieldIndex ].getValueVector().getAccessor().getObject( rowIndex );
+  }
+  
+  @Override
   public VectorWrapper<?> getVector( int columnIndex ) {
     return vectors[ columnIndex ];
   }

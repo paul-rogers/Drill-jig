@@ -6,7 +6,7 @@ import org.apache.drill.jig.api.AlterSessionKeys;
 import org.apache.drill.jig.direct.DrillClientContext;
 import org.apache.drill.jig.direct.DrillConnectionFactory;
 import org.apache.drill.jig.direct.DrillContextFactory;
-import org.apache.drill.jig.direct.DrillSession;
+import org.apache.drill.jig.direct.DirectConnection;
 import org.junit.Test;
 
 public class TestConnect
@@ -18,7 +18,7 @@ public class TestConnect
         .withEmbeddedDrillbit( )
         .build( )
         .startEmbedded( );
-    DrillSession session = new DrillConnectionFactory( )
+    DirectConnection session = new DrillConnectionFactory( )
         .embedded( )
         .connect( );
     

@@ -12,7 +12,7 @@ import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.protocol.MessageConstants;
 import org.apache.drill.jig.serde.serializer.TupleSetSerializer;
-import org.apache.drill.jig.direct.DrillSession;
+import org.apache.drill.jig.direct.DirectConnection;
 import org.apache.drill.jig.drillpress.net.RequestException;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
@@ -43,7 +43,7 @@ public class QuerySerializer
     buf = ByteBuffer.allocate( bufferSize );
   }
 
-  public void start( DrillSession session ) throws RequestException {
+  public void start( DirectConnection session ) throws RequestException {
     Statement statement = session.prepare( sqlStmt );
     try {
       results = statement.execute();
@@ -88,7 +88,7 @@ public class QuerySerializer
       FieldSchema field = schema.field( i );
       fields.add( new ColumnSchema( )
           .setName( field.name() )
-          .setCardinality( field.getCardinality().cardinalityCode() )
+          .setNullable( field.nullable() ? 1 : 0 )
           .setType( field.type().typeCode( ) ) );
     }
     state = QueryState.ROWS;

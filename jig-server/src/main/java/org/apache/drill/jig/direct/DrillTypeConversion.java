@@ -125,32 +125,32 @@ public class DrillTypeConversion
         MinorType.DECIMAL9,
         DataType.DECIMAL,
         "DECIMAL",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.DECIMAL18,
         DataType.DECIMAL,
         "DECIMAL",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.DECIMAL28SPARSE,
         DataType.DECIMAL,
         "DECIMAL",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.DECIMAL28DENSE,
         DataType.DECIMAL,
         "DECIMAL",
-        false, false ) );
+        false, true ) );
     types.add( new DrillDataType(
         MinorType.DECIMAL38SPARSE,
         DataType.DECIMAL,
         "DECIMAL",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.DECIMAL38DENSE,
         DataType.DECIMAL,
         "DECIMAL",
-        false, false ) );
+        false, true ) );
     types.add( new DrillDataType(
         MinorType.MONEY,
         DataType.DECIMAL,
@@ -252,12 +252,12 @@ public class DrillTypeConversion
         MinorType.MAP,
         DataType.MAP,
         "MAP",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.LIST,
         DataType.LIST,
         "LIST",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.GENERIC_OBJECT,
         DataType.UNDEFINED,
@@ -302,44 +302,44 @@ public class DrillTypeConversion
   
   private static DataType[] makeDrillToJigTable() {
     DataType table[ ] = new DataType[38];
-    table[ MinorType.LATE.ordinal()] = DataType.UNDEFINED; // x
-    table[ MinorType.MAP.ordinal()] = DataType.TUPLE; // x
-    table[ MinorType.TINYINT.ordinal()] = DataType.INT8; // x
-    table[ MinorType.SMALLINT.ordinal()] = DataType.INT16; // x
-    table[ MinorType.INT.ordinal()] = DataType.INT32; // x
-    table[ MinorType.BIGINT.ordinal()] = DataType.INT64; // x
-    table[ MinorType.DECIMAL9.ordinal()] = DataType.FLOAT32; // x
-    table[ MinorType.DECIMAL18.ordinal()] = DataType.FLOAT64; // x
-    table[ MinorType.DECIMAL28SPARSE.ordinal()] = DataType.DECIMAL; // x
-    table[ MinorType.DECIMAL38SPARSE.ordinal()] = DataType.DECIMAL; // x
-    table[ MinorType.MONEY.ordinal()] = DataType.DECIMAL; // x
-    table[ MinorType.DATE.ordinal()] = DataType.DATE; // x
-    table[ MinorType.TIME.ordinal()] = DataType.LOCAL_DATE_TIME; // x
-    table[ MinorType.TIMETZ.ordinal()] = DataType.UTC_DATE_TIME; // x
-    table[ MinorType.TIMESTAMPTZ.ordinal()] = DataType.UTC_DATE_TIME; // x
-    table[ MinorType.TIMESTAMP.ordinal()] = DataType.UTC_DATE_TIME; // x
-    table[ MinorType.INTERVAL.ordinal()] = DataType.DATE_TIME_SPAN; // x
-    table[ MinorType.FLOAT4.ordinal()] = DataType.FLOAT32; // x
-    table[ MinorType.FLOAT8.ordinal()] = DataType.FLOAT64; // x
-    table[ MinorType.BIT.ordinal()] = DataType.BOOLEAN; // x
-    table[ MinorType.FIXEDCHAR.ordinal()] = DataType.STRING; // x
-    table[ MinorType.FIXED16CHAR.ordinal()] = DataType.STRING; // x
-    table[ MinorType.FIXEDBINARY.ordinal()] = DataType.BLOB; // x
-    table[ MinorType.VARCHAR.ordinal()] = DataType.STRING; // x
-    table[ MinorType.VAR16CHAR.ordinal()] = DataType.STRING; // x
-    table[ MinorType.VARBINARY.ordinal()] = DataType.BLOB; // x
-    table[ MinorType.UINT1.ordinal()] = DataType.INT16; // x
-    table[ MinorType.UINT2.ordinal()] = DataType.INT32; // x
-    table[ MinorType.UINT4.ordinal()] = DataType.INT64; // x
-    table[ MinorType.UINT8.ordinal()] = DataType.DECIMAL; // x
-    table[ MinorType.DECIMAL28DENSE.ordinal()] = DataType.DECIMAL; // x
-    table[ MinorType.DECIMAL38DENSE.ordinal()] = DataType.DECIMAL; // x
-    table[ MinorType.NULL.ordinal()] = DataType.NULL; // x
-    table[ MinorType.INTERVALYEAR.ordinal()] = DataType.UNDEFINED; // x
-    table[ MinorType.INTERVALDAY.ordinal()] = DataType.UNDEFINED; // x
-    table[ MinorType.LIST.ordinal()] = DataType.LIST; // x
-    table[ MinorType.GENERIC_OBJECT.ordinal()] = DataType.UNDEFINED; // x
-    table[ MinorType.UNION.ordinal()] = DataType.UNDEFINED; // x
+    table[ MinorType.LATE.ordinal()] = DataType.UNDEFINED;
+    table[ MinorType.MAP.ordinal()] = DataType.TUPLE;
+    table[ MinorType.TINYINT.ordinal()] = DataType.INT8;
+    table[ MinorType.SMALLINT.ordinal()] = DataType.INT16;
+    table[ MinorType.INT.ordinal()] = DataType.INT32;
+    table[ MinorType.BIGINT.ordinal()] = DataType.INT64;
+    table[ MinorType.DECIMAL9.ordinal()] = DataType.FLOAT32;
+    table[ MinorType.DECIMAL18.ordinal()] = DataType.FLOAT64;
+    table[ MinorType.DECIMAL28SPARSE.ordinal()] = DataType.DECIMAL;
+    table[ MinorType.DECIMAL38SPARSE.ordinal()] = DataType.DECIMAL;
+    table[ MinorType.MONEY.ordinal()] = DataType.DECIMAL;
+    table[ MinorType.DATE.ordinal()] = DataType.DATE;
+    table[ MinorType.TIME.ordinal()] = DataType.LOCAL_DATE_TIME;
+    table[ MinorType.TIMETZ.ordinal()] = DataType.UTC_DATE_TIME;
+    table[ MinorType.TIMESTAMPTZ.ordinal()] = DataType.UTC_DATE_TIME;
+    table[ MinorType.TIMESTAMP.ordinal()] = DataType.UTC_DATE_TIME;
+    table[ MinorType.INTERVAL.ordinal()] = DataType.DATE_TIME_SPAN;
+    table[ MinorType.FLOAT4.ordinal()] = DataType.FLOAT32;
+    table[ MinorType.FLOAT8.ordinal()] = DataType.FLOAT64;
+    table[ MinorType.BIT.ordinal()] = DataType.BOOLEAN;
+    table[ MinorType.FIXEDCHAR.ordinal()] = DataType.STRING;
+    table[ MinorType.FIXED16CHAR.ordinal()] = DataType.STRING;
+    table[ MinorType.FIXEDBINARY.ordinal()] = DataType.BLOB;
+    table[ MinorType.VARCHAR.ordinal()] = DataType.STRING;
+    table[ MinorType.VAR16CHAR.ordinal()] = DataType.STRING;
+    table[ MinorType.VARBINARY.ordinal()] = DataType.BLOB;
+    table[ MinorType.UINT1.ordinal()] = DataType.INT16;
+    table[ MinorType.UINT2.ordinal()] = DataType.INT32;
+    table[ MinorType.UINT4.ordinal()] = DataType.INT64;
+    table[ MinorType.UINT8.ordinal()] = DataType.DECIMAL;
+    table[ MinorType.DECIMAL28DENSE.ordinal()] = DataType.DECIMAL;
+    table[ MinorType.DECIMAL38DENSE.ordinal()] = DataType.DECIMAL;
+    table[ MinorType.NULL.ordinal()] = DataType.NULL;
+    table[ MinorType.INTERVALYEAR.ordinal()] = DataType.UNDEFINED;
+    table[ MinorType.INTERVALDAY.ordinal()] = DataType.UNDEFINED;
+    table[ MinorType.LIST.ordinal()] = DataType.LIST;
+    table[ MinorType.GENERIC_OBJECT.ordinal()] = DataType.UNDEFINED;
+    table[ MinorType.UNION.ordinal()] = DataType.UNDEFINED;
     return table;
   }
   

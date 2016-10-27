@@ -3,8 +3,8 @@ package org.apache.drill.jig.drillpress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.drill.jig.direct.DrillSession;
-import org.apache.drill.jig.direct.DrillSessionException;
+import org.apache.drill.jig.direct.DirectConnection;
+import org.apache.drill.jig.direct.DirectConnectionException;
 import org.apache.drill.jig.drillpress.net.RequestException;
 import org.apache.drill.jig.drillpress.net.RequestProcessor;
 import org.apache.drill.jig.drillpress.net.RequestException.IncompatibleVersionsException;
@@ -30,7 +30,7 @@ public class SessionRequestProcessor implements RequestProcessor
   public enum SessionState { NEW, PRE_LOGIN, READY, QUERY, END };
   
   private SessionState state = SessionState.NEW;
-  private DrillSession session;
+  private DirectConnection session;
   private QuerySerializer querySerializer;
   private DrillPressContext drillPressContext;
   
@@ -116,7 +116,7 @@ public class SessionRequestProcessor implements RequestProcessor
     }
     try {
       session = drillPressContext.connectToDrill();
-    } catch (DrillSessionException e) {
+    } catch (DirectConnectionException e) {
       throw new RequestException( "Drill connect failed: " + e.getMessage(),
           MessageConstants.DRILL_CONNECT_ERROR );
     }

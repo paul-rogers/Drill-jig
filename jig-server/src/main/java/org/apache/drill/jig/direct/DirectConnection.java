@@ -17,11 +17,11 @@ import org.apache.drill.jig.exception.JigException;
  * Jig representation of a connection to Drill.
  */
 
-public class DrillSession extends AbstractDrillConnection
+public class DirectConnection extends AbstractDrillConnection
 {
   private final DrillClient drillClient;
   
-  protected DrillSession( DrillClient drillClient ) {
+  protected DirectConnection( DrillClient drillClient ) {
     this.drillClient = drillClient;      
   }
   
@@ -44,7 +44,7 @@ public class DrillSession extends AbstractDrillConnection
       }
       return rowCount;
     } catch (RpcException e) {
-      throw new DrillSessionException( "Execute failed: " + e.getMessage(), e );
+      throw new DirectConnectionException( "Execute failed: " + e.getMessage(), e );
     }
   }
   

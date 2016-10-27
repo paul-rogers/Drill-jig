@@ -10,11 +10,11 @@ import org.apache.drill.jig.api.TupleValue;
  * to a Jig Tuple.
  */
 
-public class DrillMapAccessor implements TupleValueAccessor {
+public class WrongMapVectorAccessor implements TupleValueAccessor {
   
-  public DrillTupleValue tuple;
+  public DirectTupleValue tuple;
   
-  public DrillMapAccessor( DrillTupleValue tuple ) {
+  public WrongMapVectorAccessor( DirectTupleValue tuple ) {
     this.tuple = tuple;
   }
 

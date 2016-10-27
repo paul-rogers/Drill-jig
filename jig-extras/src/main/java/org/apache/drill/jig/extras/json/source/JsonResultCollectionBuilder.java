@@ -1,4 +1,4 @@
-package org.apache.drill.jig.extras.json;
+package org.apache.drill.jig.extras.json.source;
 
 import java.io.Reader;
 

@@ -1,4 +1,4 @@
-package org.apache.drill.jig.extras.json;
+package org.apache.drill.jig.extras.json.source;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +17,8 @@ import org.apache.drill.jig.api.impl.TupleSchemaImpl;
 import org.apache.drill.jig.api.impl.DataDef.*;
 import org.apache.drill.jig.container.FieldValueContainer;
 import org.apache.drill.jig.container.FieldValueContainerSet;
-import org.apache.drill.jig.extras.json.ObjectParser.*;
-import org.apache.drill.jig.extras.json.JsonAccessor.*;
+import org.apache.drill.jig.extras.json.source.JsonAccessor.*;
+import org.apache.drill.jig.extras.json.source.ObjectParser.*;
 import org.apache.drill.jig.types.FieldValueFactory;
 
 /**

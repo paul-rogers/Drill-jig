@@ -15,11 +15,11 @@ import org.apache.drill.jig.container.FieldValueContainerSet;
  * or name to a Field Value that represents a vector.
  */
 
-public class DrillTupleValue extends AbstractTupleValue {
+public class DirectTupleValue extends AbstractTupleValue {
 
   private TupleSchemaImpl schema;
 
-  public DrillTupleValue(TupleSchemaImpl schema,
+  public DirectTupleValue(TupleSchemaImpl schema,
       FieldValueContainerSet containerSet) {
     super( containerSet );
     this.schema = schema;
@@ -30,7 +30,7 @@ public class DrillTupleValue extends AbstractTupleValue {
     return schema;
   }
   
-  public static class DrillRootTupleValue extends DrillTupleValue {
+  public static class DrillRootTupleValue extends DirectTupleValue {
 
     public VectorAccessor[] vectorBindings;
 

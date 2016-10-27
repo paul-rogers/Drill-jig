@@ -4,8 +4,8 @@ import org.apache.drill.jig.protocol.MessageConstants;
 import org.apache.drill.jig.direct.DrillClientContext;
 import org.apache.drill.jig.direct.DrillConnectionFactory;
 import org.apache.drill.jig.direct.DrillContextFactory;
-import org.apache.drill.jig.direct.DrillSession;
-import org.apache.drill.jig.direct.DrillSessionException;
+import org.apache.drill.jig.direct.DirectConnection;
+import org.apache.drill.jig.direct.DirectConnectionException;
 import org.apache.drill.jig.drillpress.net.RequestProcessorFactory;
 
 public class DrillPressContext
@@ -92,7 +92,7 @@ public class DrillPressContext
     this.pwd = pwd;
   }
   
-  public DrillSession connectToDrill( ) throws DrillSessionException {
+  public DirectConnection connectToDrill( ) throws DirectConnectionException {
     DrillConnectionFactory factory = new DrillConnectionFactory( );
     switch ( connectMethod ) {
     case CONFIG:

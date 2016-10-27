@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
+import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
@@ -159,8 +160,8 @@ public class RemoteResultCollection implements ResultCollection
         return true;
       case SCHEMA_CHANGE:
         // The most recent call to fetch data got a new schema.
-        deserializer = new TupleSetDeserializer( );
-        deserializer.prepareSchema( translateSchema( response.schema ) );
+        TupleSchema schema = translateSchema( response.schema );
+        deserializer = new TupleSetDeserializer( schema );
         tupleSetIndex++;
         tupleSet.reset( );
         state = State.END_OF_BUFFER;
@@ -193,8 +194,8 @@ public class RemoteResultCollection implements ResultCollection
         }
         break;
       case SCHEMA:
-        deserializer = new TupleSetDeserializer( );
-        deserializer.prepareSchema( translateSchema( response.schema ) );
+        TupleSchema schema = translateSchema( response.schema );
+        deserializer = new TupleSetDeserializer( schema );
         tupleSetIndex++;
         state = State.END_OF_BUFFER;
         return;

@@ -40,7 +40,7 @@ public class DrillConnectionFactory
   
   private void assertNoMode() {
     if ( mode != null )
-      throw new DrillSessionError( "Connection mode already set to " + mode );
+      throw new DirectConnectionError( "Connection mode already set to " + mode );
   }
 
   public DrillConnectionFactory drillbit( String host ) {
@@ -93,9 +93,9 @@ public class DrillConnectionFactory
     return this;
   }
   
-  public DrillSession connect( ) throws DrillSessionException {
+  public DirectConnection connect( ) throws DirectConnectionException {
     if ( mode == null )
-      throw new DrillSessionError( "No connection mode specified" );
+      throw new DirectConnectionError( "No connection mode specified" );
     switch ( mode ) {
     case DRILLBIT_DIRECT:
       return connectDirect( );
@@ -108,11 +108,11 @@ public class DrillConnectionFactory
     }
   }
 
-  private DrillSession connectEmbedded() throws DrillSessionException {
+  private DirectConnection connectEmbedded() throws DirectConnectionException {
     if ( ! clientContext.hasEmbeddedDrillbit( ) ) {
-      clientContext.startEmbedded();
+      throw new IllegalStateException( "Context not configured with an embedded Drillbit" );
     }
-    RemoteServiceSet serviceSet = clientContext.getEmbeddedServiceSet();
+    RemoteServiceSet serviceSet = clientContext.getEmbeddedDrillbit( ).getEmbeddedServiceSet();
     return doConnect( serviceSet.getCoordinator(), null, false );
   }
 
@@ -121,14 +121,14 @@ public class DrillConnectionFactory
    * property. All Drillbit connections share the context allocator. The ZK cluster
    * coordinator is null because we use the default.
    * @return
-   * @throws DrillSessionException 
+   * @throws DirectConnectionException 
    */
   
-  private DrillSession connectDirect() throws DrillSessionException {
+  private DirectConnection connectDirect() throws DirectConnectionException {
     return doConnect( null, null, true );
   }
   
-  private DrillSession doConnect( ClusterCoordinator coordinator, String zkConnect, boolean isDirect ) throws DrillSessionException {
+  private DirectConnection doConnect( ClusterCoordinator coordinator, String zkConnect, boolean isDirect ) throws DirectConnectionException {
     DrillConfig config = clientContext.getConfig( );
     BufferAllocator allocator = clientContext.getRootAllocator( );
 //      RemoteServiceSet serviceSet = RemoteServiceSet.getServiceSetWithFullCache(config, allocator);
@@ -140,13 +140,13 @@ public class DrillConnectionFactory
       // information must come in as a connection property instead.
     
       client.connect(zkConnect, connectProps);
-      return new DrillSession( client );
+      return new DirectConnection( client );
     } catch (RpcException e) {
-      throw new DrillSessionException( "Connect failed", e );
+      throw new DirectConnectionException( "Connect failed", e );
     }
   }
 
-  private DrillSession connectViaZk() throws DrillSessionException {
+  private DirectConnection connectViaZk() throws DirectConnectionException {
     return doConnect( null, zkConnectString, false );
   }
 }

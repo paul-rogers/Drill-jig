@@ -23,7 +23,7 @@ public class TestDrillDirect
     
     new DrillContextFactory( )
         .build( );
-    DrillSession session = new DrillConnectionFactory( )
+    DirectConnection session = new DrillConnectionFactory( )
         .drillbit( "localhost" )
         .connect( );
 //    new DrillContextFactory( )
@@ -42,7 +42,7 @@ public class TestDrillDirect
     DrillClientContext.instance( ).stopEmbeddedDrillbit( );
   }
 
-  private void testQueryPrinter(DrillSession session) throws JigException {
+  private void testQueryPrinter(DirectConnection session) throws JigException {
     String stmt = "SELECT * FROM cp.`employee.json` LIMIT 20";
     Statement statement = session.prepare( stmt );
     ResultCollection results = statement.execute( );

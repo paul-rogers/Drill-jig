@@ -16,8 +16,7 @@ public class DrillClientContext implements AutoCloseable
   private static DrillClientContext instance;
   private final DrillConfig config;
   private BufferAllocator allocator;
-  private Drillbit embeddedDrillbit;
-  private RemoteServiceSet embeddedServiceSet;
+  private EmbeddedDrillbit embeddedDrillbit;
   
   public DrillClientContext( )
   {
@@ -26,6 +25,10 @@ public class DrillClientContext implements AutoCloseable
   
   public boolean hasEmbeddedDrillbit() {
     return embeddedDrillbit != null;
+  }
+  
+  public EmbeddedDrillbit getEmbeddedDrillbit( ) {
+    return embeddedDrillbit;
   }
 
   private DrillClientContext( DrillConfig config )
@@ -46,35 +49,16 @@ public class DrillClientContext implements AutoCloseable
   public static void init( )
   {
     if ( instance != null )
-      throw new DrillSessionError( "Already initialized" );
+      throw new DirectConnectionError( "Already initialized" );
     instance = new DrillClientContext( );
   }
   
   public static DrillClientContext init( DrillConfig config )
   {
     if ( instance != null )
-      throw new DrillSessionError( "Already initialized" );
+      throw new DirectConnectionError( "Already initialized" );
     instance = new DrillClientContext( config );
     return instance;
-  }
-  
-  /**
-   * Start an embedded Drillbit.
-   * 
-   * @throws DrillSessionException
-   */
-  
-  public void startEmbedded( ) throws DrillSessionException {
-    if ( embeddedDrillbit != null )
-      throw new DrillSessionError( "Embedded Drillbit already started" );
-    if ( embeddedServiceSet == null )
-      embeddedServiceSet = RemoteServiceSet.getLocalServiceSet();
-    try {
-      embeddedDrillbit = new Drillbit(config, embeddedServiceSet);
-      embeddedDrillbit.run();
-    } catch (Exception e) {
-      throw new DrillSessionException( "Failed to start embedded Drillbit", e );
-    }
   }
   
   public static DrillClientContext instance( ) {
@@ -89,22 +73,12 @@ public class DrillClientContext implements AutoCloseable
 
   @Override
   public void close() throws Exception {
-    stopEmbeddedDrillbit( );
+    if ( embeddedDrillbit != null )
+      embeddedDrillbit.close( );
+  }
+
+  protected void startEmbeddedDrillbit() throws DirectConnectionException {
+    embeddedDrillbit = new EmbeddedDrillbit( this );
   }
   
-  /**
-   * Stop the embedded Drillbit.
-   */
-  
-  public void stopEmbeddedDrillbit( )
-  {
-    if ( embeddedDrillbit != null ) {
-      embeddedDrillbit.close();
-      embeddedDrillbit = null;
-    }
-  }
-  
-  public RemoteServiceSet getEmbeddedServiceSet( ) {
-    return embeddedServiceSet;
-  }
 }

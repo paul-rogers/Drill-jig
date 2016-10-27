@@ -44,7 +44,6 @@ public class MapFieldValue extends AbstractStructuredValue {
 
   @Override
   public Object getValue() {
-    return accessor.getValue();
+    throw new ValueConversionError( "Cannot convert a map to an object" );
   }
-
 }

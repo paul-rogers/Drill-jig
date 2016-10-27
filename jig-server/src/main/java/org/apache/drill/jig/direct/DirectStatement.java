@@ -13,9 +13,9 @@ public class DirectStatement implements Statement
 {
   DrillResultCollection results;
   private String stmt;
-  private DrillSession session;
+  private DirectConnection session;
 
-  public DirectStatement( DrillSession session, String stmt ) {
+  public DirectStatement( DirectConnection session, String stmt ) {
     this.session = session;
     this.stmt = stmt;
   }

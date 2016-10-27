@@ -11,10 +11,11 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.extras.json.ObjectParser.JsonArrayNode;
-import org.apache.drill.jig.extras.json.ObjectParser.JsonScalarNode;
-import org.apache.drill.jig.extras.json.ObjectParser.JsonSchemaNode;
-import org.apache.drill.jig.extras.json.ObjectParser.JsonObjectNode;
+import org.apache.drill.jig.extras.json.source.ObjectParser;
+import org.apache.drill.jig.extras.json.source.ObjectParser.JsonArrayNode;
+import org.apache.drill.jig.extras.json.source.ObjectParser.JsonObjectNode;
+import org.apache.drill.jig.extras.json.source.ObjectParser.JsonScalarNode;
+import org.apache.drill.jig.extras.json.source.ObjectParser.JsonSchemaNode;
 import org.apache.drill.jig.types.FieldValueFactory;
 import org.junit.Test;
 

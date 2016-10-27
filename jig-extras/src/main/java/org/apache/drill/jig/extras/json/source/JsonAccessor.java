@@ -1,4 +1,4 @@
-package org.apache.drill.jig.extras.json;
+package org.apache.drill.jig.extras.json.source;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -23,7 +23,7 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.container.VariantFieldValueContainer;
-import org.apache.drill.jig.extras.json.JsonTupleSet.JsonTupleValue;
+import org.apache.drill.jig.extras.json.source.JsonTupleSet.JsonTupleValue;
 import org.apache.drill.jig.types.FieldValueFactory;
 
 /**
@@ -129,13 +129,8 @@ public class JsonAccessor {
       return this;
     }
 
-    @Override
-    public Object getValue() {
-      return accessor.getObject();
-    }
-    
     private JsonObject getJsonObject( ) {
-      return (JsonObject) getValue( );
+      return (JsonObject) accessor.getObject();
     }
     
     @Override
@@ -260,7 +255,7 @@ public class JsonAccessor {
 
     @Override
     public boolean isNull() {
-      return checkNull( getValue( ) );
+      return checkNull( accessor.getObject() );
     }
     
     protected JsonArray getArray( ) {
@@ -278,11 +273,6 @@ public class JsonAccessor {
     @Override
     public int size() {
       return getArray( ).size();
-    }
-
-    @Override
-    public Object getValue() {
-      return accessor.getObject();
     }
 
     @Override

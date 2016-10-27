@@ -56,9 +56,9 @@ public class DrillContextFactory
     return this;
   }
   
-  public DrillClientContext build( ) {
+  public DrillClientContext build( ) throws DirectConnectionException {
     if ( DrillClientContext.isCreated( ) ) {
-      throw new DrillSessionError( "Session already created" );
+      throw new DirectConnectionError( "Session already created" );
     }
     String configPath = null;
     
@@ -68,18 +68,22 @@ public class DrillContextFactory
       configPath = configFile.getAbsolutePath();
     }
     if ( ! isEmbedded  &&  ! contextProps.isEmpty() ) {
-      throw new DrillSessionError( "Cannot specify custom properties for client session" );
+      throw new DirectConnectionError( "Cannot specify custom properties for client session" );
     }
     if ( ! isEmbedded )
       config = DrillConfig.create( configPath, false );
     else if ( configPath != null && ! contextProps.isEmpty() ) {
-      throw new DrillSessionError( "Cannot specify both custom properties and a config file" );
+      throw new DirectConnectionError( "Cannot specify both custom properties and a config file" );
     }
     else if ( configPath != null )
       config = DrillConfig.create( configPath, isEmbedded );
     else
       config = DrillConfig.create( contextProps );
     
-    return DrillClientContext.init( config );
+    DrillClientContext context = DrillClientContext.init( config );
+    if ( isEmbedded ) {
+      context.startEmbeddedDrillbit( );
+    }
+    return context;
   }
 }

@@ -9,6 +9,8 @@ import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.JigException;
+import org.apache.drill.jig.extras.json.source.JsonResultCollection;
+import org.apache.drill.jig.extras.json.source.JsonResultCollectionBuilder;
 import org.junit.Test;
 
 public class TestResultSet {

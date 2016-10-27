@@ -25,7 +25,7 @@ public class VectorRecordReader implements AutoCloseable
 {
   public enum Event { SCHEMA, BATCH, RECORD, EOF };
   
-  DrillSession session;
+  DirectConnection session;
   BufferingQueryEventListener input;
   public RecordBatchLoader loader;
   private QueryId queryId;
@@ -36,7 +36,7 @@ public class VectorRecordReader implements AutoCloseable
   private QueryDataBatch currentBatch;
   private  VectorRecordIterator recordIter;
   
-  public VectorRecordReader( DrillSession session, String stmt ) {
+  public VectorRecordReader( DirectConnection session, String stmt ) {
     input = new BufferingQueryEventListener( );
     loader = new RecordBatchLoader( session.getRootAllocator( ) );
     session.startQuery( stmt, input );
