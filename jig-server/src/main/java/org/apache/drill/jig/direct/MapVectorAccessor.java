@@ -22,7 +22,7 @@ public class MapVectorAccessor extends VectorAccessor
     return accessor.getObject( rowIndex( ) );
   }
 
-  public class RepeatedMapVectorAccessor extends VectorAccessor implements ObjectAccessor {
+  public static class RepeatedMapVectorAccessor extends VectorAccessor implements ObjectAccessor {
 
     RepeatedMapAccessor accessor;
     

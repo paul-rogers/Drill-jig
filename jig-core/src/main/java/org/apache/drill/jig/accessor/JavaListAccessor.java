@@ -29,7 +29,7 @@ public class JavaListAccessor implements ArrayAccessor, ValueObjectAccessor {
     }    
   }
 
-  private final ObjectAccessor listAccessor;
+  private ObjectAccessor listAccessor;
   private final JavaListMemberAccessor memberAccessor = new JavaListMemberAccessor( );
   private final BoxedAccessor memberValueAccessor;
 
@@ -41,6 +41,14 @@ public class JavaListAccessor implements ArrayAccessor, ValueObjectAccessor {
   public JavaListAccessor( ObjectAccessor listAccessor, FieldValueFactory factory ) {
     this.listAccessor = listAccessor;
     memberValueAccessor = new VariantBoxedAccessor( memberAccessor, factory );
+  }
+
+  public JavaListAccessor( FieldValueFactory factory ) {
+    memberValueAccessor = new VariantBoxedAccessor( memberAccessor, factory );
+  }
+  
+  public void bind( ObjectAccessor accessor ) {
+    listAccessor = accessor;
   }
 
   @SuppressWarnings("rawtypes")

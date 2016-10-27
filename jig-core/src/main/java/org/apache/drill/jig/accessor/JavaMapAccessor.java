@@ -18,15 +18,23 @@ import org.apache.drill.jig.types.FieldValueFactory;
 
 public class JavaMapAccessor implements MapValueAccessor, MapValue, ValueObjectAccessor {
 
-  private final ObjectAccessor accessor;
+  private ObjectAccessor accessor;
   private final VariantFieldValueContainer valueContainer;
   private final CachedObjectAccessor valueAccessor;
 
-  public JavaMapAccessor( ObjectAccessor accessor, FieldValueFactory factory ) {
-    this.accessor = accessor;
+  public JavaMapAccessor( FieldValueFactory factory ) {
     valueContainer = new VariantFieldValueContainer( factory );
     valueAccessor = new CachedObjectAccessor( );
     valueContainer.bind( new VariantBoxedAccessor( valueAccessor, factory ) );
+  }
+
+  public JavaMapAccessor( ObjectAccessor accessor, FieldValueFactory factory ) {
+    this( factory );
+    this.accessor = accessor;
+  }
+  
+  public void bind( ObjectAccessor accessor ) {
+    this.accessor = accessor;
   }
   
   @Override
