@@ -4,8 +4,13 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonWriter;
+import javax.json.stream.JsonGenerator;
 
 import org.apache.drill.common.exceptions.ExecutionSetupException;
 import org.apache.drill.jig.api.ResultCollection;
@@ -95,6 +100,11 @@ public class TestDrillJson {
     String stmt = "SELECT * FROM `" + testFile + "` LIMIT 20";
     Statement statement = session.prepare( stmt );
     ResultCollection results = statement.execute( );
+    Map<String,String> props = new HashMap<>( );
+    props.put( JsonGenerator.PRETTY_PRINTING, "true" );
+    String baseName = testFile.getName();
+    String outName = baseName.replaceAll( ".json", "-output.json" );
+    JsonWriter writer = Json.createWriterFactory( props ).createWriter(writer);
     while ( results.next() ) {
       TupleSet tuples = results.tuples();
       while ( tuples.next() ) {

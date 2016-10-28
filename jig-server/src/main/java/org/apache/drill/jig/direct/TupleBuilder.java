@@ -8,12 +8,15 @@ import org.apache.drill.common.types.TypeProtos.DataMode;
 import org.apache.drill.common.types.TypeProtos.MinorType;
 import org.apache.drill.exec.record.BatchSchema;
 import org.apache.drill.exec.record.MaterializedField;
+import org.apache.drill.exec.util.Text;
 import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.Resetable;
+import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.accessor.JavaListAccessor;
 import org.apache.drill.jig.accessor.JavaMapAccessor;
 import org.apache.drill.jig.accessor.ReadOnceObjectAccessor;
+import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.impl.ArrayFieldSchemaImpl;
@@ -41,10 +44,19 @@ import org.apache.drill.jig.types.MapFieldValue.JavaMapFieldValue;
 
 public class TupleBuilder
 {
-  public static class TextAccessor extends StringValueAccessor
+  public static class DrillVariantBoxedAccessor extends VariantBoxedAccessor
   {
-    
+    public DrillVariantBoxedAccessor(ObjectAccessor accessor,
+        FieldValueFactory factory) {
+      super(accessor, factory);
+    }
+
+    @Override
+    public String getString() {
+      return ((Text) getObject( )).toString();
+    }    
   }
+  
   public static class DrillFieldValueFactory extends FieldValueFactory
   {
     @Override
@@ -55,7 +67,19 @@ public class TupleBuilder
       if ( type == DataType.MAP ) {
         return new JavaMapFieldValue( this );
       }
-      throw new IllegalStateException("No field value for type: " + type);
+      return super.extendedValue(type);
+    }
+    
+    @Override
+    protected DataType extendedConversion(Class<? extends Object> valueClass) {
+      if ( valueClass.isAssignableFrom( Text.class ) )
+        return DataType.STRING;
+      return super.extendedConversion( valueClass );
+    }
+  
+    @Override
+    public FieldAccessor newVariantObjectAccessor( ObjectAccessor objAccessor ) {
+      return new DrillVariantBoxedAccessor( objAccessor, this );
     }
   }
   

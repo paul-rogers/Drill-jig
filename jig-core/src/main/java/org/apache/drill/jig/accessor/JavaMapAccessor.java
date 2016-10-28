@@ -25,7 +25,7 @@ public class JavaMapAccessor implements MapValueAccessor, MapValue, ValueObjectA
   public JavaMapAccessor( FieldValueFactory factory ) {
     valueContainer = new VariantFieldValueContainer( factory );
     valueAccessor = new CachedObjectAccessor( );
-    valueContainer.bind( new VariantBoxedAccessor( valueAccessor, factory ) );
+    valueContainer.bind( factory.newVariantObjectAccessor( valueAccessor ) );
   }
 
   public JavaMapAccessor( ObjectAccessor accessor, FieldValueFactory factory ) {

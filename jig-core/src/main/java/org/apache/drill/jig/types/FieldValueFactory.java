@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
 
@@ -153,5 +156,9 @@ public class FieldValueFactory {
       return DataType.VARIANT;
     throw new ValueConversionError("Incompatible types: " + type1 + " and "
         + type2);
+  }
+  
+  public FieldAccessor newVariantObjectAccessor( ObjectAccessor objAccessor ) {
+    return new VariantBoxedAccessor( objAccessor, this );
   }
 }
