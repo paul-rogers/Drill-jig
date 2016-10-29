@@ -9,21 +9,22 @@ import org.apache.drill.common.types.TypeProtos.MinorType;
 import org.apache.drill.exec.record.BatchSchema;
 import org.apache.drill.exec.record.MaterializedField;
 import org.apache.drill.exec.util.Text;
-import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
-import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
-import org.apache.drill.jig.accessor.FieldAccessor.Resetable;
-import org.apache.drill.jig.accessor.CachedObjectAccessor;
-import org.apache.drill.jig.accessor.FieldAccessor;
-import org.apache.drill.jig.accessor.JavaListAccessor;
-import org.apache.drill.jig.accessor.JavaMapAccessor;
-import org.apache.drill.jig.accessor.ReadOnceObjectAccessor;
+import org.apache.drill.exec.vector.complex.MapVector;
 import org.apache.drill.jig.accessor.BoxedAccessor;
 import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
+import org.apache.drill.jig.accessor.CachedObjectAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
+import org.apache.drill.jig.accessor.FieldAccessor.Resetable;
+import org.apache.drill.jig.accessor.JavaListAccessor;
+import org.apache.drill.jig.accessor.ReadOnceObjectAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.impl.ArrayFieldSchemaImpl;
 import org.apache.drill.jig.api.impl.DataDef;
-import org.apache.drill.jig.api.impl.DataDef.*;
+import org.apache.drill.jig.api.impl.DataDef.ListDef;
+import org.apache.drill.jig.api.impl.DataDef.ScalarDef;
+import org.apache.drill.jig.api.impl.DataDef.TupleDef;
 import org.apache.drill.jig.api.impl.FieldSchemaImpl;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
 import org.apache.drill.jig.container.FieldValueContainer;
@@ -46,6 +47,11 @@ import org.apache.drill.jig.types.MapFieldValue.JavaMapFieldValue;
 
 public class TupleBuilder
 {
+  /**
+   * Specialized "boxed" accessor that expects {@link Text} objects
+   * instead of Java String objects for string values.
+   */
+  
   public static class DrillBoxedAccessor extends BoxedAccessor
   {
     public DrillBoxedAccessor(ObjectAccessor accessor) {
@@ -57,6 +63,11 @@ public class TupleBuilder
       return ((Text) getObject( )).toString();
     }    
   }
+  
+  /**
+   * Specialized variant "boxed" accessor that expects {@link Text} objects
+   * instead of Java String objects for string values.
+   */
   
   public static class DrillVariantBoxedAccessor extends VariantBoxedAccessor
   {
@@ -70,6 +81,11 @@ public class TupleBuilder
       return ((Text) getObject( )).toString();
     }    
   }
+  
+  /**
+   * Specialized field value factory that handles the special cases for
+   * Drill.
+   */
   
   public static class DrillFieldValueFactory extends FieldValueFactory
   {
@@ -344,13 +360,25 @@ public class TupleBuilder
 
     @Override
     public VectorAccessor buildField(FieldValueFactory factory) {
+      
+      // Get Drill's data type used to create the proper vector accessor.
+      
       MinorType minorType = drillField.getType().getMinorType();
+      
+      // Create a simple accessor or a repeated value accessor depending
+      // on this field type. (If the mode is REPEATED, then this node
+      // represents an element of an array. Otherwise, it represents
+      // a simple scalar field.
+      
       if ( drillField.getDataMode() == DataMode.REPEATED ) {
         accessor = VectorAccessor.getElementAccessor( minorType );
       } else {
         accessor = VectorAccessor.getScalarAccessor( minorType );
       }
       accessor.bindSchema( schema );
+      
+      // Define the data element.
+      
       dataDef = new ScalarDef( schema.type( ), schema.nullable( ), accessor );
       return accessor;
     }
@@ -381,12 +409,27 @@ public class TupleBuilder
 
     @Override
     public VectorAccessor buildField(FieldValueFactory factory) {
+      
+      // Create materialized accessors for the members of the Map.
+      // Drill declares the members, so we can treat the map as a tuple
+      // with known members and types.
+      
       CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
       tuple.buildMaterialized( valueAccessor, factory );
+      
+      // Create an accessor for Drill's map vector.
+      
       MapVectorAccessor accessor = new MapVectorAccessor( );
       accessor.bindSchema( schema );
+      
+      // The Map vector materializes the map as a Java Map.
+      // Cache it for performance.
+      
       ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
-      resetable = objAccessor;     
+      resetable = objAccessor;
+      
+      // Combine the map and element accessors to create the tuple accessor.
+      
       DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet, objAccessor, valueAccessor );
       dataDef = new TupleDef( false, mapAccessor );
       return accessor;
@@ -441,8 +484,16 @@ public class TupleBuilder
 
     @Override
     public VectorAccessor buildField(FieldValueFactory factory) {
+      
+      // Build the type-specific vector element accessor for the
+      // repeated elements. (In Jig, we treat the set of repeated elements as
+      // an array, and each item as an array element.)
+      
       VectorAccessor elementAccessor = element.buildField( factory );
       RepeatedVectorAccessor arrayAccessor = new RepeatedVectorAccessor( (DrillElementAccessor) elementAccessor );
+      
+      // Combine the list and element.
+      
       dataDef = new ListDef( false, element.dataDef, arrayAccessor );
       return elementAccessor;
     }
@@ -480,10 +531,19 @@ public class TupleBuilder
 
     @Override
     public VectorAccessor buildField(FieldValueFactory factory) {
+      
+      // Create the acccessor for Drill's repeated map vector
+      
       RepeatedMapVectorAccessor accessor = new RepeatedMapVectorAccessor( );
       accessor.bindSchema( schema );
+      
+      // Drill returns the repeated maps as a Java list. Cache it.
+      
       ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
       resetable = objAccessor;
+      
+      // Build the materialized list accessor.
+      
       buildMaterialized( objAccessor, factory );
       return accessor;
     }
@@ -491,14 +551,24 @@ public class TupleBuilder
     @Override
     public void buildMaterialized(ObjectAccessor objAccessor,
         FieldValueFactory factory) {
+      
+      // The repeated map is materialized as a list. Create the
+      // list accessor.
+      
       JavaListAccessor listAccessor = new JavaListAccessor( objAccessor );
+      
+      // Build the materialized member accessors.
       
       CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
       tuple.buildMaterialized( valueAccessor, factory );
       
+      // Present each map as a tuple
+      
       DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet,
           (ObjectAccessor) listAccessor.memberAccessor(), valueAccessor );      
       DataDef elementDef = new TupleDef( false, mapAccessor );
+      
+      // Define the list and its element
       
       dataDef = new ListDef( false, elementDef, listAccessor );
     }
@@ -525,12 +595,27 @@ public class TupleBuilder
 
     @Override
     public VectorAccessor buildField(FieldValueFactory factory) {
-      element.buildField(factory);
+      
+      // Vector accessor
+      
       ListVectorAccessor accessor = new ListVectorAccessor( );
       accessor.bindSchema( schema );
+      
+      // Cached the materialized list object.
+      
       ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
       resetable = objAccessor;
+      
+      // Accessor for the materialized list
+      
       JavaListAccessor javaAccessor = new JavaListAccessor( objAccessor, factory );
+      
+      // Build the element (using the materialized list)
+      
+      element.buildMaterialized(((ObjectAccessor) javaAccessor.memberAccessor()), factory);
+      
+      // Combine the list and element data.
+      
       dataDef = new ListDef( false, element.dataDef, javaAccessor );
       return accessor;
     }
