@@ -74,7 +74,7 @@ public class DrillTypeConversion
         MinorType.UINT1,
         DataType.INT16,
         "UINT1",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.SMALLINT,
         DataType.INT16,
@@ -84,7 +84,7 @@ public class DrillTypeConversion
         MinorType.UINT2,
         DataType.INT32,
         "UINT2",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.INT,
         DataType.INT32,
@@ -94,7 +94,7 @@ public class DrillTypeConversion
         MinorType.UINT4,
         DataType.INT64,
         "UINT4",
-        true, false ) );
+        true, true ) );
     types.add( new DrillDataType(
         MinorType.BIGINT,
         DataType.INT64,
@@ -104,7 +104,7 @@ public class DrillTypeConversion
         MinorType.UINT8,
         DataType.DECIMAL,
         "UINT8",
-        true, false ) );
+        true, true ) );
     
     // Floating point types
     

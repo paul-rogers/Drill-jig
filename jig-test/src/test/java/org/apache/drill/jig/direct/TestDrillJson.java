@@ -65,7 +65,21 @@ public class TestDrillJson {
             "exec/jdbc/src/test/resources",
             new DrillTestFile[] {
                 new DrillTestFile( "donuts.json" ),
-          } )
+          } ),
+//        new DrillProject( "drill-java-ecec",
+//            "exec/java-exec/src/test/resources/jsoninput",
+//            new DrillTestFile[] {
+////                new DrillTestFile( "big_numeric.json" ), // Fails with out-of-range error (does not map to Decimal)
+//                new DrillTestFile( "input2_modified.json" ),
+//                new DrillTestFile( "input2.json" ),
+//                new DrillTestFile( "input3.json" ),
+//                new DrillTestFile( "input4.json" ),
+//                new DrillTestFile( "kvgen_complex_input.json" ),
+//                new DrillTestFile( "large_int.json" ),
+//                new DrillTestFile( "nestedArray.json" ),
+//                new DrillTestFile( "nullableOrdered1.json" ),
+//                new DrillTestFile( "repeated_list_bug.json" ),
+//         } )
         };
   }
   

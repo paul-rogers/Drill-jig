@@ -127,12 +127,10 @@ public abstract class DataDef {
   public static class TupleDef extends DataDef {
     
     public final TupleValueAccessor tupleValueAccessor;
-    public final TupleValue tupleValue;
     
-    public TupleDef( boolean nullable, TupleValueAccessor tupleValueAccessor, TupleValue tupleValue ) {
+    public TupleDef( boolean nullable, TupleValueAccessor tupleValueAccessor ) {
       super( DataType.TUPLE, nullable );
       this.tupleValueAccessor = tupleValueAccessor;
-      this.tupleValue = tupleValue;
     }
 
     @Override

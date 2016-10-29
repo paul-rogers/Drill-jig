@@ -12,10 +12,12 @@ import org.apache.drill.exec.util.Text;
 import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.Resetable;
+import org.apache.drill.jig.accessor.CachedObjectAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.accessor.JavaListAccessor;
 import org.apache.drill.jig.accessor.JavaMapAccessor;
 import org.apache.drill.jig.accessor.ReadOnceObjectAccessor;
+import org.apache.drill.jig.accessor.BoxedAccessor;
 import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
@@ -44,6 +46,18 @@ import org.apache.drill.jig.types.MapFieldValue.JavaMapFieldValue;
 
 public class TupleBuilder
 {
+  public static class DrillBoxedAccessor extends BoxedAccessor
+  {
+    public DrillBoxedAccessor(ObjectAccessor accessor) {
+      super(accessor);
+    }
+
+    @Override
+    public String getString() {
+      return ((Text) getObject( )).toString();
+    }    
+  }
+  
   public static class DrillVariantBoxedAccessor extends VariantBoxedAccessor
   {
     public DrillVariantBoxedAccessor(ObjectAccessor accessor,
@@ -128,31 +142,12 @@ public class TupleBuilder
 
     private FieldNode buildListNode(MaterializedField batchField) {
       Collection<MaterializedField> children = batchField.getChildren();
-      if ( children.size() != 1 )
-        throw new IllegalStateException( "List field should have one child, found " + children.size() );
-      return new ListNode( batchField, makeField( children.iterator().next() ) );
-    }
-    
-    public void build( FieldValueFactory factory ) {
-      FieldValueContainer containers[] = new FieldValueContainer[nodes.size( )];
-      for ( int i = 0;  i < nodes.size( );  i++ ) {
-        FieldNode node = nodes.get( i );
-        node.build( factory );
-        containers[i] = node.dataDef.container;
-      }
-      containerSet = new FieldValueContainerSet( containers );
-   }
-    
-    public void gatherResetable( List<Resetable> resets ) {
-      for ( int i = 0;  i < nodes.size( );  i++ ) {
-        nodes.get( i ).gatherResetable( resets );
-      }
-    }
-    
-    public void gatherVectorBindings( List<VectorAccessor> accessors ) {
-      for ( int i = 0;  i < nodes.size( );  i++ ) {
-        nodes.get( i ).gatherVectorBindings( accessors );
-      }
+      FieldNode child;
+      if ( children.size() == 1 )
+        child = makeField( children.iterator().next() );
+      else
+        child = new ImpliedMapNode( children );
+      return new ListNode( batchField, child );
     }
     
     @Override
@@ -190,19 +185,25 @@ public class TupleBuilder
       }      
     }
     
-    @Override
-    public void build( FieldValueFactory factory ) {
-      super.build( factory );
-      
+    public void buildFields( FieldValueFactory factory ) {
+      FieldValueContainer containers[] = new FieldValueContainer[nodes.size( )];
       List<VectorAccessor> accessors = new ArrayList<>( );
-      gatherVectorBindings( accessors );
+      List<Resetable> resets = new ArrayList<>( );
+      for ( int i = 0;  i < nodes.size( );  i++ ) {
+        FieldNode node = nodes.get( i );
+        accessors.add( node.buildField( factory ) );
+        if ( node.resetable != null )
+          resets.add( node.resetable );
+        node.dataDef.build( factory );
+        containers[i] = node.dataDef.container;
+      }
+      containerSet = new FieldValueContainerSet( containers );
+
       VectorAccessor bindings[] = new VectorAccessor[ accessors.size( ) ];
       accessors.toArray( bindings );
       
       tuple = new DrillRootTupleValue( schema, containerSet, bindings );
       
-      List<Resetable> resets = new ArrayList<>( );
-      gatherResetable( resets );
       if ( ! resets.isEmpty( ) ) {
         tuple.resetable = new Resetable[resets.size()];
         resets.toArray( tuple.resetable );
@@ -219,18 +220,24 @@ public class TupleBuilder
   
   public static class MapTupleNode extends TupleNode {
 
-    private DirectTupleValue tuple;
-
     public MapTupleNode(Collection<MaterializedField> children) {
       int i = 0;
-      for ( MaterializedField child : children )
+      for ( MaterializedField child : children ) {
+        if ( child.getLastName().equals( "$offsets$" ) )
+          continue;
         addField( child, i++ );
+      }
     }
     
-    @Override
-    public void build( FieldValueFactory factory ) {
-      super.build( factory );
-      tuple = new DirectTupleValue( schema, containerSet );
+    public void buildMaterialized( ObjectAccessor objAccessor, FieldValueFactory factory ) {
+      FieldValueContainer containers[] = new FieldValueContainer[nodes.size( )];
+      for ( int i = 0;  i < nodes.size( );  i++ ) {
+        FieldNode node = nodes.get( i );
+        node.buildMaterialized( objAccessor, factory );
+        node.dataDef.build( factory );
+        containers[i] = node.dataDef.container;
+      }
+      containerSet = new FieldValueContainerSet( containers );
     }
   }
   
@@ -251,16 +258,21 @@ public class TupleBuilder
       this.drillField = drillField;
     }
 
-    public abstract void gatherVectorBindings(List<VectorAccessor> accessors);
-
-    public void gatherResetable(List<Resetable> resets) {
-      if ( resetable != null )
-        resets.add( resetable );
-    }
-
-    public abstract void build( FieldValueFactory factory );
+    /**
+     * Builds the Jig schema for this field.
+     */
+    
     public abstract void buildSchema();
-    public abstract VectorAccessor getAccessor( );
+    /**
+     * Builds the accessors and data definition.
+     * 
+     * @param factory
+     * @return 
+     */
+    
+    public abstract VectorAccessor buildField( FieldValueFactory factory );
+    public abstract void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory);
     
     @Override
     public String toString( ) {
@@ -331,7 +343,7 @@ public class TupleBuilder
     }
 
     @Override
-    public void build(FieldValueFactory factory) {
+    public VectorAccessor buildField(FieldValueFactory factory) {
       MinorType minorType = drillField.getType().getMinorType();
       if ( drillField.getDataMode() == DataMode.REPEATED ) {
         accessor = VectorAccessor.getElementAccessor( minorType );
@@ -340,109 +352,72 @@ public class TupleBuilder
       }
       accessor.bindSchema( schema );
       dataDef = new ScalarDef( schema.type( ), schema.nullable( ), accessor );
-      dataDef.build( factory );
-    }
-
-    @Override
-    public void gatherVectorBindings(List<VectorAccessor> accessors) {
-      accessors.add( accessor );
-    }
-
-    @Override
-    public VectorAccessor getAccessor() {
       return accessor;
+    }
+
+    @Override
+    public void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory) {
+      BoxedAccessor boxed = new DrillBoxedAccessor( objAccessor );
+      dataDef = new ScalarDef( schema.type( ), schema.nullable( ), boxed );
     }
   }
   
-//  /**
-//   * Represents the a Drill map. A Drill map corresponds to a Jig
-//   * tuple. This node represents the "virtual" Jig map field,
-//   * though Drill has only the contained fields.
-//   */
+  /**
+   * Represents the a Drill map. A Drill map corresponds to a Jig
+   * tuple. The Drill {@link MapVector} materializes the Map as
+   * a Java Map, which we present using a specialized map
+   * accessor that presents the map as a tuple.
+   */
   
   public static class MapNode extends NonRepeatedNode {
 
-//    public MapTupleNode tuple;
-    private MapVectorAccessor accessor;
+    public MapTupleNode tuple;
 
     public MapNode(MaterializedField drillField) {
       super( drillField );
-//      tuple = new MapTupleNode( drillField.getChildren() );
+      tuple = new MapTupleNode( drillField.getChildren() );
     }
 
     @Override
-    public void build(FieldValueFactory factory) {
-//      tuple.build( factory );
-      accessor = new MapVectorAccessor( );
+    public VectorAccessor buildField(FieldValueFactory factory) {
+      CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
+      tuple.buildMaterialized( valueAccessor, factory );
+      MapVectorAccessor accessor = new MapVectorAccessor( );
       accessor.bindSchema( schema );
       ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
       resetable = objAccessor;     
-      JavaMapAccessor javaAccessor = new JavaMapAccessor( objAccessor, factory );
-      // TODO: Add buffering accessor
-      dataDef = new MapDef( false, javaAccessor );
-      dataDef.build( factory );
-    }
-
-    @Override
-    public void gatherVectorBindings(List<VectorAccessor> accessors) {
-//      tuple.gatherVectorBindings( accessors );
-      accessors.add( accessor );
-    }
-    
-//    @Override
-//    public void gatherResetable(List<Resetable> resets) {
-//      super.gatherResetable(resets);
-////      tuple.gatherResetable(resets);
-//    }
-
-    @Override
-    public VectorAccessor getAccessor() {
+      DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet, objAccessor, valueAccessor );
+      dataDef = new TupleDef( false, mapAccessor );
       return accessor;
     }
-    
-//    @Override
-//    protected void buildContents(StringBuilder buf) {
-//      if ( tuple != null ) {
-//        buf.append( " tuple=" );
-//        buf.append( tuple.toString() );
-//      }
-//    }
+
+    @Override
+    public void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory) {
+      // TODO Auto-generated method stub
+      assert false;
+    }
   }
   
-//  public static class MapElementNode extends NonRepeatedNode {
-//    
-//    private WrongRepeatedMapVectorElementAccessor accessor;
-//
-//    public MapElementNode(MaterializedField batchField) {
-//      super( batchField );
-//    }
-//
-//    @Override
-//    public void buildSchema() {
-//      schema = new FieldSchemaImpl( FieldSchema.ELEMENT_NAME, DataType.MAP, false );
-//    }
-//
-//    @Override
-//    public void build(FieldValueFactory factory) {
-//      accessor = new WrongRepeatedMapVectorElementAccessor( );
-//      ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
-//      MapValueAccessor mapAccessor = new JavaMapAccessor( objAccessor, factory );
-//      dataDef = new MapDef( false, mapAccessor );
-//      dataDef.build(factory);
-//    }
-//
-//    @Override
-//    public void gatherVectorBindings(List<VectorAccessor> accessors) {
-//      accessors.add( accessor );
-//    }
-//
-//    @Override
-//    public VectorAccessor getAccessor() {
-//      return accessor;
-//    }
-//  
-//  }
+  public static class ImpliedMapNode extends NonRepeatedNode {
 
+    public ImpliedMapNode(Collection<MaterializedField> children ) {
+      super(null);
+    }
+
+    @Override
+    public VectorAccessor buildField(FieldValueFactory factory) {
+      assert false;
+      return null;
+    }
+
+    @Override
+    public void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory) {
+      assert false;
+    }
+  }
   
   /**
    * Corresponds to the "virtual" Jig array field that wraps the
@@ -452,7 +427,6 @@ public class TupleBuilder
   public static class RepeatedNode extends FieldNode {
 
     private FieldNode element;
-    private RepeatedVectorAccessor arrayAccessor;
     
     public RepeatedNode(MaterializedField drillField, FieldNode element) {
       super( drillField );
@@ -466,23 +440,20 @@ public class TupleBuilder
     }
 
     @Override
-    public void build(FieldValueFactory factory) {
-      element.build( factory );
-      arrayAccessor = new RepeatedVectorAccessor( (DrillElementAccessor) element.getAccessor( ) );
+    public VectorAccessor buildField(FieldValueFactory factory) {
+      VectorAccessor elementAccessor = element.buildField( factory );
+      RepeatedVectorAccessor arrayAccessor = new RepeatedVectorAccessor( (DrillElementAccessor) elementAccessor );
       dataDef = new ListDef( false, element.dataDef, arrayAccessor );
-      dataDef.build( factory );
+      return elementAccessor;
     }
 
     @Override
-    public void gatherVectorBindings(List<VectorAccessor> accessors) {
-      element.gatherVectorBindings(accessors);
+    public void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory) {
+      JavaListAccessor listAccessor = new JavaListAccessor( objAccessor );
+      element.buildMaterialized( ((ObjectAccessor) listAccessor.memberAccessor()), factory);
     }
 
-    @Override
-    public VectorAccessor getAccessor() {
-      return arrayAccessor;
-    }   
-    
     @Override
     protected void buildContents(StringBuilder buf) {
       if ( element != null ) {
@@ -494,10 +465,11 @@ public class TupleBuilder
   
   public static class RepeatedMapNode extends FieldNode {
 
-    private RepeatedMapVectorAccessor accessor;
+    public MapTupleNode tuple;
 
     public RepeatedMapNode(MaterializedField batchField) {
       super( batchField );
+      tuple = new MapTupleNode( drillField.getChildren() );
     }
 
     @Override
@@ -507,29 +479,29 @@ public class TupleBuilder
     }
 
     @Override
-    public void build(FieldValueFactory factory) {
-      accessor = new RepeatedMapVectorAccessor( );
+    public VectorAccessor buildField(FieldValueFactory factory) {
+      RepeatedMapVectorAccessor accessor = new RepeatedMapVectorAccessor( );
       accessor.bindSchema( schema );
       ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
-      resetable = objAccessor;     
-      JavaListAccessor listAccessor = new JavaListAccessor( accessor );
+      resetable = objAccessor;
+      buildMaterialized( objAccessor, factory );
+      return accessor;
+    }
+
+    @Override
+    public void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory) {
+      JavaListAccessor listAccessor = new JavaListAccessor( objAccessor );
       
-      MapValueAccessor mapAccessor = new JavaMapAccessor( (ObjectAccessor) listAccessor.memberAccessor(), factory );      
-      DataDef elementDef = new MapDef( false, mapAccessor );
+      CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
+      tuple.buildMaterialized( valueAccessor, factory );
+      
+      DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet,
+          (ObjectAccessor) listAccessor.memberAccessor(), valueAccessor );      
+      DataDef elementDef = new TupleDef( false, mapAccessor );
       
       dataDef = new ListDef( false, elementDef, listAccessor );
-      dataDef.build( factory );
     }
-
-    @Override
-    public void gatherVectorBindings(List<VectorAccessor> accessors) {
-      accessors.add( accessor );
-    }
-
-    @Override
-    public VectorAccessor getAccessor() {
-      return accessor;
-    }  
   }
 
   /**
@@ -546,25 +518,28 @@ public class TupleBuilder
     }
 
     @Override
-    public void gatherVectorBindings(List<VectorAccessor> accessors) {
-      // TODO Auto-generated method stub     
-    }
-
-    @Override
-    public void build(FieldValueFactory factory) {
-      // TODO Auto-generated method stub    
-    }
-
-    @Override
     public void buildSchema() {
-      // TODO Auto-generated method stub      
+      element.buildSchema();
+      schema = new ArrayFieldSchemaImpl( drillField.getLastName(), false, element.schema );
     }
 
     @Override
-    public VectorAccessor getAccessor() {
-      // TODO Auto-generated method stub
-      return null;
-    }    
+    public VectorAccessor buildField(FieldValueFactory factory) {
+      element.buildField(factory);
+      ListVectorAccessor accessor = new ListVectorAccessor( );
+      accessor.bindSchema( schema );
+      ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
+      resetable = objAccessor;
+      JavaListAccessor javaAccessor = new JavaListAccessor( objAccessor, factory );
+      dataDef = new ListDef( false, element.dataDef, javaAccessor );
+      return accessor;
+    }
+
+    @Override
+    public void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory) {
+      assert false;
+    }
   }
   
   private BatchSchema batchSchema;
@@ -585,7 +560,7 @@ public class TupleBuilder
     RootTupleNode root = new RootTupleNode( batchSchema );
        
     FieldValueFactory factory = new DrillFieldValueFactory( );
-    root.build( factory );
+    root.buildFields( factory );
     return root.tuple;
   }
 }

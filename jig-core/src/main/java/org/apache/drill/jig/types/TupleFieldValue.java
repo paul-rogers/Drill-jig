@@ -39,8 +39,7 @@ public class TupleFieldValue extends AbstractStructuredValue implements TupleVal
 
   @Override
   public TupleValue getTuple() {
-    // TODO Auto-generated method stub
-    return null;
+    return accessor.getTuple();
   }
 
   @Override
