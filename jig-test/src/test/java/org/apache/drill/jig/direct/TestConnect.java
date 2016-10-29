@@ -17,7 +17,7 @@ public class TestConnect
     new DrillContextFactory( )
         .withEmbeddedDrillbit( )
         .build( )
-        .startEmbedded( );
+        .startEmbeddedDrillbit();
     DirectConnection session = new DrillConnectionFactory( )
         .embedded( )
         .connect( );
@@ -25,7 +25,7 @@ public class TestConnect
     session.alterSession( AlterSessionKeys.MAX_WIDTH_PER_NODE, 2 );
     
     session.close();
-    DrillClientContext.instance( ).stopEmbeddedDrillbit( );
+    DrillClientContext.instance( ).close( );
     
     // If we get this far, things worked well enough. If they didn't,
     // we'd have encountered an exception.

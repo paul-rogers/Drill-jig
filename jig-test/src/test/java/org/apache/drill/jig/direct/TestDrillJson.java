@@ -3,6 +3,7 @@ package org.apache.drill.jig.direct;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonWriter;
+import javax.json.JsonWriterFactory;
 import javax.json.stream.JsonGenerator;
 
 import org.apache.drill.common.exceptions.ExecutionSetupException;
@@ -96,7 +98,7 @@ public class TestDrillJson {
     session.close();
   }
 
-  private void testFile(DirectConnection session, File testFile) throws JigException {
+  private void testFile(DirectConnection session, File testFile) throws JigException, IOException {
     String stmt = "SELECT * FROM `" + testFile + "` LIMIT 20";
     Statement statement = session.prepare( stmt );
     ResultCollection results = statement.execute( );
@@ -104,16 +106,22 @@ public class TestDrillJson {
     props.put( JsonGenerator.PRETTY_PRINTING, "true" );
     String baseName = testFile.getName();
     String outName = baseName.replaceAll( ".json", "-output.json" );
-    JsonWriter writer = Json.createWriterFactory( props ).createWriter(writer);
+    File destDir = new File( "/tmp/out" );
+    destDir.mkdirs();
+    File destFile = new File( destDir, outName );
+    FileWriter fileWriter = new FileWriter( destFile );
+    JsonWriterFactory factory = Json.createWriterFactory( props );
     while ( results.next() ) {
       TupleSet tuples = results.tuples();
       while ( tuples.next() ) {
+        JsonWriter writer = factory.createWriter(fileWriter);
         TupleValue tuple = tuples.tuple();
         JsonObject obj = JsonBuilder.build( tuple );
-        System.out.println( obj.toString() );
+        writer.writeObject( obj );
       }
     }
     results.close( );
+    fileWriter.close();
   }
 
 }

@@ -39,7 +39,7 @@ public class TestDrillDirect
     testQueryPrinter( session );
     
     session.close();
-    DrillClientContext.instance( ).stopEmbeddedDrillbit( );
+    DrillClientContext.instance( ).close( );
   }
 
   private void testQueryPrinter(DirectConnection session) throws JigException {

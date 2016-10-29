@@ -30,7 +30,7 @@ public class QueryReaderTest
     new DrillContextFactory( )
         .withEmbeddedDrillbit( )
         .build( )
-        .startEmbedded( );
+        .startEmbeddedDrillbit();
     DirectConnection session = new DrillConnectionFactory( )
         .drillbit( "localhost" )
         .connect( );
@@ -43,7 +43,7 @@ public class QueryReaderTest
     assertTrue( CompareFiles.compareResource( "/direct-emp-20.txt", out.toString() ) );
     
     session.close();
-    DrillClientContext.instance( ).stopEmbeddedDrillbit( );
+    DrillClientContext.instance( ).close( );
   }
 
   private void testQueryPrinter(DirectConnection session, PrintWriter out ) {
