@@ -73,7 +73,7 @@ public class ObjectParser {
   // TODO: Detect missing fields & set them nullable
   
   public class JsonObjectNode extends JsonSchemaNode {
-    List<JsonSchemaNode> children = new ArrayList<>( );
+    public List<JsonSchemaNode> children = new ArrayList<>( );
 
     public JsonObjectNode( ) {
       super(DataType.TUPLE);
@@ -185,16 +185,16 @@ public class ObjectParser {
    */
   
   public class JsonArrayNode extends JsonSchemaNode {
-    JsonSchemaNode member;
+    public JsonSchemaNode element;
     
     public JsonArrayNode( JsonSchemaNode member ) {
       super(DataType.LIST);
-      this.member = member;
+      this.element = member;
     }
 
     @Override
     public JsonSchemaNode doMerge(JsonSchemaNode other, FieldValueFactory factory) {
-      member = member.merge( ((JsonArrayNode) other).member, factory);
+      element = element.merge( ((JsonArrayNode) other).element, factory);
       return this;
     }
 

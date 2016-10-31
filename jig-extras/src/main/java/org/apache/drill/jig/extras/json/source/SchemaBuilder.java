@@ -346,7 +346,7 @@ public class SchemaBuilder {
     switch ( node.nodeType() ) {
     case ARRAY:
       JsonArrayNode arrayNode = (JsonArrayNode) node;
-      ArrayNode array = new ArrayNode( arrayNode, buildSchemaNode( arrayNode.member, false ) );
+      ArrayNode array = new ArrayNode( arrayNode, buildSchemaNode( arrayNode.element, false ) );
       return array;
 
     case OBJECT:

@@ -124,6 +124,15 @@ public class TupleBuilder
     protected final List<FieldNode> nodes = new ArrayList<>( );
     FieldValueContainerSet containerSet;
     
+    /**
+     * Add a field by "parsing" the Drill matrialized field into an
+     * internal {@link FieldNode} that will build the Jig mechanism
+     * required to access the vector for the field.
+     * 
+     * @param batchField
+     * @param vectorIndex
+     */
+    
     protected void addField( MaterializedField batchField, int vectorIndex ) {
       FieldNode node = makeField( batchField );
       node.vectorIndex = vectorIndex;
@@ -132,21 +141,49 @@ public class TupleBuilder
       nodes.add( node );
     }
     
+    /**
+     * Build the node for a field depending on type and data mode.
+     * 
+     * @param batchField
+     * @return
+     */
+    
     private FieldNode makeField(MaterializedField batchField) {
+      
+      // Repeated fields are presented in Jig as an array.
+      
+      MinorType drillType = batchField.getType().getMinorType();
       if ( batchField.getDataMode() == DataMode.REPEATED ) {        
-        MinorType drillType = batchField.getType().getMinorType();
         if ( drillType == MinorType.MAP ) {
+          
+          // Repeated maps require special treatment. 
+          
           return new RepeatedMapNode( batchField );
-        } else {
-          return new RepeatedNode( batchField, buildNode( batchField ) );
+        } else {          
+          
+          // All other (simple) types work in a common way.
+          // Per-type differences are factored out to an
+          // element associated with the repeated node.
+          
+          return new RepeatedNode( batchField, buildNode( batchField, drillType ) );
         }
       } else {
-        return buildNode( batchField );
+        
+        // Build a scalar node
+        
+        return buildNode( batchField, drillType );
       }
     }
    
-    private FieldNode buildNode( MaterializedField batchField ) {
-      MinorType drillType = batchField.getType().getMinorType();
+    /**
+     * Build an internal node for non-repeated types.
+     * 
+     * @param batchField
+     * @param drillType
+     * @return
+     */
+    
+    private FieldNode buildNode( MaterializedField batchField, MinorType drillType ) {
       if ( drillType == MinorType.MAP ) {
         return new MapNode( batchField );
       } else if ( drillType == MinorType.LIST ) {
@@ -156,6 +193,16 @@ public class TupleBuilder
       }
     }
 
+    /**
+     * List nodes require special handling. A list can be a simple list
+     * (with one child), which Jig treats as an array of that type. Or
+     * the list can be a repeat of an (implied) map which Jig presents
+     * as an array of maps.
+     * 
+     * @param batchField
+     * @return
+     */
+    
     private FieldNode buildListNode(MaterializedField batchField) {
       Collection<MaterializedField> children = batchField.getChildren();
       FieldNode child;
@@ -194,6 +241,14 @@ public class TupleBuilder
     
     private DrillRootTupleValue tuple;
 
+    /**
+     * Build the set of parse nodes that represent the Drill
+     * fields. The parse nodes help us build the machinery needed
+     * to access and translate field values.
+     * 
+     * @param batchSchema
+     */
+    
     public RootTupleNode( BatchSchema batchSchema ) {
       int fieldCount = batchSchema.getFieldCount();
       for ( int i = 0;  i < fieldCount;  i++ ) {
@@ -201,24 +256,67 @@ public class TupleBuilder
       }      
     }
     
+    /**
+     * Build field schema, accessors and values based on
+     * the parse nodes for the fields.
+     * 
+     * @param factory
+     */
+    
     public void buildFields( FieldValueFactory factory ) {
+      
+      // The Containers provide variable field values (null or not-null, etc.)
+      
       FieldValueContainer containers[] = new FieldValueContainer[nodes.size( )];
+      
+      // Accessors are bound to vectors and must be rebound on each new batch.
+      
       List<VectorAccessor> accessors = new ArrayList<>( );
+      
+      // Materialized fields are cached, resets clear the cached
+      // value on each new tuple.
+      
       List<Resetable> resets = new ArrayList<>( );
+      
+      // Iterate over the nodes that represent the fields.
+      
       for ( int i = 0;  i < nodes.size( );  i++ ) {
         FieldNode node = nodes.get( i );
+        
+        // Build the vector accessor for the field.
+        
         accessors.add( node.buildField( factory ) );
+        
+        // Add any resets needed for materialized values.
+        
         if ( node.resetable != null )
           resets.add( node.resetable );
+        
+        // Build the field value and associated machinery.
+        
         node.dataDef.build( factory );
+        
+        // Add the field values to the set for this tuple.
+        
         containers[i] = node.dataDef.container;
       }
+      
+      // Create the container set used to access field values.
+      
       containerSet = new FieldValueContainerSet( containers );
 
+      // Convert the list of vector bindings to an array
+      // (for faster runtime access.)
+      
       VectorAccessor bindings[] = new VectorAccessor[ accessors.size( ) ];
       accessors.toArray( bindings );
       
+      // Create a tuple value visible to the client based on the
+      // schema, field values and vector bindings.
+      
       tuple = new DrillRootTupleValue( schema, containerSet, bindings );
+      
+      // Add resets, if any.
       
       if ( ! resets.isEmpty( ) ) {
         tuple.resetable = new Resetable[resets.size()];
@@ -244,6 +342,16 @@ public class TupleBuilder
         addField( child, i++ );
       }
     }
+    
+    /**
+     * A map tuple corresponds to a map field in Drill. Drill
+     * materializes such fields as a Java map. Jig presents this
+     * as a map of additional field values.
+     * 
+     * @param objAccessor the accessor that provides the Java map
+     * object
+     * @param factory
+     */
     
     public void buildMaterialized( ObjectAccessor objAccessor, FieldValueFactory factory ) {
       FieldValueContainer containers[] = new FieldValueContainer[nodes.size( )];
@@ -280,13 +388,26 @@ public class TupleBuilder
     
     public abstract void buildSchema();
     /**
-     * Builds the accessors and data definition.
+     * Builds the accessors and data definition for top-level
+     * fields of each record (tuple).
      * 
      * @param factory
      * @return 
      */
     
     public abstract VectorAccessor buildField( FieldValueFactory factory );
+    
+    /**
+     * Build the accessors and data definition for values that are
+     * elements of a structure that Drill materializes as a Java object.
+     * For example, maps, arrays and lists. In these cases Drill converts
+     * value vectors to Java objects, and the accessors created here
+     * work with those materialized objects.
+     * 
+     * @param objAccessor
+     * @param factory
+     */
+    
     public abstract void buildMaterialized(ObjectAccessor objAccessor,
         FieldValueFactory factory);
     
@@ -320,6 +441,14 @@ public class TupleBuilder
       super(drillField);
     }
 
+    /**
+     * Create the schema definition of a non-repeated node. The
+     * name is the tail end of the Drill field name. The type is
+     * converted from the Drill type. A special case is for the
+     * schema of array elements: such fields have no name so we
+     * use a dummy name instead.
+     */
+    
     @Override
     public void buildSchema() {
       String name = drillField.getLastName();
@@ -383,6 +512,12 @@ public class TupleBuilder
       return accessor;
     }
 
+    /**
+     * Define a field that appears in a materialized structure.
+     * Since this node corresponds to a simple type, we just use an
+     * accessor that maps "boxed" Java objects to Jig field values.
+     */
+    
     @Override
     public void buildMaterialized(ObjectAccessor objAccessor,
         FieldValueFactory factory) {

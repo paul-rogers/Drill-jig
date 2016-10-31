@@ -96,9 +96,7 @@ public class JsonResultCollection implements AutoCloseable, ResultCollection
     }
     else {
       tupleSetIndex++;
-//      JsonTupleSet oldSet = tupleSet;
       tupleSet = new JsonTupleSet( recordReader );
-//      tupleSet.evolveSchema( oldSet.inputSchema );
     }
     return true;
   }

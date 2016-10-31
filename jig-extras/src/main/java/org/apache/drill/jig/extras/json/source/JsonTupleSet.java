@@ -20,49 +20,6 @@ public class JsonTupleSet implements TupleSet
 {
   private enum State { START, RUN, EOF, SCHEMA_CHANGE };
   
-//  public class TupleFieldHandle implements JsonFieldHandle
-//  {
-//    protected final JsonFieldSchema fieldSchema;
-//    
-//    protected TupleFieldHandle( JsonFieldSchema schema ) {
-//      this.fieldSchema = schema;
-//    }
-//    
-//    @Override
-//    public JsonValue get( ) {
-//      return currentObject.get( fieldSchema.name() );
-//    }
-//
-//    @Override
-//    public ValueConversionError notSupportedError( String type ) {
-//      return new ValueConversionError( "Cannot convert " + fieldSchema.type().toString() + " to " + type );
-//    }
-//
-//    @Override
-//    public DataType getType() {
-//      return fieldSchema.type();
-//    }
-//
-//    @Override
-//    public Cardinality getCardinality() {
-//      return fieldSchema.getCardinality();
-//    }
-//
-//  }
-  
-//  public class TupleObjectAccessor implements ObjectAccessor {
-//
-//    @Override
-//    public boolean isNull() {
-//      return currentObject == null;
-//    }
-//
-//    @Override
-//    public Object getObject() {
-//      return currentObject;
-//    }
-//  }
-
   public static class JsonTupleValue extends AbstractTupleValue {
     
     TupleSchema schema;
@@ -89,7 +46,6 @@ public class JsonTupleSet implements TupleSet
 
   private JsonTupleReader recordReader;
   private State state = State.START;
-//  private FieldValue fieldAccessors[];
   private JsonTupleValue tuple;
   FieldValueFactory factory = new FieldValueFactory( );
   private JsonObjectNode inputSchema;
@@ -99,25 +55,6 @@ public class JsonTupleSet implements TupleSet
     this.recordReader = recordReader;
   }
   
-//  public void buildSchema( JsonObject object ) {
-//    JsonSchemaBuilder builder = new JsonSchemaBuilder( );
-//    inputSchema = builder.build( object );
-//    makeResultSchema( );
-//  }
-//  
-//  private void makeResultSchema( )
-//  {
-//    resultSchema = inputSchema.flatten( );
-//    fieldAccessors = buildAccessors( );
-//  }
-//
-//  public void mergeSchema( JsonTupleSchema prevSchema, JsonObject object ) {
-//    JsonSchemaBuilder builder = new JsonSchemaBuilder( );
-//    inputSchema = builder.build( object );
-//    inputSchema.merge( prevSchema );
-//    makeResultSchema( );
-//  }
-
   @Override
   public TupleSchema schema() {
     return tuple.schema();
@@ -188,37 +125,6 @@ public TupleValue tuple() {
     
     recordReader = new ReplayTupleReader( captureReader.getTuples(), recordReader );
   }
-
-//  private FieldValue[] buildAccessors( ) {
-//    FieldValue accessors[] = new FieldValue[ resultSchema.count( ) ];
-//    for ( int i = 0;  i < accessors.length;  i++ ) {
-//      JsonFieldSchema field = (JsonFieldSchema) resultSchema.field( i );
-//      accessors[i] = field.makeAccessor( new TupleFieldHandle( field ) );
-//    }
-//    return accessors;
-//  }
-//
-//  public void evolveSchema(JsonTupleSchema previous) {
-//    JsonObject obj = recordReader.next();
-//    mergeSchema( previous, obj );
-//    recordReader.push( obj );
-//  }
-
-//  @Override
-//  public FieldValue field(int i) {
-//    if ( i < 0  &&  i >= fieldAccessors.length ) {
-//      return null; }
-//    return fieldAccessors[ i ];
-//  }
-//
-//  @Override
-//  public FieldValue field(String name) {
-//    FieldSchema field = resultSchema.field( name );
-//    if ( field == null ) {
-//      return null;
-//    }
-//    return fieldAccessors[ field.index() ];
-//  }
   
   public boolean isEOF() {
     return state == State.EOF;
