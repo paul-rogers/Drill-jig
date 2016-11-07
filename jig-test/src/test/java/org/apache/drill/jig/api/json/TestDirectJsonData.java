@@ -1,11 +1,6 @@
 package org.apache.drill.jig.api.json;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -74,13 +69,6 @@ public class TestDirectJsonData
       assertEquals( 10, (int) field.getDouble() );
       assertEquals( new BigDecimal( 10 ), field.getDecimal() );
       assertEquals( "10", field.getString( ) );
-      try {
-        field.getString();
-        fail( );
-      }
-      catch ( ValueConversionError e ) {
-        // Expected
-      }
     }
     
     {
@@ -179,8 +167,14 @@ public class TestDirectJsonData
       assertEquals( 1, array.get( 0 ).getInt() );
       assertEquals( 2, array.get( 1 ).getInt() );
       assertEquals( 3, array.get( 2 ).getInt() );
-      assertNull( array.get( -1 ) );
-      assertNull( array.get( 4 ) );
+      try {
+        array.get( -1 );
+        fail( );
+      } catch ( IndexOutOfBoundsException e ) { }
+      try {
+        array.get( 4 );
+        fail( );
+      } catch ( IndexOutOfBoundsException e ) { }
     }
     
     {
@@ -190,8 +184,6 @@ public class TestDirectJsonData
       assertEquals( "a", array.get( 0 ).getString() );
       assertEquals( "b", array.get( 1 ).getString() );
       assertEquals( "c", array.get( 2 ).getString() );
-      assertNull( array.get( -1 ) );
-      assertNull( array.get( 4 ) );
     }
     
     {

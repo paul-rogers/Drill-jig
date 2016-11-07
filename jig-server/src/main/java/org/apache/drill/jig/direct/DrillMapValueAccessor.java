@@ -68,4 +68,17 @@ public class DrillMapValueAccessor implements TupleValueAccessor, TupleValue {
   public FieldValue field(String name) {
     return getFieldValue( schema.field( name ) );
   }
+  
+//  public static class DrillMapVectorValueAccessor extends DrillMapValueAccessor {
+//    @SuppressWarnings("unchecked")
+//    private FieldValue getFieldValue( FieldSchema field ) {
+//      if ( field == null )
+//        return null;
+//      Map<String,Object> map = ((Map<String,Object>) mapObjAccessor.getObject());
+//      Object fieldValue = map.get( field.name( ) );
+//      valueObjAccessor.bind( fieldValue );
+//      return containerSet.field( field.index( ) );
+//    }
+//
+//  }
 }

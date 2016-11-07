@@ -27,8 +27,12 @@ public class JsonResultCollection implements AutoCloseable, ResultCollection
   private JsonTupleSet tupleSet;
   
   public JsonResultCollection( Reader in ) {
+    this( in, false );
+  }
+  
+  public JsonResultCollection( Reader in, boolean flatten ) {
     recordReader = prepareReader( in );
-    flatten = false;
+    this.flatten = flatten;
   }
   
   @SuppressWarnings("resource")

@@ -52,8 +52,7 @@ public class TestDirectJsonSchema
       assertEquals( 0, field.index() );
       assertNotNull( schema.field( "numberField" ) );
       assertEquals( 0, schema.field( "numberField" ).index( ) );
-      assertTrue( field.nullable( ) );
-//      assertNull( field.getStructure() );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.INT64, field.type() );
     }
     
@@ -63,8 +62,7 @@ public class TestDirectJsonSchema
       assertEquals( 1, field.index() );
       assertNotNull( schema.field( "stringField" ) );
       assertEquals( 1, schema.field( "stringField" ).index( ) );
-      assertTrue( field.nullable( ) );
-//      assertNull( field.getStructure() );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.STRING, field.type() );
     }
     
@@ -75,8 +73,7 @@ public class TestDirectJsonSchema
       assertNotNull( schema.field( "numberWithNullField" ) );
       assertEquals( 2, schema.field( "numberWithNullField" ).index( ) );
       assertTrue( field.nullable( ) );
-//      assertNull( field.getStructure() );
-      assertEquals( DataType.VARIANT, field.type() );
+      assertEquals( DataType.INT64, field.type() );
     }
     
     {
@@ -86,8 +83,7 @@ public class TestDirectJsonSchema
       assertNotNull( schema.field( "stringWithNullField" ) );
       assertEquals( 3, schema.field( "stringWithNullField" ).index( ) );
       assertTrue( field.nullable( ) );
-//      assertNull( field.getStructure() );
-      assertEquals( DataType.VARIANT, field.type() );
+      assertEquals( DataType.STRING, field.type() );
     }
     
     {
@@ -96,8 +92,7 @@ public class TestDirectJsonSchema
       assertEquals( 4, field.index() );
       assertNotNull( schema.field( "bool1" ) );
       assertEquals( 4, schema.field( "bool1" ).index( ) );
-      assertTrue( field.nullable( ) );
-//      assertNull( field.getStructure() );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.BOOLEAN, field.type() );
     }
     
@@ -107,8 +102,7 @@ public class TestDirectJsonSchema
       assertEquals( 5, field.index() );
       assertNotNull( schema.field( "bool2" ) );
       assertEquals( 5, schema.field( "bool2" ).index( ) );
-      assertTrue( field.nullable( ) );
-//      assertNull( field.getStructure() );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.BOOLEAN, field.type() );
     }
     scanner.close( );
@@ -126,7 +120,7 @@ public class TestDirectJsonSchema
     {
       FieldSchema field = schema.field( "index" );
       assertEquals( 0, field.index() );
-      assertTrue( field.nullable( ) );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.INT64, field.type() );
     }
     
@@ -183,7 +177,7 @@ public class TestDirectJsonSchema
       FieldSchema field = schema.field( "emptyArray" );
       assertEquals( 3, field.index() );
       assertEquals( DataType.LIST, field.type() );
-      assertEquals( DataType.VARIANT, field.member( ).type() );
+      assertEquals( DataType.UNDEFINED, field.member( ).type() );
     }
     scanner.close( );
   }
@@ -191,7 +185,7 @@ public class TestDirectJsonSchema
   @Test
   public void testMapSchema() throws Exception {
     InputStream in = getClass( ).getResourceAsStream( "map.json" );
-    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ) );
+    JsonResultCollection scanner = new JsonResultCollection( new InputStreamReader( in, "UTF-8" ), true );
     assertTrue( scanner.next( ) );
     TupleSet tuples = scanner.tuples( );
     TupleSchema schema = tuples.schema( );
@@ -200,7 +194,7 @@ public class TestDirectJsonSchema
     {
       FieldSchema field = schema.field( "index" );
       assertEquals( 0, field.index() );
-      assertTrue( field.nullable( ) );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.INT64, field.type() );
     }   
     
@@ -219,35 +213,16 @@ public class TestDirectJsonSchema
       FieldSchema field = schema.field( "map.a" );
       assertEquals( 1, field.index() );
       assertEquals( "map.a", field.name() );
-      assertTrue( field.nullable( ) );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.INT64, field.type() );
     }
     
     {
       FieldSchema field = schema.field( "map.b" );
       assertEquals( 2, field.index() );
-      assertTrue( field.nullable( ) );
+      assertFalse( field.nullable( ) );
       assertEquals( DataType.STRING, field.type() );
     }
-    
-    // Not supported by Drill
-    
-//    {
-//      FieldSchema field = schema.getField( "numberMap" );
-//      assertEquals( 1, field.getIndex() );
-//      assertEquals( FieldCardinality.Optional, field.getCardinality() );
-//      assertEquals( FieldType.MAP, field.getType() );
-//    }
-    
-    // Not supported by Drill
-    
-//    {
-//      FieldSchema field = schema.getField( "complexMap" );
-//      assertEquals( 1, field.getIndex() );
-//      assertEquals( FieldCardinality.Optional, field.getCardinality() );
-//      assertEquals( FieldType.COMPLEX_MAP, field.getType() );
-//    }
     scanner.close( );
-  }
-    
+  }    
 }

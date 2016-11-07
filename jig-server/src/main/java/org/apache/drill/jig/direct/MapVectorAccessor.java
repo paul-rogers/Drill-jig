@@ -4,7 +4,6 @@ import org.apache.drill.exec.vector.complex.MapVector;
 import org.apache.drill.exec.vector.complex.RepeatedMapVector;
 import org.apache.drill.exec.vector.complex.RepeatedMapVector.RepeatedMapAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
-import org.apache.drill.jig.direct.VectorAccessor.DrillElementAccessor;
 
 public class MapVectorAccessor extends VectorAccessor
     implements ObjectAccessor {

@@ -47,6 +47,9 @@ import org.apache.drill.jig.types.MapFieldValue.JavaMapFieldValue;
 
 public class TupleBuilder
 {
+  public static final Object DATA_FIELD_NAME = "$data";
+  public static final Object OFFSETS_FIELD_NAME = "$offsets$";
+  
   /**
    * Specialized "boxed" accessor that expects {@link Text} objects
    * instead of Java String objects for string values.
@@ -205,12 +208,27 @@ public class TupleBuilder
     
     private FieldNode buildListNode(MaterializedField batchField) {
       Collection<MaterializedField> children = batchField.getChildren();
-      FieldNode child;
-      if ( children.size() == 1 )
-        child = makeField( children.iterator().next() );
-      else
-        child = new ImpliedMapNode( children );
-      return new ListNode( batchField, child );
+      
+      // The nested field named "$data$" carries the type information
+      // for elements. The children are stored in a map, but it seems
+      // that the map is not exposed, so we have to iterate over the
+      // fields to find "$data$".
+      
+      FieldNode child = null;
+      for ( MaterializedField childField : children ) {
+        if ( childField.getName().equals( DATA_FIELD_NAME ) ) {
+          child = makeField( childField );
+        }
+      }
+      assert child != null;
+      
+      // Repeated lists use a different value vector than non-repeated lists.
+      
+      if ( child.drillField.getType().getMinorType() == MinorType.LIST ) {
+        return new RepeatedListNode( batchField, child );
+      } else {
+        return new ListNode( batchField, child );
+      }
     }
     
     @Override
@@ -337,7 +355,7 @@ public class TupleBuilder
     public MapTupleNode(Collection<MaterializedField> children) {
       int i = 0;
       for ( MaterializedField child : children ) {
-        if ( child.getLastName().equals( "$offsets$" ) )
+        if ( child.getLastName().equals( OFFSETS_FIELD_NAME ) )
           continue;
         addField( child, i++ );
       }
@@ -364,7 +382,7 @@ public class TupleBuilder
       containerSet = new FieldValueContainerSet( containers );
     }
   }
-  
+
   /**
    * Represents a field within a Drill record or a member of a 
    * (non-repeated, top-level) Drill map.
@@ -426,6 +444,13 @@ public class TupleBuilder
     }
 
     protected void buildContents(StringBuilder buf) { }
+    
+    protected String getName( ) {
+      String name = drillField.getLastName();
+      if ( name.equals( DATA_FIELD_NAME ) )
+        name = FieldSchema.ELEMENT_NAME;
+      return name;
+    }
   }
   
   /**
@@ -451,7 +476,7 @@ public class TupleBuilder
     
     @Override
     public void buildSchema() {
-      String name = drillField.getLastName();
+      String name = getName( );
       DataMode mode = drillField.getDataMode();
       if ( mode == DataMode.REPEATED ) {
         name = FieldSchema.ELEMENT_NAME;
@@ -551,7 +576,7 @@ public class TupleBuilder
       
       CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
       tuple.buildMaterialized( valueAccessor, factory );
-      
+        
       // Create an accessor for Drill's map vector.
       
       MapVectorAccessor accessor = new MapVectorAccessor( );
@@ -578,24 +603,43 @@ public class TupleBuilder
     }
   }
   
-  public static class ImpliedMapNode extends NonRepeatedNode {
-
-    public ImpliedMapNode(Collection<MaterializedField> children ) {
-      super(null);
-    }
-
-    @Override
-    public VectorAccessor buildField(FieldValueFactory factory) {
-      assert false;
-      return null;
-    }
-
-    @Override
-    public void buildMaterialized(ObjectAccessor objAccessor,
-        FieldValueFactory factory) {
-      assert false;
-    }
-  }
+//  public static class ImpliedMapNode extends NonRepeatedNode {
+//
+//    public MapTupleNode tuple;
+//
+//    public ImpliedMapNode(Collection<MaterializedField> children ) {
+//      super( null );
+//      tuple = new MapTupleNode( children );
+//    }
+//    
+//    @Override
+//    public void buildSchema() {
+//      schema = new FieldSchemaImpl( FieldSchema.ELEMENT_NAME, DataType.MAP, false );
+//    }
+//    
+//    @Override
+//    public VectorAccessor buildField(FieldValueFactory factory) {
+//      assert false;
+//      return null;
+//    }
+//
+//    @Override
+//    public void buildMaterialized(ObjectAccessor objAccessor,
+//        FieldValueFactory factory) {
+//      
+//      // Create materialized accessors for the members of the Map.
+//      // Drill declares the members, so we can treat the map as a tuple
+//      // with known members and types.
+//      
+//      CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
+//      tuple.buildMaterialized( valueAccessor, factory );
+//        
+//      // Combine the map and element accessors to create the tuple accessor.
+//      
+//      DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet, objAccessor, valueAccessor );
+//      dataDef = new TupleDef( false, mapAccessor );
+//    }
+//  }
   
   /**
    * Corresponds to the "virtual" Jig array field that wraps the
@@ -614,7 +658,7 @@ public class TupleBuilder
     @Override
     public void buildSchema() {
       element.buildSchema( );
-      schema = new ArrayFieldSchemaImpl( drillField.getLastName(), false, element.schema );
+      schema = new ArrayFieldSchemaImpl( getName( ), false, element.schema );
     }
 
     @Override
@@ -638,6 +682,7 @@ public class TupleBuilder
         FieldValueFactory factory) {
       JavaListAccessor listAccessor = new JavaListAccessor( objAccessor );
       element.buildMaterialized( ((ObjectAccessor) listAccessor.memberAccessor()), factory);
+      dataDef = new ListDef( false, element.dataDef, listAccessor );
     }
 
     @Override
@@ -648,6 +693,13 @@ public class TupleBuilder
       }
     }
   }
+  /**
+   * Represents a repeated map, backed by a <code>RepeatedMapVector</code>.
+   * The vector materializes the repeated maps as a Java list. Java
+   * accessors then retrieve the individual maps and the fields within
+   * the maps. Since Drill provides a map schema, the repeated map is,
+   * in Jig's terms, a repeated tuple.
+   */
   
   public static class RepeatedMapNode extends FieldNode {
 
@@ -661,7 +713,7 @@ public class TupleBuilder
     @Override
     public void buildSchema() {
       FieldSchema element = new FieldSchemaImpl( FieldSchema.ELEMENT_NAME, DataType.MAP, false );
-      schema = new ArrayFieldSchemaImpl( drillField.getLastName(), false, element );
+      schema = new ArrayFieldSchemaImpl( getName( ), false, element );
     }
 
     @Override
@@ -710,14 +762,18 @@ public class TupleBuilder
   }
 
   /**
-   * Represents a Drill list node.
+   * Represents a Drill non-repeated list backed by a
+   * <code>ListVector</code>. Drill materializes the value as a
+   * Java <code>List</code> with elements of the declared element
+   * type. Jig uses a Java list accessor along with a type-specific
+   * element accessor. 
    */
   
-  public static class ListNode extends FieldNode {
+  public static abstract class AbstractListNode extends FieldNode {
 
     private FieldNode element;
 
-    public ListNode(MaterializedField drillField, FieldNode element) {
+    public AbstractListNode(MaterializedField drillField, FieldNode element) {
       super( drillField );
       this.element = element;
     }
@@ -725,7 +781,7 @@ public class TupleBuilder
     @Override
     public void buildSchema() {
       element.buildSchema();
-      schema = new ArrayFieldSchemaImpl( drillField.getLastName(), false, element.schema );
+      schema = new ArrayFieldSchemaImpl( getName( ), false, element.schema );
     }
 
     @Override
@@ -733,13 +789,22 @@ public class TupleBuilder
       
       // Vector accessor
       
-      ListVectorAccessor accessor = new ListVectorAccessor( );
-      accessor.bindSchema( schema );
+      VectorAccessor accessor = buildVectorAccessor( );
       
       // Cached the materialized list object.
       
-      ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
+      ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( (ObjectAccessor) accessor );
       resetable = objAccessor;
+      
+      buildMaterialized( objAccessor, factory );
+      return accessor;
+    }
+
+    protected abstract VectorAccessor buildVectorAccessor();
+
+    @Override
+    public void buildMaterialized(ObjectAccessor objAccessor,
+        FieldValueFactory factory) {
       
       // Accessor for the materialized list
       
@@ -752,13 +817,45 @@ public class TupleBuilder
       // Combine the list and element data.
       
       dataDef = new ListDef( false, element.dataDef, javaAccessor );
-      return accessor;
+    }
+  }
+  
+  public static class ListNode extends AbstractListNode {
+    
+    public ListNode(MaterializedField drillField, FieldNode element) {
+      super( drillField, element );
     }
 
     @Override
-    public void buildMaterialized(ObjectAccessor objAccessor,
-        FieldValueFactory factory) {
-      assert false;
+    protected VectorAccessor buildVectorAccessor() {
+      ListVectorAccessor accessor = new ListVectorAccessor( );
+      accessor.bindSchema( schema );
+      return accessor;
+    }
+  }
+  
+  /**
+   * Represents a repeated list, backed by a <code>RepeatedListVector</code>.
+   * Drill materializes each column value as a Java <code>List<code> of
+   * <code>List</code> of values, where the type
+   * of the item depends on the type of items within the list. Jig uses a
+   * Java list accessor for the outer list, then an element accessor that
+   * is also a Java list accessor for the inner list, finally with
+   * a type-specific member accessor to pick
+   * apart the materialized value.
+   */
+  
+  public static class RepeatedListNode extends AbstractListNode {
+    
+    public RepeatedListNode(MaterializedField drillField, FieldNode element) {
+      super( drillField, element );
+    }
+
+    @Override
+    protected VectorAccessor buildVectorAccessor() {
+      RepeatedListVectorAccessor accessor = new RepeatedListVectorAccessor( );
+      accessor.bindSchema( schema );
+      return accessor;
     }
   }
   

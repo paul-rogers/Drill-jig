@@ -1,6 +1,6 @@
 package org.apache.drill.jig.direct;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,7 +21,6 @@ import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.extras.json.builder.JsonBuilder;
-import org.json.simple.JSONObject;
 import org.junit.Test;
 
 public class TestDrillJson {
@@ -61,17 +60,17 @@ public class TestDrillJson {
   
   public static DrillProject[] buildTestFiles( ) {
     return new DrillProject[] {
-        new DrillProject( "drill-jdbc",
-            "exec/jdbc/src/test/resources",
-            new DrillTestFile[] {
-                new DrillTestFile( "donuts.json" ),
-          } ),
-//        new DrillProject( "drill-java-ecec",
-//            "exec/java-exec/src/test/resources/jsoninput",
+//        new DrillProject( "drill-jdbc",
+//            "exec/jdbc/src/test/resources",
 //            new DrillTestFile[] {
+//                new DrillTestFile( "donuts.json" ),
+//          } ),
+        new DrillProject( "drill-java-ecec",
+            "exec/java-exec/src/test/resources/jsoninput",
+            new DrillTestFile[] {
 ////                new DrillTestFile( "big_numeric.json" ), // Fails with out-of-range error (does not map to Decimal)
 //                new DrillTestFile( "input2_modified.json" ),
-//                new DrillTestFile( "input2.json" ),
+                new DrillTestFile( "input2.json" ),
 //                new DrillTestFile( "input3.json" ),
 //                new DrillTestFile( "input4.json" ),
 //                new DrillTestFile( "kvgen_complex_input.json" ),
@@ -79,7 +78,7 @@ public class TestDrillJson {
 //                new DrillTestFile( "nestedArray.json" ),
 //                new DrillTestFile( "nullableOrdered1.json" ),
 //                new DrillTestFile( "repeated_list_bug.json" ),
-//         } )
+         } )
         };
   }
   
@@ -88,7 +87,7 @@ public class TestDrillJson {
   @Test
   public void test() throws ExecutionSetupException, IOException, JigException {
     File drillDir = new File( drillPath );
-    System.out.println( drillDir.getCanonicalPath() );
+//    System.out.println( drillDir.getCanonicalPath() );
     new DrillContextFactory( )
         .withEmbeddedDrillbit( )
         .build( )
