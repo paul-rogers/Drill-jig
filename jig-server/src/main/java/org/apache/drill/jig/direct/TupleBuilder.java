@@ -47,7 +47,7 @@ import org.apache.drill.jig.types.MapFieldValue.JavaMapFieldValue;
 
 public class TupleBuilder
 {
-  public static final Object DATA_FIELD_NAME = "$data";
+  public static final Object DATA_FIELD_NAME = "$data$";
   public static final Object OFFSETS_FIELD_NAME = "$offsets$";
   
   /**
@@ -156,7 +156,9 @@ public class TupleBuilder
       // Repeated fields are presented in Jig as an array.
       
       MinorType drillType = batchField.getType().getMinorType();
-      if ( batchField.getDataMode() == DataMode.REPEATED ) {        
+      if ( drillType == MinorType.LIST ) {
+        return buildListNode( batchField );
+      } else if ( batchField.getDataMode() == DataMode.REPEATED ) {        
         if ( drillType == MinorType.MAP ) {
           
           // Repeated maps require special treatment. 
@@ -189,8 +191,6 @@ public class TupleBuilder
     private FieldNode buildNode( MaterializedField batchField, MinorType drillType ) {
       if ( drillType == MinorType.MAP ) {
         return new MapNode( batchField );
-      } else if ( drillType == MinorType.LIST ) {
-        return buildListNode( batchField );
       } else {
         return new ScalarNode( batchField );
       }
@@ -224,7 +224,7 @@ public class TupleBuilder
       
       // Repeated lists use a different value vector than non-repeated lists.
       
-      if ( child.drillField.getType().getMinorType() == MinorType.LIST ) {
+      if ( child.drillField.getType().getMode() == DataMode.REPEATED ) {
         return new RepeatedListNode( batchField, child );
       } else {
         return new ListNode( batchField, child );
@@ -303,7 +303,9 @@ public class TupleBuilder
         
         // Build the vector accessor for the field.
         
-        accessors.add( node.buildField( factory ) );
+        VectorAccessor accessor = node.buildField( factory );
+        accessor.define( node.schema.nullable(), node.vectorIndex );
+        accessors.add( accessor );
         
         // Add any resets needed for materialized values.
         
@@ -506,8 +508,6 @@ public class TupleBuilder
   
   public static class ScalarNode extends NonRepeatedNode {
 
-    private VectorAccessor accessor;
-
     public ScalarNode(MaterializedField drillField) {
       super( drillField );
     }
@@ -524,12 +524,12 @@ public class TupleBuilder
       // represents an element of an array. Otherwise, it represents
       // a simple scalar field.
       
+      VectorAccessor accessor;
       if ( drillField.getDataMode() == DataMode.REPEATED ) {
         accessor = VectorAccessor.getElementAccessor( minorType );
       } else {
         accessor = VectorAccessor.getScalarAccessor( minorType );
       }
-      accessor.bindSchema( schema );
       
       // Define the data element.
       
@@ -580,7 +580,6 @@ public class TupleBuilder
       // Create an accessor for Drill's map vector.
       
       MapVectorAccessor accessor = new MapVectorAccessor( );
-      accessor.bindSchema( schema );
       
       // The Map vector materializes the map as a Java Map.
       // Cache it for performance.
@@ -722,7 +721,6 @@ public class TupleBuilder
       // Create the acccessor for Drill's repeated map vector
       
       RepeatedMapVectorAccessor accessor = new RepeatedMapVectorAccessor( );
-      accessor.bindSchema( schema );
       
       // Drill returns the repeated maps as a Java list. Cache it.
       
@@ -828,9 +826,7 @@ public class TupleBuilder
 
     @Override
     protected VectorAccessor buildVectorAccessor() {
-      ListVectorAccessor accessor = new ListVectorAccessor( );
-      accessor.bindSchema( schema );
-      return accessor;
+      return new ListVectorAccessor( );
     }
   }
   
@@ -853,9 +849,7 @@ public class TupleBuilder
 
     @Override
     protected VectorAccessor buildVectorAccessor() {
-      RepeatedListVectorAccessor accessor = new RepeatedListVectorAccessor( );
-      accessor.bindSchema( schema );
-      return accessor;
+      return new RepeatedListVectorAccessor( );
     }
   }
   
@@ -874,10 +868,29 @@ public class TupleBuilder
    */
   
   public DrillRootTupleValue build() {
+    dumpSchema( );
     RootTupleNode root = new RootTupleNode( batchSchema );
        
     FieldValueFactory factory = new DrillFieldValueFactory( );
     root.buildFields( factory );
+    System.out.println( "Jig Schema: " );
+    System.out.println( root.tuple.schema().toString() );
     return root.tuple;
+  }
+
+  private void dumpSchema( ) {
+    System.out.println( "Drill Schema:" );
+    for ( MaterializedField field : batchSchema ) {
+      dumpField( "  ", field );
+    }
+    
+  }
+
+  private void dumpField(String indent, MaterializedField field) {
+    System.out.print( indent );
+    System.out.println( field.toString() );
+    for ( MaterializedField child : field.getChildren() ) {
+      dumpField( indent + "  ", child );
+    }
   }
 }

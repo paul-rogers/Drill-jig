@@ -29,9 +29,9 @@ public abstract class VectorAccessor implements FieldAccessor {
   protected int fieldIndex;
   private ValueVector.Accessor genericAccessor;
   
-  public void bindSchema( FieldSchema schema ) {
-    this.nullable = schema.nullable();
-    this.fieldIndex = schema.index();
+  public void define( boolean nullable, int fieldIndex ) {
+    this.nullable = nullable;
+    this.fieldIndex = fieldIndex;
   }
 
   public void bindReader( VectorRecordReader reader ) {
