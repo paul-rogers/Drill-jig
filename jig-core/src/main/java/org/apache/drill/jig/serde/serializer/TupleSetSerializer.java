@@ -354,7 +354,7 @@ public class TupleSetSerializer extends BaseTupleSetSerde
     if ( field.type() != DataType.LIST ) {
       return getScalarSerializer( field.type() );
     }
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     if ( member.type( ).isVariant() )
       return new SerializeVariantArray( );
     else if ( member.type( ) == DataType.LIST ) {

@@ -129,14 +129,14 @@ public class TestDirectJsonSchema
       assertEquals( 1, field.index() );
       assertEquals( DataType.LIST, field.type() );
 //      assertNull( field.getStructure() );
-      assertEquals( DataType.INT64, field.member( ).type() );
+      assertEquals( DataType.INT64, field.element( ).type() );
     }
     
     {
       FieldSchema field = schema.field( "stringArray" );
       assertEquals( 2, field.index() );
       assertEquals( DataType.LIST, field.type() );
-      assertEquals( DataType.STRING, field.member( ).type() );
+      assertEquals( DataType.STRING, field.element( ).type() );
     }
     
     // Not supported by Drill
@@ -177,7 +177,7 @@ public class TestDirectJsonSchema
       FieldSchema field = schema.field( "emptyArray" );
       assertEquals( 3, field.index() );
       assertEquals( DataType.LIST, field.type() );
-      assertEquals( DataType.UNDEFINED, field.member( ).type() );
+      assertEquals( DataType.UNDEFINED, field.element( ).type() );
     }
     scanner.close( );
   }

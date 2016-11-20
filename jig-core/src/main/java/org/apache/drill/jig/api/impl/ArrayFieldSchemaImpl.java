@@ -3,25 +3,29 @@ package org.apache.drill.jig.api.impl;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 
+/**
+ * Implementation for fields of type {@link DataType#LIST}.
+ */
+
 public class ArrayFieldSchemaImpl extends FieldSchemaImpl {
 
-  FieldSchema memberSchema;
+  FieldSchema elementSchema;
 
   public ArrayFieldSchemaImpl(String name, boolean isNullable,
-      FieldSchema memberSchema) {
+      FieldSchema elementSchema) {
     super(name, DataType.LIST, isNullable);
-    this.memberSchema = memberSchema;
+    this.elementSchema = elementSchema;
   }
 
   @Override
-  public FieldSchema member() {
-    return memberSchema;
+  public FieldSchema element() {
+    return elementSchema;
   }
 
   @Override
   protected void buildString(StringBuilder buf) {
     super.buildString( buf );
-    buf.append( ", member=" );
-    buf.append( memberSchema.toString() );
+    buf.append( ", element=" );
+    buf.append( elementSchema.toString() );
   }
 }

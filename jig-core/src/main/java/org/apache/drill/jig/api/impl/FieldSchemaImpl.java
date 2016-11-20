@@ -2,13 +2,20 @@ package org.apache.drill.jig.api.impl;
 
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
+import org.apache.drill.jig.api.TupleSchema;
+
+/**
+ * Standard implementation of a field schema. Subclasses exist for
+ * certain field types: {@link ArrayFieldSchemaImpl} for arrays,
+ * {@link TupleFieldSchemaImpl} for tuples.
+ */
 
 public class FieldSchemaImpl implements FieldSchema
 {
   protected int index;
   protected final String name;
   protected final boolean isNullable;
-  protected DataType type;
+  protected final DataType type;
   protected int length;
 
   public FieldSchemaImpl( String name, DataType type, boolean isNullable ) {
@@ -16,13 +23,13 @@ public class FieldSchemaImpl implements FieldSchema
     this.isNullable = isNullable;
     this.type = type;
   }
-  
+
   @Override
   public String name() { return name; }
 
   @Override
   public int index() { return index; }
-  
+
   public void setIndex( int index ) { this.index = index; }
 
   @Override
@@ -35,10 +42,10 @@ public class FieldSchemaImpl implements FieldSchema
   public String getDisplayType() {
     return type.displayName() + (isNullable ? "?" : "");
   }
-  
+
   @Override
   public int getLength( ) { return length; }
-  
+
   @Override
   public String toString( ) {
     StringBuilder buf = new StringBuilder( );
@@ -58,8 +65,12 @@ public class FieldSchemaImpl implements FieldSchema
   }
 
   @Override
-  public FieldSchema member() {
+  public FieldSchema element() {
     return null;
   }
 
+  @Override
+  public TupleSchema schema() {
+    return null;
+  }
 }

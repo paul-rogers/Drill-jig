@@ -17,17 +17,24 @@ public class RepeatedVectorAccessor extends VectorAccessor
 
   private final DrillElementAccessor memberAccessor;
   private RepeatedAccessor accessor;
-  
+
   public RepeatedVectorAccessor( DrillElementAccessor memberAccessor ) {
     this.memberAccessor = memberAccessor;
   }
-  
+
+  @Override
+  public void bindReader( VectorRecordReader reader ) {
+    super.bindReader( reader );
+    memberAccessor.bindReader( reader );
+  }
+
   @Override
   public void bindVector( ) {
     super.bindVector();
     accessor = ((BaseRepeatedValueVector) getVector( )).getAccessor();
+    memberAccessor.bindVector();
   }
-  
+
   @Override
   public FieldAccessor memberAccessor() {
     return memberAccessor;

@@ -131,7 +131,7 @@ public class SerdeTestUtils {
     assertEquals( expected.type(), actual.type() );
     assertEquals( expected.nullable(), actual.nullable() );
     if ( expected.type() == DataType.LIST )
-      validateFieldSchema( expected.member(), actual.member() );
+      validateFieldSchema( expected.element(), actual.element() );
   }
 
   public static void validateTuple(TupleValue expected, TupleValue actual) {
@@ -186,7 +186,7 @@ public class SerdeTestUtils {
 
   public static void validateList(FieldSchema schema, ArrayValue expected, ArrayValue actual) {
     assertEquals( expected.size(), actual.size() );
-    FieldSchema memberSchema = schema.member();
+    FieldSchema memberSchema = schema.element();
     for ( int i = 0;  i < expected.size( );  i++ ) {
       validateField( memberSchema, expected.get(i), actual.get(i) );
     }    

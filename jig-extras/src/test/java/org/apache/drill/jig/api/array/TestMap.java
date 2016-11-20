@@ -44,7 +44,7 @@ public class TestMap {
     assertEquals( "col", field.name() );
     assertEquals( DataType.MAP, field.type() );
     assertFalse( field.nullable() );
-    assertNull( field.member( ) );
+    assertNull( field.element( ) );
     
     assertTrue( tupleSet.next() );
     TupleValue tuple = tupleSet.tuple();

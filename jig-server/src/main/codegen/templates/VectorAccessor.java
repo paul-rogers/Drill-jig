@@ -4,12 +4,11 @@ import java.math.BigDecimal;
 
 import org.apache.drill.common.types.TypeProtos.MinorType;
 import org.apache.drill.exec.vector.*;
-import org.apache.drill.jig.accessor.FieldAccessor;
-import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.types.Int64Conversions;
 
 //--------------------------------------------------------------
 // WARNING: This code is generated!
+<#-- OK, so not this file, but the one that this file generates... -->
 // Modify src/main/codegen/templates/VectorAccessor.java
 // Then regenerate this file by:
 // $ cd src/main/codegen
@@ -23,12 +22,12 @@ import org.apache.drill.jig.types.Int64Conversions;
  */
 
 public abstract class VectorAccessor implements FieldAccessor {
-  
+
   protected VectorRecordReader reader;
   protected boolean nullable;
   protected int fieldIndex;
   private ValueVector.Accessor genericAccessor;
-  
+
   public void define( boolean nullable, int fieldIndex ) {
     this.nullable = nullable;
     this.fieldIndex = fieldIndex;
@@ -46,11 +45,11 @@ public abstract class VectorAccessor implements FieldAccessor {
   public boolean isNull() {
     return genericAccessor.isNull( rowIndex( ) );
   }
-  
+
   public ValueVector getVector( ) {
     return reader.getRecord().getVector( fieldIndex ).getValueVector();
   }
-  
+
   protected int rowIndex( ) {
     return reader.getRecordIndex();
   }
@@ -58,20 +57,20 @@ public abstract class VectorAccessor implements FieldAccessor {
   /**
    * Base class for scalar (required or optional) vectors accessors.
    */
-  
+
   public static class DrillScalarAccessor extends VectorAccessor {
-    
+
   }
 
   /**
    * Base class for scalar to access individual elements within a
    * repeated vector.
    */
-  
+
   public static class DrillElementAccessor extends VectorAccessor implements IndexedAccessor {
-    
+
     protected int elementIndex;
-    
+
     @Override
     public void bind( int index ) {
       elementIndex = index;
@@ -96,7 +95,7 @@ public abstract class VectorAccessor implements FieldAccessor {
       <#assign asObject=false>
     </#if>
     <#if ! notyet>
-  
+
   /**
    * Jig field accessor for a Drill ${drillType} vector (Nullable or Required)
    * returned as a Jig ${jigType} value encoded as a Java ${returnType}.
@@ -105,12 +104,12 @@ public abstract class VectorAccessor implements FieldAccessor {
   public static class ${drillType}VectorAccessor extends DrillScalarAccessor implements ${jigType}Accessor
   {
     ${drillType}Vector.Accessor accessor;
-  
+
     @Override
     @SuppressWarnings("resource")
     public void bindVector( ) {
       super.bindVector( );
-      ${drillType}Vector v; 
+      ${drillType}Vector v;
       if ( nullable ) {
         v = ((Nullable${drillType}Vector) getVector( )).getValuesVector();
       } else {
@@ -118,7 +117,7 @@ public abstract class VectorAccessor implements FieldAccessor {
       }
       accessor = v.getAccessor( );
     }
-  
+
     @Override
     public ${returnType} get${getLabel}()
     {
@@ -135,7 +134,7 @@ public abstract class VectorAccessor implements FieldAccessor {
     </#if>
     }
   }
-  
+
   /**
    * Jig array element accessor for a Drill ${drillType} repeated vector
    * returned as a Jig ${jigType} value encoded as a Java ${returnType}.
@@ -144,13 +143,13 @@ public abstract class VectorAccessor implements FieldAccessor {
   public static class ${drillType}ElementAccessor extends DrillElementAccessor implements ${jigType}Accessor
   {
     Repeated${drillType}Vector.Accessor accessor;
-    
+
     @Override
     public void bindVector( ) {
       super.bindVector( );
       accessor = ((Repeated${drillType}Vector) getVector()).getAccessor( );
     }
-  
+
     @Override
     public ${returnType} get${getLabel}()
     {
@@ -170,10 +169,10 @@ public abstract class VectorAccessor implements FieldAccessor {
     </#if>
   </#list>
 </#list>
-  
+
   private static Class<? extends DrillScalarAccessor> scalarAccessors[ ] =
       buildScalarAccessorTable( );
-  
+
   private static Class<? extends DrillScalarAccessor>[] buildScalarAccessorTable() {
     @SuppressWarnings("unchecked")
     Class<? extends DrillScalarAccessor> table[] =
@@ -197,7 +196,7 @@ public abstract class VectorAccessor implements FieldAccessor {
 
   private static Class<? extends DrillElementAccessor> elementAccessors[ ] =
       buildElementAccessorTable( );
-  
+
   private static Class<? extends DrillElementAccessor>[] buildElementAccessorTable() {
     @SuppressWarnings("unchecked")
     Class<? extends DrillElementAccessor> table[] =
@@ -218,15 +217,15 @@ public abstract class VectorAccessor implements FieldAccessor {
   </#list>
     return table;
   }
-  
+
   public static DrillScalarAccessor getScalarAccessor( MinorType drillType ) {
-    return instanceOf( scalarAccessors[ drillType.ordinal( ) ] );    
+    return instanceOf( scalarAccessors[ drillType.ordinal( ) ] );
   }
-  
+
   public static DrillElementAccessor getElementAccessor( MinorType drillType ) {
-    return instanceOf( elementAccessors[ drillType.ordinal( ) ] );    
+    return instanceOf( elementAccessors[ drillType.ordinal( ) ] );
   }
-  
+
   public static <T> T instanceOf(Class<? extends T> theClass) {
     if ( theClass == null )
       return null;

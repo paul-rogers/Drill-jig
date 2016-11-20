@@ -48,12 +48,12 @@ public class TestNestedLists {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.LIST, member.type() );
     assertFalse( member.nullable() );
     
-    FieldSchema member2 = member.member();
+    FieldSchema member2 = member.element();
     assertNotNull( member2 );
     assertEquals( DataType.STRING, member2.type() );
     assertFalse( member2.nullable() );
@@ -100,12 +100,12 @@ public class TestNestedLists {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.LIST, member.type() );
     assertFalse( member.nullable() );
     
-    FieldSchema member2 = member.member();
+    FieldSchema member2 = member.element();
     assertNotNull( member2 );
     assertEquals( DataType.STRING, member2.type() );
     assertFalse( member2.nullable() );
@@ -156,12 +156,12 @@ public class TestNestedLists {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.LIST, member.type() );
     assertFalse( member.nullable() );
     
-    FieldSchema member2 = member.member();
+    FieldSchema member2 = member.element();
     assertNotNull( member2 );
     assertEquals( DataType.STRING, member2.type() );
     assertFalse( member2.nullable() );
@@ -208,12 +208,12 @@ public class TestNestedLists {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.LIST, member.type() );
     assertFalse( member.nullable() );
     
-    FieldSchema member2 = member.member();
+    FieldSchema member2 = member.element();
     assertNotNull( member2 );
     assertEquals( DataType.STRING, member2.type() );
     assertFalse( member2.nullable() );

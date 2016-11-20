@@ -23,6 +23,12 @@ import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.extras.json.builder.JsonBuilder;
 import org.junit.Test;
 
+
+// Vectors not matching up
+// Field x marked as map, should be tuple
+// For tuple field, add schema as accessor in FieldSchema
+// Rename member to element in FieldSchema
+
 public class TestDrillJson {
   
   public static class DrillProject
@@ -52,8 +58,7 @@ public class TestDrillJson {
 
     public File getPath(File base) {
       return new File( base, filePath );
-    }
-    
+    }    
   }
   
   public static DrillProject drillProjects[] = buildTestFiles( );

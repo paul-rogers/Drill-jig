@@ -57,7 +57,7 @@ public class TestLists {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertFalse( member.nullable() );
@@ -108,7 +108,7 @@ public class TestLists {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertTrue( member.nullable() );
@@ -152,7 +152,7 @@ public class TestLists {
     assertEquals( DataType.LIST, field.type() );
     assertTrue( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertFalse( member.nullable() );
@@ -197,7 +197,7 @@ public class TestLists {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.UNDEFINED, member.type() );
     assertFalse( member.nullable() );

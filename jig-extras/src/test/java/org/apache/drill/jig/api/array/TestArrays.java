@@ -46,7 +46,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertFalse( member.nullable() );
@@ -92,7 +92,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.DECIMAL, member.type() );
     assertFalse( member.nullable() );
@@ -132,7 +132,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertTrue( member.nullable() );
@@ -173,7 +173,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertTrue( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertTrue( member.nullable() );
@@ -219,7 +219,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertFalse( member.nullable() );
@@ -265,7 +265,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.STRING, member.type() );
     assertFalse( member.nullable() );
@@ -305,7 +305,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.UNDEFINED, member.type() );
     assertFalse( member.nullable() );
@@ -341,7 +341,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertTrue( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.VARIANT, member.type() );
     assertFalse( member.nullable() );
@@ -384,7 +384,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertTrue( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.VARIANT, member.type() );
     assertTrue( member.nullable() );
@@ -425,7 +425,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.BOOLEAN, member.type() );
     assertFalse( member.nullable() );
@@ -459,7 +459,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.INT8, member.type() );
     assertFalse( member.nullable() );
@@ -493,7 +493,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.INT16, member.type() );
     assertFalse( member.nullable() );
@@ -526,7 +526,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.INT32, member.type() );
     assertFalse( member.nullable() );
@@ -559,7 +559,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.INT64, member.type() );
     assertFalse( member.nullable() );
@@ -593,7 +593,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.FLOAT32, member.type() );
     assertFalse( member.nullable() );
@@ -626,7 +626,7 @@ public class TestArrays {
     assertEquals( DataType.LIST, field.type() );
     assertFalse( field.nullable() );
     
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     assertNotNull( member );
     assertEquals( DataType.FLOAT64, member.type() );
     assertFalse( member.nullable() );

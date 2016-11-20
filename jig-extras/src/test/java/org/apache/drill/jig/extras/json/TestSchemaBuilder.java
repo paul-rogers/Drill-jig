@@ -62,24 +62,24 @@ public class TestSchemaBuilder {
     assertEquals( "f", field.name() );
     assertFalse( field.nullable() );
     assertEquals( DataType.LIST, field.type() );
-    assertFalse( field.member().nullable() );
-    assertEquals( DataType.UNDEFINED, field.member( ).type() );
+    assertFalse( field.element().nullable() );
+    assertEquals( DataType.UNDEFINED, field.element( ).type() );
     
     field = schema.field( 6 );
     assertEquals( "g", field.name() );
     assertFalse( field.nullable() );
     assertEquals( DataType.LIST, field.type() );
-    assertFalse( field.member().nullable() );
-    assertEquals( DataType.INT64, field.member( ).type() );
+    assertFalse( field.element().nullable() );
+    assertEquals( DataType.INT64, field.element( ).type() );
     
     field = schema.field( 7 );
     assertEquals( "h", field.name() );
     assertFalse( field.nullable() );
     assertEquals( DataType.LIST, field.type() );
-    assertFalse( field.member().nullable() );
-    assertEquals( DataType.LIST, field.member( ).type() );
-    assertFalse( field.member().member().nullable() );
-    assertEquals( DataType.STRING, field.member( ).member().type() );
+    assertFalse( field.element().nullable() );
+    assertEquals( DataType.LIST, field.element( ).type() );
+    assertFalse( field.element().element().nullable() );
+    assertEquals( DataType.STRING, field.element( ).element().type() );
   }
 
   private JsonObject createObject() {

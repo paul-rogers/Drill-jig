@@ -213,7 +213,7 @@ public class TupleBuilder {
 
     public ListNode(FieldSchema field, BufferStructureAccessor accessor ) {
       super( field, accessor );
-      this.member = field.member( );
+      this.member = field.element( );
     }
     
     /**
@@ -330,7 +330,7 @@ public class TupleBuilder {
     public StructureListNode(FieldSchema field,
         StructureNode elementNode ) {
       super( field, new ArrayOfStructureAccessor( elementNode.accessor,
-                                            field.member( ).nullable() ) );
+                                            field.element( ).nullable() ) );
       element = elementNode;
     }
 
@@ -456,7 +456,7 @@ public class TupleBuilder {
    */
   
   private ListNode buildListNode(FieldSchema field) {
-    FieldSchema member = field.member();
+    FieldSchema member = field.element();
     switch ( member.type() ) {
     case BOOLEAN:
       return new PrimitiveListNode( field, new BooleanArrayAccessor( ) );
