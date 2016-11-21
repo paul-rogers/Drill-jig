@@ -1,9 +1,10 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.drill.jig.drillpress.net.DrillPressServer;
-import org.apache.drill.jig.drillpress.net.DrillPressServer.ReadyListener;
+import org.apache.drill.jig.direct.DirectConnectionException;
+import org.apache.drill.jig.server.net.DrillPressServer;
+import org.apache.drill.jig.server.net.DrillPressServer.ReadyListener;
 
 public class EmbeddedDrillPress
 {
@@ -12,11 +13,11 @@ public class EmbeddedDrillPress
     private CountDownLatch readyLatch = new CountDownLatch( 1 );
     private CountDownLatch stopLatch = new CountDownLatch( 1 );
     private DrillPressServer server;
-    
+
     public EmbeddedDrillPressThread(  ) {
       super( "Embedded DrillPress" );
     }
-    
+
     @Override
     public void run( )
     {
@@ -25,10 +26,13 @@ public class EmbeddedDrillPress
       } catch (InterruptedException e) {
         System.err.println( "Interrupted" );
         e.printStackTrace();
+      } catch (DirectConnectionException e) {
+        System.err.println( "Failed" );
+        e.printStackTrace();
       }
     }
 
-    private void runServer() throws InterruptedException {
+    private void runServer() throws InterruptedException, DirectConnectionException {
       server = new DrillPressServer( context );
       server.setReadyListener( this );
       server.start();
@@ -40,19 +44,19 @@ public class EmbeddedDrillPress
     public void ready() {
       readyLatch.countDown();
     }
-    
+
     public void shutDown( ) {
       stopLatch.countDown();
     }
-  }    
+  }
 
   private EmbeddedDrillPressThread thread;
   private DrillPressContext context;
-  
+
   public EmbeddedDrillPress( DrillPressContext context ) {
     this.context = context;
   }
-  
+
   public EmbeddedDrillPress start( ) {
     assert thread == null;
     if ( thread != null ) {
@@ -67,14 +71,14 @@ public class EmbeddedDrillPress
     }
     return this;
   }
-  
+
   public void shutDown( ) {
     assert thread != null;
     if ( thread == null )
       return;
     thread.shutDown( );
   }
-  
+
   public void join( ) {
     try {
       thread.join();
@@ -82,7 +86,7 @@ public class EmbeddedDrillPress
       // Should not occur
     }
   }
-  
+
   public void stop( ) {
     shutDown( );
     join( );

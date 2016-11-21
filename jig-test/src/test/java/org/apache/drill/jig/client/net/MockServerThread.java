@@ -4,9 +4,9 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.drill.jig.drillpress.net.JigFrameDecoder;
-import org.apache.drill.jig.drillpress.net.JigServerHandler;
 import org.apache.drill.jig.protocol.MessageConstants;
+import org.apache.drill.jig.server.net.JigFrameDecoder;
+import org.apache.drill.jig.server.net.JigServerHandler;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

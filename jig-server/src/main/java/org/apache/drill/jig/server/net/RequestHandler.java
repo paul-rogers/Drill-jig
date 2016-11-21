@@ -1,4 +1,4 @@
-package org.apache.drill.jig.drillpress.net;
+package org.apache.drill.jig.server.net;
 
 import org.apache.drill.jig.exception.JigException;
 

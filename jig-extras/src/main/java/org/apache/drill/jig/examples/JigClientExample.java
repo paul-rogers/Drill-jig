@@ -6,9 +6,9 @@ import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.client.ConnectionFactory;
-import org.apache.drill.jig.drillpress.DrillPressContext;
-import org.apache.drill.jig.drillpress.EmbeddedDrillPress;
 import org.apache.drill.jig.exception.JigException;
+import org.apache.drill.jig.server.DrillPressContext;
+import org.apache.drill.jig.server.EmbeddedDrillPress;
 
 /**
  * Illustrates the very basics of using Jig to query Drill.

@@ -1,14 +1,10 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.drill.jig.direct.DirectConnection;
 import org.apache.drill.jig.direct.DirectConnectionException;
-import org.apache.drill.jig.drillpress.net.RequestException;
-import org.apache.drill.jig.drillpress.net.RequestProcessor;
-import org.apache.drill.jig.drillpress.net.RequestException.IncompatibleVersionsException;
-import org.apache.drill.jig.drillpress.net.RequestException.InvalidRequestException;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ExecuteRequest;
 import org.apache.drill.jig.proto.ListLoginsResponse;
@@ -24,6 +20,10 @@ import org.apache.drill.jig.protocol.DataResponse;
 import org.apache.drill.jig.protocol.HelloRequest;
 import org.apache.drill.jig.protocol.HelloResponse;
 import org.apache.drill.jig.protocol.MessageConstants;
+import org.apache.drill.jig.server.net.RequestException;
+import org.apache.drill.jig.server.net.RequestProcessor;
+import org.apache.drill.jig.server.net.RequestException.IncompatibleVersionsException;
+import org.apache.drill.jig.server.net.RequestException.InvalidRequestException;
 
 public class SessionRequestProcessor implements RequestProcessor
 {

@@ -1,10 +1,10 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.drill.jig.drillpress.net.RequestProcessor;
-import org.apache.drill.jig.drillpress.net.RequestProcessorFactory;
+import org.apache.drill.jig.server.net.RequestProcessor;
+import org.apache.drill.jig.server.net.RequestProcessorFactory;
 
 public class SessionProcessorFactory implements RequestProcessorFactory
 {

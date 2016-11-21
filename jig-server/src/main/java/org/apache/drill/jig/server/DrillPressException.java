@@ -1,4 +1,4 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
 public class DrillPressException extends Exception {
 

@@ -4,7 +4,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.TupleSchema;
@@ -61,7 +60,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
 
   @Override
   public int isNullable(int column) throws SQLException {
-    if ( getJigField( column ).getCardinality( ) == Cardinality.OPTIONAL )
+    if ( getJigField( column ).nullable() )
       return columnNullable;
     else
       return columnNoNulls;
@@ -75,7 +74,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
   }
 
   private static boolean signed[] = initSigned( );
-  
+
   private static boolean[] initSigned() {
     boolean signed[] = new boolean[ DataType.values().length ];
     signed[ DataType.DECIMAL.ordinal() ] = true;
@@ -166,7 +165,7 @@ public class JigResultSetMetaData implements ResultSetMetaData
     types[ DataType.UTC_DATE_TIME.ordinal() ] = Types.TIMESTAMP;
     return types;
   }
-  
+
   @Override
   public int getColumnType(int column) throws SQLException {
     FieldSchema field = getJigField( column );

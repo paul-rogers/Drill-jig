@@ -9,8 +9,8 @@ import java.util.Properties;
 
 import org.apache.drill.jig.client.ClientConstants;
 import org.apache.drill.jig.protocol.MessageConstants;
-import org.apache.drill.jig.drillpress.DrillPressContext;
-import org.apache.drill.jig.drillpress.EmbeddedDrillPress;
+import org.apache.drill.jig.server.DrillPressContext;
+import org.apache.drill.jig.server.EmbeddedDrillPress;
 import org.apache.drill.jig.jdbc.JigDriver.UrlParser;
 import org.junit.Test;
 

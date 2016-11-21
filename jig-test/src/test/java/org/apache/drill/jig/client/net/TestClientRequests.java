@@ -9,7 +9,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
@@ -43,21 +42,21 @@ public class TestClientRequests
     MockServerThread serverThread = new MockServerThread( new PrintWriter( out ) );
     serverThread.start();
     serverThread.readyLatch.await();
-    
+
     JigClientFacade client = new JigClientFacade( );
     client.connect( "localhost", MessageConstants.DEFAULT_PORT );
-    
+
     // Hello
-    
+
     {
       HelloRequest req = new HelloRequest( 2, 1 );
       HelloResponse resp = client.hello( req );
       assertEquals( 3, resp.serverVersion );
       assertEquals( 2, resp.sessionVersion );
     }
-    
+
     // List Logins
-    
+
     {
       ListLoginsResponse resp = client.getLoginMethods( );
       List<String> methods = resp.getLoginTypesList();
@@ -65,9 +64,9 @@ public class TestClientRequests
       assertTrue( methods.contains( MessageConstants.OPEN_LOGIN ) );
       assertTrue( methods.contains( MessageConstants.USER_PWD_LOGIN ) );
     }
-    
+
     // Get Login Properties
-    
+
     {
       LoginPropertiesResponse resp = client.getLoginProperties( MessageConstants.USER_PWD_LOGIN );
       assertEquals( MessageConstants.USER_PWD_LOGIN, resp.getLoginType() );
@@ -80,9 +79,9 @@ public class TestClientRequests
       assertEquals( "password", prop.getName() );
       assertEquals( PropertyType.STRING, prop.getType() );
     }
-    
+
     // Login
-    
+
     {
       LoginRequest req = new LoginRequest( )
           .setLoginType( MessageConstants.USER_PWD_LOGIN );
@@ -96,20 +95,20 @@ public class TestClientRequests
           .setValue( "secret" );
       props.add( prop );
       req.setPropertiesList( props );
-      client.login( req );     
+      client.login( req );
     }
-    
+
     // Execute statement
-    
+
     {
       ExecuteRequest req = new ExecuteRequest( )
           .setStatement( "ALTER SESSION SET foo = \"bar\";" );
       SuccessResponse resp = client.executeStmt( req );
       assertEquals( 10, resp.getRowCount( ) );
     }
-    
+
     // Execute query and fetch simulated results
-    
+
     {
       QueryRequest req = new QueryRequest( )
           .setStatement( "SELECT * FROM foo;" )
@@ -117,9 +116,9 @@ public class TestClientRequests
           .setMaxWaitSec( 75 );
       client.executeQuery( req );
     }
-    
+
     // First fetch, no data
-    
+
     {
       DataResponse resp = client.getResults();
       assertEquals( DataResponse.Type.NO_DATA, resp.type );
@@ -128,9 +127,9 @@ public class TestClientRequests
       assertEquals( 20, resp.info.getCode().intValue() );
       assertEquals( "Working", resp.info.getMessage() );
     }
-    
+
     // Second fetch: schema
-    
+
     {
       DataResponse resp = client.getResults();
       assertEquals( DataResponse.Type.SCHEMA, resp.type );
@@ -141,15 +140,15 @@ public class TestClientRequests
       ColumnSchema col = cols.get( 0 );
       assertEquals( "first", col.getName() );
       assertEquals( DataType.STRING.typeCode(), col.getType() );
-      assertEquals( Cardinality.OPTIONAL.cardinalityCode(), col.getCardinality() );
+      assertEquals( 1, col.getNullable() );
       col = cols.get( 1 );
       assertEquals( "second", col.getName() );
       assertEquals( DataType.STRING.typeCode(), col.getType() );
-      assertEquals( Cardinality.REQUIRED.cardinalityCode(), col.getCardinality() );
+      assertEquals( 0, col.getNullable() );
     }
-    
+
     // Third fetch: simulated data
-    
+
     {
       DataResponse resp = client.getResults();
       assertEquals( DataResponse.Type.DATA, resp.type );
@@ -157,22 +156,22 @@ public class TestClientRequests
       String value = new String( resp.data );
       assertEquals( "ABC|xyz", value );
     }
-    
+
     // Fourth fetch: eof
-    
+
     {
       DataResponse resp = client.getResults();
       assertEquals( DataResponse.Type.EOF, resp.type );
     }
-    
+
     // Goodbye & close
-    
+
     {
       client.close( );
     }
-    
+
     serverThread.join();
-    
+
     assertTrue( CompareFiles.compareResource( "/protocol-test.txt", out.toString() ) );
   }
 

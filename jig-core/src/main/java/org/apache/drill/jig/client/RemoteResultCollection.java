@@ -3,33 +3,43 @@ package org.apache.drill.jig.client;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.ResultCollection;
-import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
+import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.api.impl.FieldSchemaImpl;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
+import org.apache.drill.jig.api.impl.TupleValueImpl;
 import org.apache.drill.jig.client.net.JigClientFacade;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.SchemaResponse;
 import org.apache.drill.jig.protocol.DataResponse;
+import org.apache.drill.jig.serde.deserializer.TupleBuilder;
 import org.apache.drill.jig.serde.deserializer.TupleSetDeserializer;
 
 public class RemoteResultCollection implements ResultCollection
 {
   private enum State { START, SCHEMA_CHANGE, END_OF_BUFFER, ROWS, EOF };
-  
+
   private class RemoteTupleSet implements TupleSet
   {
-    int index = -1;
-    
+    private final TupleSchema schema;
+    private final TupleSetDeserializer deserializer;
+    private int index = -1;
+    private final TupleValueImpl tuple;
+
+    public RemoteTupleSet(TupleSchema schema) {
+      this.schema = schema;
+      deserializer = new TupleSetDeserializer( schema );
+      TupleBuilder builder = new TupleBuilder( deserializer );
+      tuple = builder.build( schema );
+    }
+
     @Override
     public TupleSchema schema() {
-      return deserializer.getSchema();
+      return schema;
     }
 
     @Override
@@ -47,29 +57,6 @@ public class RemoteResultCollection implements ResultCollection
         case END_OF_BUFFER:
           getResults( );
           break;
-//          response = client.getResults();
-//          switch ( response.type ) {
-//          case DATA:
-//            buffer = ByteBuffer.wrap( response.data );
-//            state = State.ROWS;
-//            break;
-//          case EOF:
-//            state = State.EOF;
-//            return false;
-//          case NO_DATA:
-//            try {
-//              Thread.sleep( conn.dataPollPeriodMs );
-//            } catch (InterruptedException e) {
-//              state = State.EOF;
-//              return false;
-//            }
-//            break;
-//          case SCHEMA:
-//            state = State.SCHEMA_CHANGE;
-//            return false;
-//          default:
-//            throw new IllegalArgumentException( "Unexpected get results type: " + response.type );
-//          }
         case ROWS:
           if ( deserializer.startTuple( buffer ) ) {
             index++;
@@ -85,23 +72,22 @@ public class RemoteResultCollection implements ResultCollection
 
     @Override
     public TupleValue tuple() {
-      return deserializer.getTuple();
+      return tuple;
     }
 
     public void reset() {
       index = -1;
     }
-    
+
   }
-  
+
   private RemoteConnection conn;
   private JigClientFacade client;
   private RemoteStatement stmt;
   private State state = State.START;
   private int tupleSetIndex = -1;
-  private RemoteTupleSet tupleSet = new RemoteTupleSet( );
+  private RemoteTupleSet tupleSet;
   private ByteBuffer buffer;
-  private TupleSetDeserializer deserializer;
   private DataResponse response;
 
   public RemoteResultCollection(RemoteStatement stmt) {
@@ -121,36 +107,12 @@ public class RemoteResultCollection implements ResultCollection
       switch( state ) {
       case START:
         // No rows fetched yet. Will either be a schema or EOF
-        
+
         getResults( );
         if ( state == State.ROWS ) {
           throw new IllegalStateException( "Received data packet before schema" );
         }
         break;
-//        response = client.getResults();
-//        switch ( response.type ) {
-//        case DATA:
-//          throw new IllegalStateException( "Received data packet before schema" );
-//        case EOF:
-//          state = State.EOF;
-//          return false;
-//        case NO_DATA:
-//          try {
-//            Thread.sleep( conn.dataPollPeriodMs );
-//          } catch (InterruptedException e) {
-//            state = State.EOF;
-//            return false;
-//          }
-//          break;
-//        case SCHEMA:
-//          deserializer = new TupleSetDeserializer( );
-//          deserializer.prepareSchema( translateSchema( response.schema ) );
-//          tupleSetIndex++;
-//          state = State.END_OF_BUFFER;
-//          return true;
-//        default:
-//          throw new IllegalStateException( "Unexpected results response type:" + response.type );
-//        }
       case END_OF_BUFFER:
         return true;
       case ROWS:
@@ -161,19 +123,18 @@ public class RemoteResultCollection implements ResultCollection
       case SCHEMA_CHANGE:
         // The most recent call to fetch data got a new schema.
         TupleSchema schema = translateSchema( response.schema );
-        deserializer = new TupleSetDeserializer( schema );
         tupleSetIndex++;
-        tupleSet.reset( );
+        tupleSet = new RemoteTupleSet( schema );
         state = State.END_OF_BUFFER;
         return true;
       case EOF:
         return false;
       default:
-        throw new IllegalStateException( "Unexpected state: " + state );    
+        throw new IllegalStateException( "Unexpected state: " + state );
       }
     }
   }
-  
+
   private void getResults( ) throws JigException {
     for ( ; ; ) {
       response = client.getResults();
@@ -195,7 +156,7 @@ public class RemoteResultCollection implements ResultCollection
         break;
       case SCHEMA:
         TupleSchema schema = translateSchema( response.schema );
-        deserializer = new TupleSetDeserializer( schema );
+        tupleSet = new RemoteTupleSet( schema );
         tupleSetIndex++;
         state = State.END_OF_BUFFER;
         return;

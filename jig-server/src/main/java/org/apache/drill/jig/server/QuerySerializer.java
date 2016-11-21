@@ -1,4 +1,4 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.protocol.MessageConstants;
 import org.apache.drill.jig.serde.serializer.TupleSetSerializer;
+import org.apache.drill.jig.server.net.RequestException;
 import org.apache.drill.jig.direct.DirectConnection;
-import org.apache.drill.jig.drillpress.net.RequestException;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.QueryRequest;

@@ -9,8 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 
-import org.apache.drill.jig.drillpress.DrillPressContext;
-import org.apache.drill.jig.drillpress.EmbeddedDrillPress;
+import org.apache.drill.jig.server.DrillPressContext;
+import org.apache.drill.jig.server.EmbeddedDrillPress;
 import org.junit.Test;
 
 public class TestJdbcQuery

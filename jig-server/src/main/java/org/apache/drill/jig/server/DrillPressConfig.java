@@ -1,4 +1,4 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
 import java.net.URL;
 

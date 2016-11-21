@@ -37,7 +37,7 @@ public class JigJdbcResultSet implements ResultSet
   private boolean wasNull;
   private JigResultSetMetaData resultMetaData;
   private boolean isEof;
-  
+
   public JigJdbcResultSet( JigJdbcStatement stmt, TupleSet tupleSet ) {
     this.stmt = stmt;
     this.tupleSet = tupleSet;
@@ -70,7 +70,7 @@ public class JigJdbcResultSet implements ResultSet
       throw wrapJigException( e );
     }
   }
-  
+
   private void validateOpen( ) throws SQLException {
     if ( tupleSet == null )
       throw new SQLException( "ResultSet closed" );
@@ -79,7 +79,7 @@ public class JigJdbcResultSet implements ResultSet
   private SQLException wrapJigException(JigException e) {
     return new JigWrapperException( e );
   }
-  
+
   @Override
   public void close() throws SQLException {
     if ( tupleSet == null )
@@ -118,9 +118,9 @@ public class JigJdbcResultSet implements ResultSet
     wasNull = field.isNull();
     if ( wasNull )
       return null;
-    return field.asScalar();
+    return field;
   }
-  
+
   @Override
   public boolean getBoolean(int columnIndex) throws SQLException {
     ScalarValue accessor = getScalar( columnIndex );
@@ -436,7 +436,7 @@ public class JigJdbcResultSet implements ResultSet
   public void beforeFirst() throws SQLException {
     throw scrollUnsupported( );
   }
-  
+
   private UnsupportedException scrollUnsupported( ) throws SQLException {
     validateOpen( );
     return new UnsupportedException( "scroll" );
@@ -492,7 +492,7 @@ public class JigJdbcResultSet implements ResultSet
   @Override
   public void setFetchSize(int rows) throws SQLException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -737,7 +737,7 @@ public class JigJdbcResultSet implements ResultSet
   public void refreshRow() throws SQLException {
     validateOpen( );
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -956,7 +956,7 @@ public class JigJdbcResultSet implements ResultSet
   @Override
   public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override

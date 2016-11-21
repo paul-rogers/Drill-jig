@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.drill.jig.api.AlterSessionKeys;
-import org.apache.drill.jig.drillpress.DrillPressContext;
-import org.apache.drill.jig.drillpress.EmbeddedDrillPress;
 import org.apache.drill.jig.exception.JigException;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.ExecuteRequest;
@@ -23,6 +21,8 @@ import org.apache.drill.jig.protocol.DataResponse;
 import org.apache.drill.jig.protocol.HelloRequest;
 import org.apache.drill.jig.protocol.HelloResponse;
 import org.apache.drill.jig.protocol.MessageConstants;
+import org.apache.drill.jig.server.DrillPressContext;
+import org.apache.drill.jig.server.EmbeddedDrillPress;
 import org.junit.Test;
 
 /**

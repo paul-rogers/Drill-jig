@@ -1,6 +1,6 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
-import org.apache.drill.jig.drillpress.DrillPressContext.DrillConnectMethod;
+import org.apache.drill.jig.server.DrillPressContext.DrillConnectMethod;
 import org.apache.drill.jig.util.JigUtilities;
 
 import com.typesafe.config.Config;

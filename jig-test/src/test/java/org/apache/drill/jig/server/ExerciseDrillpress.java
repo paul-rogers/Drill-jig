@@ -1,4 +1,4 @@
-package org.apache.drill.jig.drillpress;
+package org.apache.drill.jig.server;
 
 import org.apache.drill.jig.api.DrillConnection;
 import org.apache.drill.jig.api.ResultCollection;

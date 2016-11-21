@@ -5,9 +5,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.drill.jig.api.Cardinality;
 import org.apache.drill.jig.api.DataType;
-import org.apache.drill.jig.drillpress.net.RequestProcessor;
 import org.apache.drill.jig.proto.ColumnSchema;
 import org.apache.drill.jig.proto.ExecuteRequest;
 import org.apache.drill.jig.proto.InformationResponse;
@@ -25,6 +23,7 @@ import org.apache.drill.jig.protocol.DataResponse;
 import org.apache.drill.jig.protocol.HelloRequest;
 import org.apache.drill.jig.protocol.HelloResponse;
 import org.apache.drill.jig.protocol.MessageConstants;
+import org.apache.drill.jig.server.net.RequestProcessor;
 
 public class MockRequestProcessor implements RequestProcessor
 {
@@ -114,11 +113,11 @@ public class MockRequestProcessor implements RequestProcessor
       List<ColumnSchema> cols = new ArrayList<>( );
       cols.add( new ColumnSchema( )
           .setName( "first" )
-          .setCardinality( Cardinality.OPTIONAL.cardinalityCode() )
+          .setNullable( 1 )
           .setType( DataType.STRING.typeCode() ) );
       cols.add( new ColumnSchema( )
           .setName( "second" )
-          .setCardinality( Cardinality.REQUIRED.cardinalityCode() )
+          .setNullable( 0 )
           .setType( DataType.STRING.typeCode() ) );
       step = 2;
       return new DataResponse( new SchemaResponse( )
