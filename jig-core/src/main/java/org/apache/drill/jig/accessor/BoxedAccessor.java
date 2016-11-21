@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.apache.drill.jig.accessor.FieldAccessor.*;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.types.FieldValueFactory;
+import org.apache.drill.jig.util.JigUtilities;
 
 /**
  * Field value accessor backed by a Java object. The caller is responsible
@@ -20,7 +21,7 @@ public class BoxedAccessor implements BooleanAccessor, Int8Accessor,
   public BoxedAccessor( ObjectAccessor accessor ) {
     this.accessor = accessor;
   }
-  
+
   @Override
   public boolean isNull() {
     return accessor.isNull();
@@ -75,13 +76,21 @@ public class BoxedAccessor implements BooleanAccessor, Int8Accessor,
   public Object getObject() {
     return accessor.getObject();
   }
-  
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( " accessor = " );
+    accessor.visualize( buf, indent + 1 );
+    buf.append( "]" );
+  }
+
   /**
    * Extends the boxed accessor to convert the boxed object to the corresponding
    * Jig type using the factory provided. Used when the boxed object participates
    * in a Variant field.
    */
- 
+
   public static class VariantBoxedAccessor extends BoxedAccessor implements TypeAccessor
   {
     private final FieldValueFactory factory;
@@ -94,6 +103,16 @@ public class BoxedAccessor implements BooleanAccessor, Int8Accessor,
     @Override
     public DataType getType() {
       return factory.objectToJigType( accessor.getObject( ) );
+    }
+
+    @Override
+    public void visualize(StringBuilder buf, int indent) {
+      JigUtilities.objectHeader( buf, this );
+      buf.append( " factory = " );
+      buf.append( factory.toString() );
+      buf.append( ", accessor = " );
+      accessor.visualize( buf, indent + 1 );
+      buf.append( "]" );
     }
   }
 }

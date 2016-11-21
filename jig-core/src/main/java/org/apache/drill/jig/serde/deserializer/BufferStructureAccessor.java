@@ -9,46 +9,55 @@ import org.apache.drill.jig.serde.deserializer.BufferScalarAccessor.BufferMember
 import org.apache.drill.jig.types.AbstractFieldValue;
 import org.apache.drill.jig.types.FieldValueCache;
 import org.apache.drill.jig.types.FieldValueFactory;
+import org.apache.drill.jig.util.JigUtilities;
 
 public abstract class BufferStructureAccessor implements ObjectAccessor {
 
   protected int index;
   protected TupleSetDeserializer deserializer;
-  
+
   public void bind( TupleSetDeserializer deserializer, int index ) {
     this.deserializer = deserializer;
     this.index = index;
   }
-  
+
   @Override
   public boolean isNull() {
     return deserializer.isNull( index );
   }
-  
+
   protected void seek( ) {
     deserializer.seek( index );
   }
-  
+
   /**
    * If the array is a top-level field, it starts with a field
    * length, which we skip here.
    */
-  
+
   protected void skipHeader( ) {
     seek( );
     deserializer.reader( ).readInt( ); // Skip field length
   }
-  
+
   @Override
   public Object getObject() {
     if ( isNull( ) )
       return null;
-  
+
     skipHeader( );
     return buildStructure( );
   }
-  
+
   protected abstract Object buildStructure( );
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( " index = " );
+    buf.append( index );
+    buf.append( "]" );
+  }
 
   public static class BooleanArrayAccessor extends BufferStructureAccessor {
 
@@ -68,7 +77,7 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         }
       }
       return array;
-    }    
+    }
   }
 
   public static class Int8ArrayAccessor extends BufferStructureAccessor {
@@ -82,7 +91,7 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = reader.readByte();
       }
       return array;
-    }  
+    }
   }
 
   public static class Int16ArrayAccessor extends BufferStructureAccessor {
@@ -96,9 +105,9 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = reader.readShort();
       }
       return array;
-    }  
+    }
   }
-  
+
   public static class Int32ArrayAccessor extends BufferStructureAccessor {
 
     @Override
@@ -110,9 +119,9 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = reader.readIntEncoded();
       }
       return array;
-    }  
+    }
   }
-  
+
   public static class Int64ArrayAccessor extends BufferStructureAccessor {
 
     @Override
@@ -124,9 +133,9 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = reader.readLongEncoded();
       }
       return array;
-    }  
+    }
   }
-  
+
   public static class Float32ArrayAccessor extends BufferStructureAccessor {
 
     @Override
@@ -138,9 +147,9 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = reader.readFloat();
       }
       return array;
-    }  
+    }
   }
-  
+
   public static class Float64ArrayAccessor extends BufferStructureAccessor {
 
     @Override
@@ -152,9 +161,9 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = reader.readDouble();
       }
       return array;
-    }  
+    }
   }
-  
+
   /**
    * Accesses a serialized array by building a Java object array to hold
    * the deserialized objects. Handles both nullable and non-nullable array
@@ -162,14 +171,14 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
    * to indicate which members are null, and only reads the non-null
    * members.
    */
-  
+
   public abstract static class BufferObjectArrayAccessor extends BufferStructureAccessor {
 
     private boolean nullable;
-    
+
     public BufferObjectArrayAccessor( boolean nullable ) {
       this.nullable = nullable;
-    }    
+    }
 
     @Override
     protected Object buildStructure() {
@@ -178,7 +187,7 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       else
         return buildNonNullableArray( );
     }
-    
+
     protected Object buildNonNullableArray() {
       TupleReader reader = deserializer.reader( );
       int size = reader.readIntEncoded();
@@ -187,7 +196,7 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = readObject( reader );
       }
       return array;
-    }  
+    }
 
     protected Object buildNullableArray() {
       TupleReader reader = deserializer.reader( );
@@ -200,10 +209,10 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       }
       return array;
     }
-    
+
     protected abstract Object readObject( TupleReader reader );
   }
-  
+
   public static class DecimalArrayAccessor extends BufferObjectArrayAccessor {
 
     public DecimalArrayAccessor(boolean nullable) {
@@ -213,9 +222,9 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
     @Override
     protected Object readObject(TupleReader reader) {
       return reader.readDecimal();
-    }  
+    }
   }
-  
+
   public static class StringArrayAccessor extends BufferObjectArrayAccessor {
 
     public StringArrayAccessor(boolean nullable) {
@@ -225,18 +234,18 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
     @Override
     protected Object readObject(TupleReader reader) {
       return reader.readString();
-    }  
+    }
   }
-  
+
   /**
    * Reads an array of Variants into a Java Object array.
    */
-  
+
   public static class VariantArrayAccessor extends BufferStructureAccessor {
 
     private final FieldValueCache valueCache;
     private BufferMemberAccessor accessor;
-    
+
     public VariantArrayAccessor( FieldValueFactory factory ) {
       valueCache = new FieldValueCache( factory );
       accessor = new BufferMemberAccessor( );
@@ -260,23 +269,23 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         array[i] = value.getValue( );
       }
       return array;
-    }  
+    }
   }
-  
+
   /**
    * Reads an array of structured types into a Java Object array.
    */
-  
+
   public static class ArrayOfStructureAccessor extends BufferObjectArrayAccessor {
 
     private final BufferStructureAccessor innerAccessor;
-    
+
     /**
      * Constructor.
      * @param innerAccessor accesssor for the structure that appears as
      * each element of the array.
      */
-    
+
     public ArrayOfStructureAccessor( BufferStructureAccessor innerAccessor, boolean nullable ) {
       super( nullable );
       this.innerAccessor = innerAccessor;
@@ -287,33 +296,33 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       super.bind( deserializer, index );
       innerAccessor.bind( deserializer, 0 );
     }
-    
+
     @Override
     protected Object readObject(TupleReader reader) {
       return innerAccessor.buildStructure();
     }
   }
-  
+
   /**
    * Reads a serialized map into a Java Map object.
    */
-  
+
   public static class BufferMapAccessor extends BufferStructureAccessor {
 
     private final FieldValueCache valueCache;
     private BufferMemberAccessor valueAccessor;
-    
+
     public BufferMapAccessor( FieldValueFactory factory ) {
       valueCache = new FieldValueCache( factory );
       valueAccessor = new BufferMemberAccessor( );
     }
-    
+
     @Override
     public void bind( TupleSetDeserializer deserializer, int index ) {
       super.bind( deserializer, index);
       valueAccessor.bind( deserializer, 0 );
     }
-    
+
     @Override
     public Object buildStructure() {
       TupleReader reader = deserializer.reader( );
@@ -329,7 +338,7 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
       return map;
     }
   }
-  
+
   protected boolean[] readNullFlags( TupleReader reader, int n ) {
     boolean isNull[] = new boolean[n];
     int byteCount = (n+7)/8;
@@ -341,6 +350,6 @@ public abstract class BufferStructureAccessor implements ObjectAccessor {
         flags <<= 1;
       }
     }
-    return isNull;     
+    return isNull;
   }
 }

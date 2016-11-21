@@ -1,6 +1,5 @@
 package org.apache.drill.jig.api;
 
-
 /**
  * Provides access to a single field. A field can be null
  * (no data), scalar (single value), a list, a structure, or

@@ -7,11 +7,12 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.ValueConversionError;
+import org.apache.drill.jig.util.JigUtilities;
 
 public class TupleFieldValue extends AbstractStructuredValue implements TupleValueAccessor {
 
   protected TupleValueAccessor accessor;
-  
+
   @Override
   public boolean isNull() {
     return accessor.isNull( );
@@ -45,5 +46,14 @@ public class TupleFieldValue extends AbstractStructuredValue implements TupleVal
   @Override
   public Object getValue() {
     throw new ValueConversionError( "Cannot convert a tuple to an object" );
+  }
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( "\n" );
+    JigUtilities.visualizeLn(buf, indent + 1, "accessor", accessor);
+    JigUtilities.indent(buf, indent + 1);
+    buf.append( "]" );
   }
 }

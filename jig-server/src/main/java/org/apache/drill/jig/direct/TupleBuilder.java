@@ -30,7 +30,6 @@ import org.apache.drill.jig.api.impl.TupleFieldSchemaImpl;
 import org.apache.drill.jig.api.impl.TupleSchemaImpl;
 import org.apache.drill.jig.container.FieldValueContainer;
 import org.apache.drill.jig.container.FieldValueContainerSet;
-import org.apache.drill.jig.direct.DirectTupleValue.DrillRootTupleValue;
 import org.apache.drill.jig.direct.DrillTypeConversion.DrillDataType;
 import org.apache.drill.jig.direct.MapVectorAccessor.RepeatedMapVectorAccessor;
 import org.apache.drill.jig.direct.VectorAccessor.DrillElementAccessor;
@@ -505,6 +504,18 @@ public class TupleBuilder
   /**
    * Represents a simple Drill data type (everything other than a
    * repeated field, a list or a map.)
+   * <p>
+   * The accessor structure built by this node for nullable or
+   * required vectors is:<pre>
+   * &lt;parent>
+   *   &lt;container>
+   *     &lt;type>VectorAccessor</pre>
+   * And for element vectors:<pre>
+   * &lt;parent>
+   *   &lt;array accessor>
+   *     &lt;elementAccessor>
+   *       &lt;container>
+   *         &lt;type>ElementAccessor</pre>
    */
 
   public static class ScalarNode extends NonRepeatedNode {
@@ -571,13 +582,6 @@ public class TupleBuilder
     @Override
     public VectorAccessor buildField(FieldValueFactory factory) {
 
-      // Create materialized accessors for the members of the Map.
-      // Drill declares the members, so we can treat the map as a tuple
-      // with known members and types.
-
-      CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
-      tuple.buildMaterialized( valueAccessor, factory );
-
       // Create an accessor for Drill's map vector.
 
       MapVectorAccessor accessor = new MapVectorAccessor( );
@@ -588,58 +592,26 @@ public class TupleBuilder
       ReadOnceObjectAccessor objAccessor = new ReadOnceObjectAccessor( accessor );
       resetable = objAccessor;
 
-      // Combine the map and element accessors to create the tuple accessor.
-
-      DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet, objAccessor, valueAccessor );
-      dataDef = new TupleDef( false, mapAccessor );
+      buildMaterialized( objAccessor, factory );
       return accessor;
     }
 
     @Override
-    public void buildMaterialized(ObjectAccessor objAccessor,
-        FieldValueFactory factory) {
-      // TODO Auto-generated method stub
-      assert false;
+    public void buildMaterialized(ObjectAccessor objAccessor, FieldValueFactory factory) {
+
+      // Create materialized accessors for the members of the Map.
+      // Drill declares the members, so we can treat the map as a tuple
+      // with known members and types.
+
+      CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
+      tuple.buildMaterialized( valueAccessor, factory );
+
+      // Combine the map and element accessors to create the tuple accessor.
+
+      DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet, objAccessor, valueAccessor );
+      dataDef = new TupleDef( false, mapAccessor );
     }
   }
-
-//  public static class ImpliedMapNode extends NonRepeatedNode {
-//
-//    public MapTupleNode tuple;
-//
-//    public ImpliedMapNode(Collection<MaterializedField> children ) {
-//      super( null );
-//      tuple = new MapTupleNode( children );
-//    }
-//
-//    @Override
-//    public void buildSchema() {
-//      schema = new FieldSchemaImpl( FieldSchema.ELEMENT_NAME, DataType.MAP, false );
-//    }
-//
-//    @Override
-//    public VectorAccessor buildField(FieldValueFactory factory) {
-//      assert false;
-//      return null;
-//    }
-//
-//    @Override
-//    public void buildMaterialized(ObjectAccessor objAccessor,
-//        FieldValueFactory factory) {
-//
-//      // Create materialized accessors for the members of the Map.
-//      // Drill declares the members, so we can treat the map as a tuple
-//      // with known members and types.
-//
-//      CachedObjectAccessor valueAccessor = new CachedObjectAccessor( );
-//      tuple.buildMaterialized( valueAccessor, factory );
-//
-//      // Combine the map and element accessors to create the tuple accessor.
-//
-//      DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet, objAccessor, valueAccessor );
-//      dataDef = new TupleDef( false, mapAccessor );
-//    }
-//  }
 
   /**
    * Corresponds to the "virtual" Jig array field that wraps the
@@ -688,7 +660,7 @@ public class TupleBuilder
     public void buildMaterialized(ObjectAccessor objAccessor,
         FieldValueFactory factory) {
       JavaListAccessor listAccessor = new JavaListAccessor( objAccessor );
-      element.buildMaterialized( ((ObjectAccessor) listAccessor.memberAccessor()), factory);
+      element.buildMaterialized( ((ObjectAccessor) listAccessor.elementAccessor()), factory);
       dataDef = new ListDef( false, element.dataDef, listAccessor );
     }
 
@@ -758,7 +730,7 @@ public class TupleBuilder
       // Present each map as a tuple
 
       DrillMapValueAccessor mapAccessor = new DrillMapValueAccessor( tuple.schema, tuple.containerSet,
-          (ObjectAccessor) listAccessor.memberAccessor(), valueAccessor );
+          (ObjectAccessor) listAccessor.elementAccessor(), valueAccessor );
       DataDef elementDef = new TupleDef( false, mapAccessor );
 
       // Define the list and its element
@@ -818,7 +790,7 @@ public class TupleBuilder
 
       // Build the element (using the materialized list)
 
-      element.buildMaterialized(((ObjectAccessor) javaAccessor.memberAccessor()), factory);
+      element.buildMaterialized(((ObjectAccessor) javaAccessor.elementAccessor()), factory);
 
       // Combine the list and element data.
 
@@ -881,8 +853,9 @@ public class TupleBuilder
 
     FieldValueFactory factory = new DrillFieldValueFactory( );
     root.buildFields( factory );
-    System.out.println( "Jig Schema: " );
-    System.out.println( root.tuple.schema().toString() );
+//    System.out.println( "Jig Schema: " );
+//    System.out.println( root.tuple.schema().toString() );
+//    System.out.println( root.tuple.toString() );
     return root.tuple;
   }
 

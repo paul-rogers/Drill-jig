@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 
 import org.apache.drill.common.types.TypeProtos.MinorType;
 import org.apache.drill.exec.vector.*;
+import org.apache.drill.jig.accessor.FieldAccessor;
 import org.apache.drill.jig.types.Int64Conversions;
+import org.apache.drill.jig.util.JigUtilities;
 
 //--------------------------------------------------------------
 // WARNING: This code is generated!
@@ -54,12 +56,21 @@ public abstract class VectorAccessor implements FieldAccessor {
     return reader.getRecordIndex();
   }
 
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( " field index = " );
+    buf.append( fieldIndex );
+    buf.append( ", nullable = " );
+    buf.append( nullable );
+    buf.append( "]" );
+  }
+
   /**
    * Base class for scalar (required or optional) vectors accessors.
    */
 
   public static class DrillScalarAccessor extends VectorAccessor {
-
   }
 
   /**

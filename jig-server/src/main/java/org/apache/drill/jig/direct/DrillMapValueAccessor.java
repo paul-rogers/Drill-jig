@@ -8,7 +8,9 @@ import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleValue;
+import org.apache.drill.jig.api.impl.TupleValueImpl;
 import org.apache.drill.jig.container.FieldValueContainerSet;
+import org.apache.drill.jig.util.JigUtilities;
 
 /**
  * Drill maps are actually tuples: they have a defined schema.
@@ -18,21 +20,18 @@ import org.apache.drill.jig.container.FieldValueContainerSet;
  * represent the Drill Map.
  */
 
-public class DrillMapValueAccessor implements TupleValueAccessor, TupleValue {
+public class DrillMapValueAccessor extends TupleValueImpl implements TupleValueAccessor {
 
   private final ObjectAccessor mapObjAccessor;
-  private final TupleSchema schema;
-  private final FieldValueContainerSet containerSet;
   private final CachedObjectAccessor valueObjAccessor;
-  
+
   public DrillMapValueAccessor( TupleSchema schema, FieldValueContainerSet containerSet,
       ObjectAccessor mapAccessor, CachedObjectAccessor valueObjAccessor ) {
-    this.schema = schema;
-    this.containerSet = containerSet;
+    super( schema, containerSet );
     mapObjAccessor = mapAccessor;
     this.valueObjAccessor = valueObjAccessor;
   }
-  
+
   @Override
   public boolean isNull() {
     return mapObjAccessor.isNull();
@@ -43,42 +42,26 @@ public class DrillMapValueAccessor implements TupleValueAccessor, TupleValue {
     return this;
   }
 
-  @Override
-  public TupleSchema schema() {
-    return schema;
-  }
-
-  @Override
-  public FieldValue field(int i) {
-    FieldSchema field = schema.field( i );
-    return getFieldValue( field );
-  }
-  
   @SuppressWarnings("unchecked")
-  private FieldValue getFieldValue( FieldSchema field ) {
+  @Override
+  protected FieldValue getFieldValue( FieldSchema field ) {
     if ( field == null )
       return null;
     Map<String,Object> map = ((Map<String,Object>) mapObjAccessor.getObject());
     Object fieldValue = map.get( field.name( ) );
     valueObjAccessor.bind( fieldValue );
-    return containerSet.field( field.index( ) );
+    return containers.field( field.index( ) );
   }
 
   @Override
-  public FieldValue field(String name) {
-    return getFieldValue( schema.field( name ) );
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( "\n" );
+    JigUtilities.visualizeLn(buf, indent + 1, "schema", schema);
+    JigUtilities.visualizeLn(buf, indent + 1, "map accessor", mapObjAccessor);
+    JigUtilities.visualizeLn(buf, indent + 1, "value accessor", valueObjAccessor);
+    JigUtilities.visualizeLn(buf, indent + 1, "container set", containers);
+    JigUtilities.indent( buf, indent + 1 );
+    buf.append( "]" );
   }
-  
-//  public static class DrillMapVectorValueAccessor extends DrillMapValueAccessor {
-//    @SuppressWarnings("unchecked")
-//    private FieldValue getFieldValue( FieldSchema field ) {
-//      if ( field == null )
-//        return null;
-//      Map<String,Object> map = ((Map<String,Object>) mapObjAccessor.getObject());
-//      Object fieldValue = map.get( field.name( ) );
-//      valueObjAccessor.bind( fieldValue );
-//      return containerSet.field( field.index( ) );
-//    }
-//
-//  }
 }

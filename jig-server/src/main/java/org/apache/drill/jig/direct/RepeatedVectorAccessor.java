@@ -36,7 +36,7 @@ public class RepeatedVectorAccessor extends VectorAccessor
   }
 
   @Override
-  public FieldAccessor memberAccessor() {
+  public FieldAccessor elementAccessor() {
     return memberAccessor;
   }
 

@@ -8,6 +8,7 @@ import org.apache.drill.jig.api.ArrayValue;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.ValueConversionError;
+import org.apache.drill.jig.util.JigUtilities;
 
 /**
  * Base class for scalar field values. Provides default do-nothing
@@ -20,7 +21,7 @@ public abstract class AbstractScalarFieldValue implements AbstractFieldValue {
   public boolean isNull() {
     return false;
   }
-  
+
   @Override
   public byte[] getBlob() {
     throw typeError("blob");
@@ -55,30 +56,34 @@ public abstract class AbstractScalarFieldValue implements AbstractFieldValue {
   public TupleValue getTuple() {
     throw typeError("tuple");
   }
-  
+
   private ValueConversionError typeError(String dest) {
     return new ValueConversionError("Can't convert scalar to " + dest);
   }
-  
+
   @Override
   public String toString( ) {
     StringBuilder buf = new StringBuilder( );
-    buf.append( "[Field Value: null=" );
+    JigUtilities.objectHeader( buf, this );
+    buf.append( " null = " );
     buf.append( isNull( ) );
-    buf.append( ", type=" );
+    buf.append( ", type = " );
     buf.append( type( ) );
     if ( ! isNull( ) ) {
-      buf.append( ", value=" );
-      Object value = getValue( );
-      if ( value instanceof String ) {
-        buf.append( "\"" );
-      }
-      buf.append( value );
-      if ( value instanceof String ) {
-        buf.append( "\"" );
-      }
+      buf.append( ", value = " );
+      JigUtilities.quote( buf, getValue( ) );
     }
     buf.append( "]" );
     return buf.toString( );
+  }
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( " null = " );
+    buf.append( isNull( ) );
+    buf.append( ", type = " );
+    buf.append( type( ) );
+    buf.append( "]" );
   }
 }

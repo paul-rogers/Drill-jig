@@ -9,26 +9,27 @@ import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.api.TupleValue;
 import org.apache.drill.jig.exception.ValueConversionError;
+import org.apache.drill.jig.util.JigUtilities;
 
 public class MapFieldValue extends AbstractStructuredValue {
 
   public static class JavaMapFieldValue extends MapFieldValue {
-    
+
     JavaMapAccessor javaMapAccessor;
-    
+
     public JavaMapFieldValue( FieldValueFactory factory ) {
       javaMapAccessor = new JavaMapAccessor( factory );
       accessor = javaMapAccessor;
     }
-        
+
     @Override
     public void bind(FieldAccessor accessor) {
       javaMapAccessor.bind( (ObjectAccessor) accessor );
     }
   }
-  
+
   protected MapValueAccessor accessor;
-  
+
   @Override
   public void bind(FieldAccessor accessor) {
     this.accessor = (MapValueAccessor) accessor;
@@ -62,5 +63,13 @@ public class MapFieldValue extends AbstractStructuredValue {
   @Override
   public Object getValue() {
     throw new ValueConversionError( "Cannot convert a map to an object" );
+  }
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( " " );
+    JigUtilities.visualize(buf, indent + 1, "accessor", accessor);
+    buf.append( "]" );
   }
 }

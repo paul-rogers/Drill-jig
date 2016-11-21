@@ -1,6 +1,7 @@
 package org.apache.drill.jig.extras.array;
 
 import org.apache.drill.jig.accessor.FieldAccessor.ObjectAccessor;
+import org.apache.drill.jig.util.JigUtilities;
 
 /**
  * Accesses a field within an array. Uses a tuple handle to point
@@ -13,10 +14,10 @@ public class ArrayFieldHandle implements ObjectAccessor {
   public interface ArrayTupleHandle {
     Object get( int fieldIndex );
   }
-  
+
   private final ArrayTupleHandle tupleHandle;
   private final int fieldIndex;
-  
+
   public ArrayFieldHandle(ArrayTupleHandle tupleHandle, int fieldIndex) {
     this.tupleHandle = tupleHandle;
     this.fieldIndex = fieldIndex;
@@ -32,4 +33,13 @@ public class ArrayFieldHandle implements ObjectAccessor {
     return tupleHandle.get( fieldIndex );
   }
 
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( " index = " );
+    buf.append( fieldIndex );
+    buf.append( ", tuple handle = " );
+    buf.append( tupleHandle.toString( ) );
+    buf.append( "]" );
+  }
 }

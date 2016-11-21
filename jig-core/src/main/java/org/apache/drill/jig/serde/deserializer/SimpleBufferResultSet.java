@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.drill.jig.api.ResultCollection;
 import org.apache.drill.jig.api.TupleValue;
-import org.apache.drill.jig.api.impl.AbstractTupleValue;
+import org.apache.drill.jig.api.impl.TupleValueImpl;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 
@@ -16,7 +16,7 @@ public class SimpleBufferResultSet implements ResultCollection
     private int tupleIndex = -1;
     private final ByteBuffer buf;
     private final TupleSetDeserializer deserializer;
-    private final AbstractTupleValue tuple;
+    private final TupleValueImpl tuple;
     
     public SimpleBufferTupleSet( TupleSchema schema, ByteBuffer buf ) {
       this.buf = buf;

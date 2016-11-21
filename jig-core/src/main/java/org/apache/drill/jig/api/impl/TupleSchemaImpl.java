@@ -8,8 +8,10 @@ import java.util.Map;
 import org.apache.drill.jig.api.FieldSchema;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.exception.SchemaException;
+import org.apache.drill.jig.util.JigUtilities;
+import org.apache.drill.jig.util.Visualizable;
 
-public class TupleSchemaImpl implements TupleSchema
+public class TupleSchemaImpl implements TupleSchema, Visualizable
 {
   protected List<FieldSchema> fields = new ArrayList<>( );
   protected Map<String,FieldSchema> nameIndex = new HashMap<>( );
@@ -41,11 +43,11 @@ public class TupleSchemaImpl implements TupleSchema
     }
     nameIndex.put( name, field );
   }
-  
+
   public Iterable<FieldSchema> fields( ) {
     return fields;
   }
-  
+
   @Override
   public String toString( ) {
     StringBuilder buf = new StringBuilder( );
@@ -57,5 +59,20 @@ public class TupleSchemaImpl implements TupleSchema
     }
     buf.append( " ]" );
     return buf.toString();
+  }
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( "\n" );
+    for ( FieldSchema field : fields ) {
+      JigUtilities.indent(buf, indent + 1 );
+      buf.append( field.index() );
+      buf.append( ": " );
+      buf.append( field.toString( ) );
+      buf.append( "\n" );
+    }
+    JigUtilities.indent(buf, indent + 1 );
+    buf.append( "]" );
   }
 }

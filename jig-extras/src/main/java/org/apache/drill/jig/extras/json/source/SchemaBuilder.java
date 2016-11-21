@@ -244,7 +244,7 @@ public class SchemaBuilder {
     public void buildAccessor(ObjectAccessor input) {
       JsonArrayAccessor arrayAccessor = new JsonArrayAccessor( input );
       accessor = arrayAccessor;
-      member.buildAccessor( (ObjectAccessor) arrayAccessor.memberAccessor() );     
+      member.buildAccessor( (ObjectAccessor) arrayAccessor.elementAccessor() );     
     }
 
     @Override

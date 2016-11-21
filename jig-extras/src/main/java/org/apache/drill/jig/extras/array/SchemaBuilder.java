@@ -262,16 +262,16 @@ public class SchemaBuilder {
       switch ( listType ) {
       case LIST:
         arrayAccessor = new JavaListAccessor( objAccessor );
-        memberDef.buildFieldAccessor( (ObjectAccessor) arrayAccessor.memberAccessor(), factory );
+        memberDef.buildFieldAccessor( (ObjectAccessor) arrayAccessor.elementAccessor(), factory );
         break;
       case OBJECT_ARRAY:
       case TYPED_OBJECT_ARRAY:
         arrayAccessor = new ObjectArrayAccessor( objAccessor );
-        memberDef.buildFieldAccessor( (ObjectAccessor) arrayAccessor.memberAccessor(), factory );
+        memberDef.buildFieldAccessor( (ObjectAccessor) arrayAccessor.elementAccessor(), factory );
         break;
       case PRIMITIVE_ARRAY:
         arrayAccessor = new PrimitiveArrayAccessor( objAccessor, memberDef.type );
-        memberDef.accessor = arrayAccessor.memberAccessor();
+        memberDef.accessor = arrayAccessor.elementAccessor();
         break;
       default:
         throw new IllegalStateException( "Undefined list type: " + listType );

@@ -6,7 +6,7 @@ import javax.json.JsonValue.ValueType;
 import org.apache.drill.jig.api.TupleSchema;
 import org.apache.drill.jig.api.TupleSet;
 import org.apache.drill.jig.api.TupleValue;
-import org.apache.drill.jig.api.impl.AbstractTupleValue;
+import org.apache.drill.jig.api.impl.TupleValueImpl;
 import org.apache.drill.jig.container.FieldValueContainerSet;
 import org.apache.drill.jig.extras.json.reader.CapturingTupleReader;
 import org.apache.drill.jig.extras.json.reader.JsonScannerException;
@@ -19,29 +19,22 @@ import org.apache.drill.jig.types.FieldValueFactory;
 public class JsonTupleSet implements TupleSet
 {
   private enum State { START, RUN, EOF, SCHEMA_CHANGE };
-  
-  public static class JsonTupleValue extends AbstractTupleValue {
-    
-    TupleSchema schema;
+
+  public static class JsonTupleValue extends TupleValueImpl {
+
     private JsonObject currentObject;
 
     public JsonTupleValue(TupleSchema schema, FieldValueContainerSet containers) {
-      super(containers);
-      this.schema = schema;
+      super(schema, containers);
     }
-    
+
     public void bind( JsonObject tuple ) {
       currentObject = tuple;
     }
 
-    @Override
-    public TupleSchema schema() {
-      return schema;
-    }
-
     public Object getJsonObject() {
       return currentObject;
-    }   
+    }
   }
 
   private JsonTupleReader recordReader;
@@ -50,11 +43,11 @@ public class JsonTupleSet implements TupleSet
   FieldValueFactory factory = new FieldValueFactory( );
   private JsonObjectNode inputSchema;
   public int sampleSize = 3;
-  
+
   public JsonTupleSet( JsonTupleReader recordReader ) {
     this.recordReader = recordReader;
   }
-  
+
   @Override
   public TupleSchema schema() {
     return tuple.schema();
@@ -64,12 +57,12 @@ public class JsonTupleSet implements TupleSet
   public int getIndex() {
     return recordReader.getIndex();
   }
-  
+
   protected boolean isDone( ) {
     return state == State.EOF ||
            state == State.SCHEMA_CHANGE;
   }
-  
+
   protected boolean hasSchemaChange( ) {
     return state == State.SCHEMA_CHANGE;
   }
@@ -122,11 +115,11 @@ public TupleValue tuple() {
     TupleObjectAccessor tupleAccessor = schemaBuilder.rootAccessor( );
     tuple = new JsonTupleValue( schema, container );
     tupleAccessor.bind( tuple );
-    
+
     recordReader = new ReplayTupleReader( captureReader.getTuples(), recordReader );
   }
-  
+
   public boolean isEOF() {
     return state == State.EOF;
-  }   
+  }
 }

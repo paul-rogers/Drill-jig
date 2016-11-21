@@ -6,6 +6,7 @@ import org.apache.drill.jig.accessor.FieldAccessor.ArrayAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ValueObjectAccessor;
 import org.apache.drill.jig.api.DataType;
 import org.apache.drill.jig.exception.ValueConversionError;
+import org.apache.drill.jig.util.JigUtilities;
 
 /**
  * Array accessor for arrays backed by a Java array. The Java array can be a primitive
@@ -21,23 +22,29 @@ import org.apache.drill.jig.exception.ValueConversionError;
  */
 
 public abstract class JavaArrayAccessor implements ArrayAccessor, ValueObjectAccessor {
-  
+
   protected abstract class AbstractMemberAccessor implements IndexedAccessor
   {
     protected int index;
-    
+
     @Override
     public void bind(int index) {
       this.index = index;
     }
-    
+
     protected Object getArray( ) {
       return prepareArray( index );
+    }
+
+    @Override
+    public void visualize(StringBuilder buf, int indent) {
+      JigUtilities.objectHeader( buf, this );
+      buf.append( "]" );
     }
   }
 
   protected final ObjectAccessor arrayAccessor;
-  protected IndexedAccessor memberAccessor;
+  protected IndexedAccessor elementAccessor;
 
   public JavaArrayAccessor( ObjectAccessor arrayAccessor ) {
     this.arrayAccessor = arrayAccessor;
@@ -64,15 +71,15 @@ public abstract class JavaArrayAccessor implements ArrayAccessor, ValueObjectAcc
   }
 
   @Override
-  public FieldAccessor memberAccessor( ) {
-    return memberAccessor;
+  public FieldAccessor elementAccessor( ) {
+    return elementAccessor;
   }
 
   @Override
   public void select( int i ) {
-    memberAccessor.bind( i );
+    elementAccessor.bind( i );
   }
-  
+
   protected Object prepareArray( int memberIndex ) {
     Object array = getValue( );
     if ( array == null )
@@ -81,30 +88,45 @@ public abstract class JavaArrayAccessor implements ArrayAccessor, ValueObjectAcc
       throw new ValueConversionError( "Index out of bounds: " + memberIndex + ", size = " + Array.getLength( array ) );
     return array;
   }
-  
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( "\n" );
+    JigUtilities.indent( buf, indent + 1 );
+    buf.append( "array accessor = " );
+    arrayAccessor.visualize( buf, indent + 2 );
+    buf.append( "\n" );
+    buf.append( "element accessor = " );
+    elementAccessor.visualize( buf, indent + 2 );
+    buf.append( "\n" );
+    JigUtilities.indent( buf, indent );
+    buf.append( "]" );
+  }
+
   public static class ObjectArrayAccessor extends JavaArrayAccessor {
-    
+
     private class ObjectArrayMemberAccessor extends AbstractMemberAccessor implements ObjectAccessor {
-      
+
       @Override
       public boolean isNull() {
         return getObject( ) == null;
       }
-      
+
       @Override
       public Object getObject() {
        return Array.get( getArray( ), index );
       }
     }
-    
+
    public ObjectArrayAccessor(ObjectAccessor arrayAccessor) {
       super( arrayAccessor );
-      memberAccessor = new ObjectArrayMemberAccessor( );
+      elementAccessor = new ObjectArrayMemberAccessor( );
     }
   }
-  
+
   public static class PrimitiveArrayAccessor extends JavaArrayAccessor {
-  
+
     private class PrimitiveMemberAccessor extends AbstractMemberAccessor implements FieldAccessor {
 
       @Override
@@ -112,86 +134,86 @@ public abstract class JavaArrayAccessor implements ArrayAccessor, ValueObjectAcc
         return false;
       }
     }
-    
+
     private class BooleanMemberAccessor extends PrimitiveMemberAccessor implements BooleanAccessor {
 
       @Override
-      public boolean getBoolean() {    
+      public boolean getBoolean() {
         return ((boolean[]) getArray( ))[index];
-      }   
+      }
     }
-    
+
     private class Int8MemberAccessor extends PrimitiveMemberAccessor implements Int8Accessor {
 
       @Override
-      public byte getByte() {    
+      public byte getByte() {
         return ((byte[]) getArray( ))[index];
-      }   
+      }
     }
-    
+
     private class Int16MemberAccessor extends PrimitiveMemberAccessor implements Int16Accessor {
 
       @Override
-      public short getShort() {    
+      public short getShort() {
         return ((short[]) getArray( ))[index];
-      }   
+      }
     }
-    
+
     private class Int32MemberAccessor extends PrimitiveMemberAccessor implements Int32Accessor {
 
       @Override
-      public int getInt() {    
+      public int getInt() {
         return ((int[]) getArray( ))[index];
-      }   
+      }
     }
-    
+
     private class Int64MemberAccessor extends PrimitiveMemberAccessor implements Int64Accessor {
 
       @Override
-      public long getLong() {    
+      public long getLong() {
         return ((long[]) getArray( ))[index];
-      }   
+      }
     }
-    
+
     private class Float32MemberAccessor extends PrimitiveMemberAccessor implements Float32Accessor {
 
      @Override
-      public float getFloat() {    
+      public float getFloat() {
         return ((float[]) getArray( ))[index];
-      }   
+      }
     }
-    
+
     private class Float64MemberAccessor extends PrimitiveMemberAccessor implements Float64Accessor {
 
       @Override
-      public double getDouble() {    
+      public double getDouble() {
         return ((double[]) getArray( ))[index];
-      }   
+      }
     }
 
     public PrimitiveArrayAccessor( ObjectAccessor arrayAccessor, DataType memberType ) {
       super(arrayAccessor);
       switch ( memberType ) {
       case BOOLEAN:
-        memberAccessor = new BooleanMemberAccessor( );
+        elementAccessor = new BooleanMemberAccessor( );
         break;
       case FLOAT32:
-        memberAccessor = new Float32MemberAccessor( );
+        elementAccessor = new Float32MemberAccessor( );
         break;
       case FLOAT64:
-        memberAccessor = new Float64MemberAccessor( );
+        elementAccessor = new Float64MemberAccessor( );
         break;
       case INT16:
-        memberAccessor = new Int16MemberAccessor( );
+        elementAccessor = new Int16MemberAccessor( );
         break;
       case INT32:
-        memberAccessor = new Int32MemberAccessor( );
+        elementAccessor = new Int32MemberAccessor( );
         break;
       case INT64:
-        memberAccessor = new Int64MemberAccessor( );
+        elementAccessor = new Int64MemberAccessor( );
         break;
       case INT8:
-        memberAccessor = new Int8MemberAccessor( );
+        elementAccessor = new Int8MemberAccessor( );
         break;
       default:
         throw new IllegalStateException( "Not a scalar type: " + memberType );

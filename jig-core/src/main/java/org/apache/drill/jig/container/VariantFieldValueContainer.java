@@ -7,6 +7,7 @@ import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.types.AbstractFieldValue;
 import org.apache.drill.jig.types.FieldValueCache;
 import org.apache.drill.jig.types.FieldValueFactory;
+import org.apache.drill.jig.util.JigUtilities;
 
 /**
  * Field value container for a variant field. The container holds a cache
@@ -17,7 +18,7 @@ import org.apache.drill.jig.types.FieldValueFactory;
 public class VariantFieldValueContainer implements FieldValueContainer {
 
   private final FieldValueCache valueCache;
-  private TypeAccessor accessor;
+  private TypeAccessor typeAccessor;
 
   public VariantFieldValueContainer( FieldValueFactory factory ) {
     valueCache = new FieldValueCache( factory );
@@ -25,15 +26,25 @@ public class VariantFieldValueContainer implements FieldValueContainer {
 
   @Override
   public void bind(FieldAccessor accessor) {
-    this.accessor = (TypeAccessor) accessor;
+    this.typeAccessor = (TypeAccessor) accessor;
   }
-  
+
   @Override
   public FieldValue get() {
     // Map null fields to the Null type.
-    DataType type = (accessor.isNull()) ? DataType.NULL : accessor.getType();
+    DataType type = (typeAccessor.isNull()) ? DataType.NULL : typeAccessor.getType();
     AbstractFieldValue value = valueCache.get( type );
-    value.bind( accessor );
+    value.bind( typeAccessor );
     return value;
+  }
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( "\n" );
+    JigUtilities.visualizeLn(buf, indent + 1, "type accessor", typeAccessor);
+    JigUtilities.visualizeLn(buf, indent + 1, "value cache", valueCache);
+    JigUtilities.indent( buf, indent );
+    buf.append( "]" );
   }
 }

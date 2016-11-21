@@ -3,13 +3,13 @@ package org.apache.drill.jig.accessor;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.drill.jig.accessor.BoxedAccessor.VariantBoxedAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.MapValueAccessor;
 import org.apache.drill.jig.accessor.FieldAccessor.ValueObjectAccessor;
 import org.apache.drill.jig.api.FieldValue;
 import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.container.VariantFieldValueContainer;
 import org.apache.drill.jig.types.FieldValueFactory;
+import org.apache.drill.jig.util.JigUtilities;
 
 /**
  * MapValueAccessor (and corresponding MapValue) for a Java
@@ -18,7 +18,7 @@ import org.apache.drill.jig.types.FieldValueFactory;
 
 public class JavaMapAccessor implements MapValueAccessor, MapValue, ValueObjectAccessor {
 
-  private ObjectAccessor accessor;
+  private ObjectAccessor mapAccessor;
   private final VariantFieldValueContainer valueContainer;
   private final CachedObjectAccessor valueAccessor;
 
@@ -30,16 +30,16 @@ public class JavaMapAccessor implements MapValueAccessor, MapValue, ValueObjectA
 
   public JavaMapAccessor( ObjectAccessor accessor, FieldValueFactory factory ) {
     this( factory );
-    this.accessor = accessor;
+    this.mapAccessor = accessor;
   }
-  
+
   public void bind( ObjectAccessor accessor ) {
-    this.accessor = accessor;
+    this.mapAccessor = accessor;
   }
-  
+
   @Override
   public boolean isNull() {
-    return accessor.isNull();
+    return mapAccessor.isNull();
   }
 
   @Override
@@ -67,14 +67,32 @@ public class JavaMapAccessor implements MapValueAccessor, MapValue, ValueObjectA
   public MapValue getMap() {
     return this;
   }
-  
+
   @SuppressWarnings("rawtypes")
   private Map getMapObject( ) {
-    return (Map) accessor.getObject();
+    return (Map) mapAccessor.getObject();
   }
 
   @Override
   public Object getValue() {
-    return accessor.getObject();
+    return mapAccessor.getObject();
+  }
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( "\n" );
+    JigUtilities.indent( buf, indent + 1 );
+    buf.append( "map accessor = " );
+    mapAccessor.visualize( buf, indent + 2 );
+    buf.append( "\n" );
+    buf.append( "value accessor = " );
+    valueAccessor.visualize( buf, indent + 2 );
+    buf.append( "\n" );
+    buf.append( "value container = " );
+    valueContainer.visualize( buf, indent + 2 );
+    buf.append( "\n" );
+    JigUtilities.indent( buf, indent );
+    buf.append( "]" );
   }
 }

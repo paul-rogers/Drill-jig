@@ -25,6 +25,8 @@ import org.apache.drill.jig.api.MapValue;
 import org.apache.drill.jig.container.VariantFieldValueContainer;
 import org.apache.drill.jig.extras.json.source.JsonTupleSet.JsonTupleValue;
 import org.apache.drill.jig.types.FieldValueFactory;
+import org.apache.drill.jig.util.JigUtilities;
+import org.apache.drill.jig.util.Visualizable;
 
 /**
  * <ul>
@@ -40,62 +42,16 @@ import org.apache.drill.jig.types.FieldValueFactory;
  * </ul>
  */
 
-public class JsonAccessor {
+public class JsonAccessor implements Visualizable {
 
-//  public interface PushedObjectAccessor {
-//    void push( Object object );
-//  }
-//  
-//  public interface JsonObjectAccessor extends FieldAccessor {
-//    JsonObject getJsonObject( );
-//  }
-//  
-//  public class CachedJsonObjectAccessor implements JsonObjectAccessor {
-//    private JsonObject value;
-//
-//    public void bind( JsonObject value ) {
-//      this.value = value;
-//    }
-//    
-//    public JsonObject getJsonObject( ) {
-//      return value;
-//    }
-//
-//    @Override
-//    public boolean isNull() {
-//      return checkNull( value );
-//    }
-//  }
-//  
-//  public interface JsonValueAccessor extends FieldAccessor {
-//    JsonValue getJsonValue( );
-//  }
-//  
-//  public class CachedJsonValueAcccessor implements JsonValueAccessor {
-//    private JsonValue value;
-//
-//    public void bind( JsonValue value ) {
-//      this.value = (value == null) ? JsonValue.NULL : value;
-//    }
-//    
-//    public JsonValue getJsonValue( ) {
-//      return value;
-//    }
-//
-//    @Override
-//    public boolean isNull() {
-//      return checkNull( value );
-//    }
-//  }
-
-  public static class TupleObjectAccessor implements ObjectAccessor {
+  public static class TupleObjectAccessor extends JsonAccessor implements ObjectAccessor {
 
     private JsonTupleValue tupleValue;
 
     void bind( JsonTupleValue tupleValue ) {
       this.tupleValue = tupleValue;
     }
-    
+
     @Override
     public boolean isNull() {
       return false;
@@ -107,8 +63,8 @@ public class JsonAccessor {
     }
   }
 
-  public static class JsonMapAccessor implements MapValueAccessor, MapValue {
-    
+  public static class JsonMapAccessor extends JsonAccessor implements MapValueAccessor, MapValue {
+
     private ObjectAccessor accessor;
     private VariantFieldValueContainer container;
     CachedObjectAccessor memberAccessor = new CachedObjectAccessor( );
@@ -132,7 +88,7 @@ public class JsonAccessor {
     private JsonObject getJsonObject( ) {
       return (JsonObject) accessor.getObject();
     }
-    
+
     @Override
     public int size() {
       return getJsonObject( ).size();
@@ -148,21 +104,31 @@ public class JsonAccessor {
       memberAccessor.bind( getJsonObject( ).get( key ) );
       return container.get();
     }
-    
+
+    @Override
+    public void visualize(StringBuilder buf, int indent) {
+      JigUtilities.objectHeader( buf, this );
+      JigUtilities.visualizeLn(buf, indent + 1, "accessor", accessor);
+      JigUtilities.visualizeLn(buf, indent + 1, "member accessor", memberAccessor);
+      JigUtilities.visualizeLn(buf, indent + 1, "container", container);
+      JigUtilities.indent(buf, indent + 1 );
+      buf.append( "]" );
+    }
   }
-  public static class JsonValueAccessor implements StringAccessor, DecimalAccessor, Int64Accessor, BooleanAccessor, TypeAccessor {
+
+  public static class JsonValueAccessor extends JsonAccessor implements StringAccessor, DecimalAccessor, Int64Accessor, BooleanAccessor, TypeAccessor {
 
     private ObjectAccessor accessor;
 
     public JsonValueAccessor( ObjectAccessor accessor ) {
       this.accessor = accessor;
     }
-    
+
     @Override
     public boolean isNull() {
       return checkNull( accessor.getObject() );
     }
-    
+
     private Object getValue( ) {
       return accessor.getObject();
     }
@@ -191,10 +157,18 @@ public class JsonAccessor {
     public DataType getType() {
       return ObjectParser.parseType( (JsonValue) accessor.getObject() );
     }
+
+    @Override
+    public void visualize(StringBuilder buf, int indent) {
+      JigUtilities.objectHeader( buf, this );
+      JigUtilities.visualizeLn(buf, indent + 1, "accessor", accessor);
+      JigUtilities.indent(buf, indent + 1 );
+      buf.append( "]" );
+    }
   }
 
-  public static class JsonObjectMemberAccessor implements ObjectAccessor {
-    
+  public static class JsonObjectMemberAccessor extends JsonAccessor implements ObjectAccessor {
+
     private final ObjectAccessor accessor;
     private final String key;
 
@@ -222,19 +196,29 @@ public class JsonAccessor {
     public Object getObject() {
       return getJsonValue( );
     }
+
+    @Override
+    public void visualize(StringBuilder buf, int indent) {
+      JigUtilities.objectHeader( buf, this );
+      buf.append( " key = " );
+      buf.append( key );
+      JigUtilities.visualizeLn(buf, indent + 1, "accessor", accessor);
+      JigUtilities.indent(buf, indent + 1 );
+      buf.append( "]" );
+    }
   }
 
-  public static class JsonArrayAccessor implements ArrayAccessor {
+  public static class JsonArrayAccessor extends JsonAccessor implements ArrayAccessor {
 
     protected class MemberAccessor implements IndexedAccessor, ObjectAccessor
     {
       protected int index;
-      
+
       @Override
       public void bind(int index) {
         this.index = index;
       }
-      
+
       @Override
       public boolean isNull() {
         return checkNull( getObject( ) );
@@ -243,6 +227,12 @@ public class JsonAccessor {
       @Override
       public Object getObject() {
          return getArray( ).get(index);
+      }
+
+      @Override
+      public void visualize(StringBuilder buf, int indent) {
+        JigUtilities.objectHeader( buf, this );
+        buf.append( "]" );
       }
     }
 
@@ -257,16 +247,16 @@ public class JsonAccessor {
     public boolean isNull() {
       return checkNull( accessor.getObject() );
     }
-    
+
     protected JsonArray getArray( ) {
       Object array = accessor.getObject( );
       if ( checkNull( array ) )
         return null;
       return (JsonArray) array;
     }
-    
+
     @Override
-    public FieldAccessor memberAccessor() {
+    public FieldAccessor elementAccessor() {
       return memberAccessor;
     }
 
@@ -281,9 +271,24 @@ public class JsonAccessor {
         throw new ArrayIndexOutOfBoundsException( );
       memberAccessor.bind( index );
     }
+
+    @Override
+    public void visualize(StringBuilder buf, int indent) {
+      JigUtilities.objectHeader( buf, this );
+      JigUtilities.visualizeLn(buf, indent + 1, "accessor", accessor);
+      JigUtilities.visualizeLn(buf, indent + 1, "member accessor", memberAccessor);
+      JigUtilities.indent(buf, indent + 1 );
+      buf.append( "]" );
+    }
   }
 
   public static boolean checkNull( Object value ) {
     return value == null  ||  value == JsonValue.NULL;
+  }
+
+  @Override
+  public void visualize(StringBuilder buf, int indent) {
+    JigUtilities.objectHeader( buf, this );
+    buf.append( "]" );
   }
 }
